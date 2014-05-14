@@ -32,6 +32,11 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="Nooz"
             android:theme="@android:style/Theme.NoTitleBar" >
+            <intent-filter android:label="Nooz" >
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
         <!-- Should change new article activity name programmatically to the name of the article or user or something -->
@@ -41,11 +46,6 @@
             android:label="NewArticleActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:windowSoftInputMode="adjustPan" >
-            <intent-filter android:label="Nooz" >
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <meta-data

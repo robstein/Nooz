@@ -20,8 +20,8 @@
         android:background="#FFF"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp" >
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp" >
 
         <!-- the padding left/right won't be right on tablet screens: -->
 
@@ -40,8 +40,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/settings"
-            android:contentDescription="SettingsAndFilters" />
+            android:contentDescription="SettingsAndFilters"
+            android:src="@drawable/settings" />
 
         <TextView
             android:id="@+id/breaking"
@@ -54,11 +54,49 @@
             android:textSize="16dp" />
     </LinearLayout>
 
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="4dp"
+        android:background="#FFDDDDDD" />
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="3"
-        android:background="#000000" >
+        android:layout_height="0dp"
+        android:layout_weight="3" >
+
+        <com.nooz.nooz.widget.PagerContainer
+            android:id="@+id/pager_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="0dp"
+            android:background="#FFDDDDDD"
+            android:padding="0dp" >
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/view_pager"
+                android:layout_width="168dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="0dp"
+                android:padding="0dp" />
+        </com.nooz.nooz.widget.PagerContainer>
+
+        <ImageView
+            android:id="@+id/button_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerInParent="true"
+            android:src="@drawable/refresh" />
+
+        <ImageView
+            android:id="@+id/button_new_story"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:clickable="true"
+            android:src="@drawable/new_story" />
     </RelativeLayout>
 
 </LinearLayout>
