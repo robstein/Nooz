@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:weightSum="10" >
+    android:weightSum="11" >
 
     <fragment
         android:id="@+id/map"
@@ -40,7 +40,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/settings" />
+            android:src="@drawable/settings"
+            android:contentDescription="SettingsAndFilters" />
 
         <TextView
             android:id="@+id/breaking"
