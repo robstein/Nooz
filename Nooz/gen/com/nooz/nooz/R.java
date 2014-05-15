@@ -225,15 +225,17 @@ containing a value of this type.
         public static final int share_twitter=0x7f02002a;
     }
     public static final class id {
-        public static final int breaking=0x7f050008;
         public static final int btn_break_post=0x7f050016;
         public static final int btn_cancel_new_article=0x7f05000d;
         public static final int btn_choose_category=0x7f05000e;
         public static final int btn_share_facebook=0x7f050013;
         public static final int btn_share_tumblr=0x7f050015;
         public static final int btn_share_twitter=0x7f050014;
+        public static final int button_breaking=0x7f050008;
         public static final int button_new_story=0x7f05000c;
         public static final int button_refresh=0x7f05000b;
+        public static final int button_relevant=0x7f050006;
+        public static final int button_settings=0x7f050007;
         public static final int caption=0x7f050011;
         public static final int categoryRuler=0x7f050019;
         public static final int headline=0x7f050010;
@@ -244,9 +246,7 @@ containing a value of this type.
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
         public static final int pager_container=0x7f050009;
-        public static final int relevant=0x7f050006;
         public static final int satellite=0x7f050002;
-        public static final int settings=0x7f050007;
         public static final int story_item_author=0x7f05001a;
         public static final int story_item_shader=0x7f050017;
         public static final int story_item_title=0x7f050018;
