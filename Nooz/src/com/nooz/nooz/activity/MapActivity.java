@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.res.Resources;
 import android.location.Location;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.PagerAdapter;
@@ -16,8 +17,14 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Animation.AnimationListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,10 +56,19 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 	private ImageView mButtonNewStory;
 	private GoogleMap mMap;
 
+	private RelativeLayout mStoryFooter;
+	private RelativeLayout mMenuSettings;
+
 	private LocationClient mLocationClient;
 	private Location mCurrentLocation;
 
 	private SearchType mCurrentSearchType = SearchType.RELEVANT;
+	private Boolean settingsMenuIsOpen = false;
+
+	private Animation mSlideInBottom;
+	private Animation mSlideOutBottom;
+	private Animation mFadeIn;
+	private Animation mFadeOut;
 
 	private static final int SEARCH_TYPE_ACTIVE_COLOR = 0xFF000000;
 	private static final int SEARCH_TYPE_FADED_COLOR = 0xFF979797;
@@ -89,6 +105,14 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		mButtonSettingsAndFilters.setOnClickListener(this);
 		mButtonRefresh.setOnClickListener(this);
 		mButtonNewStory.setOnClickListener(this);
+
+		mSlideInBottom = AnimationUtils.loadAnimation(this, R.anim.slide_in_bottom);
+		mSlideOutBottom = AnimationUtils.loadAnimation(this, R.anim.slide_out_bottom);
+		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+		mFadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+		mMenuSettings = (RelativeLayout) findViewById(R.id.menu_settings);
+		mStoryFooter = (RelativeLayout) findViewById(R.id.story_footer);
+
 
 		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		setUpMapIfNeeded();
@@ -157,6 +181,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 			switchSearchTypes(R.id.button_breaking);
 			break;
 		case R.id.button_settings:
+			hideOrShowSettingsMenu();
 			break;
 		case R.id.button_refresh:
 			break;
@@ -164,6 +189,42 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
 			startActivity(newStoryIntent);
 			break;
+		}
+	}
+
+	private void hideOrShowSettingsMenu() {
+		if (settingsMenuIsOpen) {
+			mStoryFooter.setVisibility(View.VISIBLE);
+			mStoryFooter.startAnimation(mFadeIn);
+			
+			// change color of settings icon and show relevant, breaking buttons
+			mButtonSettingsAndFilters.setImageResource(R.drawable.settings);
+
+			mButtonRelevant.setVisibility(View.VISIBLE);
+			mButtonRelevant.startAnimation(mFadeIn);
+			mButtonBreaking.setVisibility(View.VISIBLE);
+			mButtonBreaking.startAnimation(mFadeIn);
+
+			mMenuSettings.setVisibility(View.GONE);
+			mMenuSettings.startAnimation(mSlideOutBottom);
+
+			settingsMenuIsOpen = false;
+		} else {
+			mStoryFooter.setVisibility(View.GONE);
+			mStoryFooter.startAnimation(mFadeOut);
+
+			// change color of settings icon and hide relevant, breaking buttons
+			mButtonSettingsAndFilters.setImageResource(R.drawable.settings_active);
+
+			mButtonRelevant.setVisibility(View.INVISIBLE);
+			mButtonRelevant.startAnimation(mFadeOut);
+			mButtonBreaking.setVisibility(View.INVISIBLE);
+			mButtonBreaking.startAnimation(mFadeOut);
+
+			mMenuSettings.setVisibility(View.VISIBLE);
+			mMenuSettings.startAnimation(mSlideInBottom);
+
+			settingsMenuIsOpen = true;
 		}
 	}
 
