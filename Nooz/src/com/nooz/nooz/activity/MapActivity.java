@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -29,8 +28,10 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.SearchType;
@@ -92,23 +93,32 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		setUpMapIfNeeded();
 		mLocationClient = new LocationClient(this, this, this);
-		
+
 		drawCirlesOnMap();
 
 	}
 
 	private void drawCirlesOnMap() {
 		CircleOptions circleOptions;
-		
+
 		circleOptions = new CircleOptions().center(new LatLng(40.1012894, -88.2358381)).radius(100);
 		Circle bluecircle = mMap.addCircle(circleOptions);
 		bluecircle.setStrokeColor(0xC06DA3ED);
 		bluecircle.setFillColor(0xC0377DEC);
-		
-		circleOptions = new CircleOptions().center(new LatLng(40.103766, -88.235417)).radius(100);
+
+		mMap.addGroundOverlay(new GroundOverlayOptions()
+				.image(BitmapDescriptorFactory.fromResource(R.drawable.community_white)).anchor(0.5f, 0.5f)
+				.position(new LatLng(40.1012894, -88.2358381), 60f, 60f));
+
+		circleOptions = new CircleOptions().center(new LatLng(40.103766, -88.235417)).radius(25);
 		Circle greencircle = mMap.addCircle(circleOptions);
-		greencircle.setStrokeColor(0xC06DA3ED);
-		greencircle.setFillColor(0xC0377DEC);
+		greencircle.setStrokeColor(0xC03CB34B);
+		greencircle.setFillColor(0xC08DC88E);
+
+		mMap.addGroundOverlay(new GroundOverlayOptions()
+				.image(BitmapDescriptorFactory.fromResource(R.drawable.food_white)).anchor(0.5f, 0.5f)
+				.position(new LatLng(40.103766, -88.235417), 20f, 20f));
+
 	}
 
 	/*
