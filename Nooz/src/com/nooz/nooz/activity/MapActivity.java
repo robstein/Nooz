@@ -5,25 +5,19 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.res.Resources;
 import android.location.Location;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AlphaAnimation;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.Animation.AnimationListener;
-import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.SearchType;
 import com.nooz.nooz.widget.PagerContainer;
+import com.nooz.nooz.util.Tools;
 
 public class MapActivity extends FragmentActivity implements OnClickListener,
 		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
@@ -90,7 +85,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		// make this at least however many pages you can see
 		mPager.setOffscreenPageLimit(adapter.getCount());
 		// A little space between pages
-		mPager.setPageMargin(pixelsToDips(4));
+		mPager.setPageMargin((int)Tools.dipToPixels(this, 4));
 		// If hardware acceleration is enabled, you should also remove
 		// clipping on the pager for its children.
 		mPager.setClipChildren(false);
@@ -186,7 +181,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		case R.id.button_refresh:
 			break;
 		case R.id.button_new_story:
-			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
+			Intent newStoryIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
 			startActivity(newStoryIntent);
 			break;
 		}
@@ -245,11 +240,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		}
 	}
 
-	private int pixelsToDips(int i) {
-		Resources r = getResources();
-		float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, i, r.getDisplayMetrics());
-		return (int) Math.floor(px);
-	}
+
 
 	// Nothing special about this adapter, just throwing up colored views for
 	// demo

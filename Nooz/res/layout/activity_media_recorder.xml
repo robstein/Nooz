@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="61dp" >
+
+        <FrameLayout
+            android:id="@+id/camera_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="61dp"
+        android:background="#FF222222"
+        android:orientation="horizontal"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp" >
+
+        <ImageView
+            android:id="@+id/btn_cancel_new_media"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:contentDescription="Cancel"
+            android:src="@drawable/cancel_new_media_white" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/media_control_layer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FF222222"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:weightSum="1" >
+
+            <ImageView
+                android:id="@+id/btn_record_audio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight=".33"
+                android:clickable="true"
+                android:contentDescription="Record Audio"
+                android:padding="6dp"
+                android:src="@drawable/mic_grey" />
+
+            <ImageView
+                android:id="@+id/btn_snap_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight=".33"
+                android:clickable="true"
+                android:contentDescription="Snap Picture"
+                android:padding="6dp"
+                android:src="@drawable/camera_active" />
+
+            <ImageView
+                android:id="@+id/btn_record_video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight=".33"
+                android:clickable="true"
+                android:contentDescription="Record Video"
+                android:padding="6dp"
+                android:src="@drawable/recorder_grey" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -126,6 +126,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"
+            android:clickable="true"
             android:src="@drawable/refresh" />
 
         <ImageView
