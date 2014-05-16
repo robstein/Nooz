@@ -1,5 +1,6 @@
 package com.nooz.nooz.activity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -11,6 +12,10 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -37,6 +42,8 @@ public class MediaRecorderActivity extends Activity {
 	private CameraPreview mPreview;
 	private MediaRecorder mMediaRecorder;
 	private LinearLayout mMediaControlLayer;
+	
+	private int mScreenWidthInPixels;
 
 	public static final int MEDIA_TYPE_IMAGE = 1;
 	public static final int MEDIA_TYPE_VIDEO = 2;
@@ -51,11 +58,11 @@ public class MediaRecorderActivity extends Activity {
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
-		int width = size.x;
+		int mScreenWidthInPixels = size.x;
 		mMediaControlLayer = (LinearLayout) findViewById(R.id.media_control_layer);
 		RelativeLayout.LayoutParams controlLayoutParams = (RelativeLayout.LayoutParams) mMediaControlLayer
 				.getLayoutParams();
-		controlLayoutParams.setMargins(0, (int) Tools.dipToPixels(this, TOP_BAR_HEIGHT) + width, 0, 0);
+		controlLayoutParams.setMargins(0, (int) Tools.dipToPixels(this, TOP_BAR_HEIGHT) + mScreenWidthInPixels, 0, 0);
 		mMediaControlLayer.setLayoutParams(controlLayoutParams);
 
 		// Create an instance of Camera
@@ -106,6 +113,15 @@ public class MediaRecorderActivity extends Activity {
 
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
+			
+			int[] pixels = new int[mScreenWidthInPixels*mScreenWidthInPixels];//the size of the array is the dimensions of the sub-photo
+	        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	        Bitmap bitmap = BitmapFactory.decodeByteArray(data , 0, data.length);
+	        bitmap.getPixels(pixels, 0, 1, 0, 0, mScreenWidthInPixels, mScreenWidthInPixels);//the stride value is (in my case) the width value
+	        bitmap = Bitmap.createBitmap(pixels, 0, 1, mScreenWidthInPixels, mScreenWidthInPixels, Config.ARGB_8888);//ARGB_8888 is a good quality configuration
+	        bitmap.compress(CompressFormat.JPEG, 100, bos);//100 is the best quality possibe
+	        byte[] square = bos.toByteArray();
+			
 			//Save to file:
 			File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
 			if (pictureFile == null) {
@@ -115,7 +131,7 @@ public class MediaRecorderActivity extends Activity {
 
 			try {
 				FileOutputStream fos = new FileOutputStream(pictureFile);
-				fos.write(data);
+				fos.write(square);
 				fos.close();
 			} catch (FileNotFoundException e) {
 				Log.d(TAG, "File not found: " + e.getMessage());
@@ -125,7 +141,8 @@ public class MediaRecorderActivity extends Activity {
 			
 			// Pass bypte array to NewArticleActivity
 			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
-			newStoryIntent.putExtra("image", data);
+			newStoryIntent.putExtra("image", square);
+			newStoryIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 			startActivity(newStoryIntent);
 			finish();
 		}

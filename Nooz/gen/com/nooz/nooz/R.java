@@ -247,15 +247,15 @@ containing a value of this type.
         public static final int top_nooz=0x7f02003a;
     }
     public static final class id {
-        public static final int btn_break_post=0x7f060025;
-        public static final int btn_cancel_new_article=0x7f06001c;
+        public static final int btn_break_post=0x7f060026;
+        public static final int btn_cancel_new_article=0x7f06001e;
         public static final int btn_cancel_new_media=0x7f060017;
-        public static final int btn_choose_category=0x7f06001d;
+        public static final int btn_choose_category=0x7f06001f;
         public static final int btn_record_audio=0x7f060019;
         public static final int btn_record_video=0x7f06001b;
-        public static final int btn_share_facebook=0x7f060022;
-        public static final int btn_share_tumblr=0x7f060024;
-        public static final int btn_share_twitter=0x7f060023;
+        public static final int btn_share_facebook=0x7f060023;
+        public static final int btn_share_tumblr=0x7f060025;
+        public static final int btn_share_twitter=0x7f060024;
         public static final int btn_snap_picture=0x7f06001a;
         public static final int button_breaking=0x7f060009;
         public static final int button_map_filters=0x7f060014;
@@ -266,27 +266,28 @@ containing a value of this type.
         public static final int button_settings=0x7f060008;
         public static final int button_top_nooz=0x7f060015;
         public static final int camera_preview=0x7f060016;
-        public static final int caption=0x7f060020;
-        public static final int categoryRuler=0x7f060028;
-        public static final int headline=0x7f06001f;
+        public static final int caption=0x7f060021;
+        public static final int categoryRuler=0x7f060029;
+        public static final int headline=0x7f06001d;
         public static final int hybrid=0x7f060004;
         public static final int icon_map_filters=0x7f060011;
         public static final int icon_profile=0x7f060010;
         public static final int icon_top_nooz=0x7f060012;
-        public static final int keywords=0x7f060021;
+        public static final int keywords=0x7f060022;
+        public static final int layout_story_details=0x7f060020;
         public static final int map=0x7f060005;
         public static final int media_control_layer=0x7f060018;
         public static final int menu_settings=0x7f06000f;
-        public static final int new_article_image=0x7f06001e;
+        public static final int new_article_image=0x7f06001c;
         public static final int none=0x7f060000;
         public static final int normal=0x7f060001;
         public static final int pager_container=0x7f06000b;
         public static final int region=0x7f060006;
         public static final int satellite=0x7f060002;
         public static final int story_footer=0x7f06000a;
-        public static final int story_item_author=0x7f060029;
-        public static final int story_item_shader=0x7f060026;
-        public static final int story_item_title=0x7f060027;
+        public static final int story_item_author=0x7f06002a;
+        public static final int story_item_shader=0x7f060027;
+        public static final int story_item_title=0x7f060028;
         public static final int terrain=0x7f060003;
         public static final int view_pager=0x7f06000c;
     }
@@ -403,11 +404,13 @@ containing a value of this type.
         /** 
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+
     
 
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
+
         
 
         Base application theme for API 11+. This theme completely replaces
@@ -423,9 +426,9 @@ containing a value of this type.
          */
         public static final int AppBaseTheme=0x7f090000;
         /**  Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
          */
         public static final int AppTheme=0x7f090001;
+        public static final int noAnimTheme=0x7f090002;
     }
     public static final class styleable {
         /** Attributes that can be used with a AdsAttrs.
