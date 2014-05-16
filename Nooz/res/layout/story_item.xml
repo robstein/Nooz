@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="168dp"
-    android:layout_height="168dp" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <com.nooz.nooz.widget.SquareImageView
         android:id="@+id/new_article_image"
-        android:layout_width="168dp"
-        android:layout_height="168dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:src="@drawable/example_article_picture" />
     <View
         android:id="@+id/story_item_shader"
-        android:layout_width="180dp"
-        android:layout_height="180dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="#C0000000" />
     
     <LinearLayout

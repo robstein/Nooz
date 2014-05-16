@@ -5,18 +5,21 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -36,8 +39,8 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.SearchType;
-import com.nooz.nooz.widget.PagerContainer;
 import com.nooz.nooz.util.Tools;
+import com.nooz.nooz.widget.PagerContainer;
 
 public class MapActivity extends FragmentActivity implements OnClickListener,
 		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
@@ -70,7 +73,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 	private static final LatLng USA = new LatLng(37.09024, -95.712891);
 	private static final int ZOOM_USA = 3;
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-	static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
+	private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
+	private static final float FOOTER_WEIGHT = 0.29f;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +93,16 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		// If hardware acceleration is enabled, you should also remove
 		// clipping on the pager for its children.
 		mPager.setClipChildren(false);
+		
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		int width = size.x;
+		int height = size.y;
+		int footer_height = (int) (height * FOOTER_WEIGHT);
+		FrameLayout.LayoutParams footerLayoutParams = (FrameLayout.LayoutParams) mPager.getLayoutParams();
+		footerLayoutParams.setMargins((int)((width-footer_height)/2)+(int)Tools.dipToPixels(this, 4), 0, (int)((width-footer_height)/2)+(int)Tools.dipToPixels(this, 4), 0);
+		mPager.setLayoutParams(footerLayoutParams);
 
 		mButtonRelevant = (TextView) findViewById(R.id.button_relevant);
 		mButtonBreaking = (TextView) findViewById(R.id.button_breaking);
