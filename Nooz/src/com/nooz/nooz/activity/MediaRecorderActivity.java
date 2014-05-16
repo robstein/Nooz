@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.Camera;
@@ -61,10 +62,21 @@ public class MediaRecorderActivity extends Activity {
 		mCamera = getCameraInstance();
 		mCamera.setDisplayOrientation(90);
 		Camera.Parameters camParams = mCamera.getParameters();
+		camParams.setRotation(90);
+		//camParams.set("orientation", "portrait");
 		List<String> focusModes = camParams.getSupportedFocusModes();
 		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
 			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 		}
+		List<Camera.Size> pictureSizes = camParams.getSupportedPictureSizes();
+		camParams.setPictureSize(pictureSizes.get(0).width, pictureSizes.get(0).height);
+		List<Camera.Size> previewSizes = camParams.getSupportedPreviewSizes();
+		camParams.setPictureSize(previewSizes.get(0).width, previewSizes.get(0).height);
+
+		if (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+		}
+		
 		mCamera.setParameters(camParams);
 
 		// Create our Preview view and set it as the content of our activity.
@@ -94,7 +106,7 @@ public class MediaRecorderActivity extends Activity {
 
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
-
+			//Save to file:
 			File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
 			if (pictureFile == null) {
 				Log.d(TAG, "Error creating media file, check storage permissions");
@@ -110,6 +122,12 @@ public class MediaRecorderActivity extends Activity {
 			} catch (IOException e) {
 				Log.d(TAG, "Error accessing file: " + e.getMessage());
 			}
+			
+			// Pass bypte array to NewArticleActivity
+			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
+			newStoryIntent.putExtra("image", data);
+			startActivity(newStoryIntent);
+			finish();
 		}
 	};
 

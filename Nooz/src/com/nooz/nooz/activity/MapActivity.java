@@ -181,8 +181,8 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		case R.id.button_refresh:
 			break;
 		case R.id.button_new_story:
-			Intent newStoryIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
-			startActivity(newStoryIntent);
+			Intent mediaRecorderIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
+			startActivity(mediaRecorderIntent);
 			break;
 		}
 	}
