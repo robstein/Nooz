@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -38,8 +39,10 @@ import com.nooz.nooz.widget.CameraPreview;
 public class MediaRecorderActivity extends Activity {
 	private static final String TAG = "MediaRecorderActivity";
 
+	private Context mContext;
+	
 	private Camera mCamera;
-	private CameraPreview mPreview;
+	private CameraPreview mCameraPreview;
 	private MediaRecorder mMediaRecorder;
 	private LinearLayout mMediaControlLayer;
 	
@@ -54,11 +57,13 @@ public class MediaRecorderActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_media_recorder);
+		mContext = this;
 
+		// Move the control buttons down to where they should be
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
-		int mScreenWidthInPixels = size.x;
+		mScreenWidthInPixels = size.x;
 		mMediaControlLayer = (LinearLayout) findViewById(R.id.media_control_layer);
 		RelativeLayout.LayoutParams controlLayoutParams = (RelativeLayout.LayoutParams) mMediaControlLayer
 				.getLayoutParams();
@@ -80,16 +85,24 @@ public class MediaRecorderActivity extends Activity {
 		List<Camera.Size> previewSizes = camParams.getSupportedPreviewSizes();
 		camParams.setPictureSize(previewSizes.get(0).width, previewSizes.get(0).height);
 
-		if (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+		
+		if (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+		} else if (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
 			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 		}
 		
 		mCamera.setParameters(camParams);
 
 		// Create our Preview view and set it as the content of our activity.
-		mPreview = new CameraPreview(this, mCamera);
-		FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-		preview.addView(mPreview);
+		mCameraPreview = new CameraPreview(this, mCamera);
+		FrameLayout frameLayoutPreview = (FrameLayout) findViewById(R.id.camera_preview);
+		
+		//RelativeLayout.LayoutParams cameraFrameParams = (RelativeLayout.LayoutParams) frameLayoutPreview.getLayoutParams();
+		//cameraFrameParams.height = mScreenWidthInPixels;
+		//frameLayoutPreview.setLayoutParams(cameraFrameParams);
+		
+		frameLayoutPreview.addView(mCameraPreview);
 
 		// Add a listener to the Capture button
 		ImageView captureButton = (ImageView) findViewById(R.id.btn_snap_picture);
@@ -114,15 +127,8 @@ public class MediaRecorderActivity extends Activity {
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
 			
-			int[] pixels = new int[mScreenWidthInPixels*mScreenWidthInPixels];//the size of the array is the dimensions of the sub-photo
-	        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	        Bitmap bitmap = BitmapFactory.decodeByteArray(data , 0, data.length);
-	        bitmap.getPixels(pixels, 0, 1, 0, 0, mScreenWidthInPixels, mScreenWidthInPixels);//the stride value is (in my case) the width value
-	        bitmap = Bitmap.createBitmap(pixels, 0, 1, mScreenWidthInPixels, mScreenWidthInPixels, Config.ARGB_8888);//ARGB_8888 is a good quality configuration
-	        bitmap.compress(CompressFormat.JPEG, 100, bos);//100 is the best quality possibe
-	        byte[] square = bos.toByteArray();
-			
 			//Save to file:
+	        /*
 			File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
 			if (pictureFile == null) {
 				Log.d(TAG, "Error creating media file, check storage permissions");
@@ -138,10 +144,11 @@ public class MediaRecorderActivity extends Activity {
 			} catch (IOException e) {
 				Log.d(TAG, "Error accessing file: " + e.getMessage());
 			}
+			*/
 			
-			// Pass bypte array to NewArticleActivity
+			// Pass byte array to NewArticleActivity
 			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
-			newStoryIntent.putExtra("image", square);
+			newStoryIntent.putExtra("image", data);
 			newStoryIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 			startActivity(newStoryIntent);
 			finish();
@@ -203,11 +210,5 @@ public class MediaRecorderActivity extends Activity {
 			mCamera.release(); // release the camera for other applications
 			mCamera = null;
 		}
-	}
-
-	private int pixelsToDips(int i) {
-		Resources r = getResources();
-		float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, i, r.getDisplayMetrics());
-		return (int) Math.floor(px);
 	}
 }
