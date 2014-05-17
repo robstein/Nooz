@@ -32,14 +32,20 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="com.nooz.nooz.activity.MapActivity"
+            android:name="com.nooz.nooz.activity.LoginActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="Nooz" >
+            android:label="LoginActivity"
+            android:windowSoftInputMode="adjustPan" >
             <intent-filter android:label="Nooz" >
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.nooz.nooz.activity.MapActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="Nooz" >
         </activity>
 
         <!-- Should change new article activity name programmatically to the name of the article or user or something -->

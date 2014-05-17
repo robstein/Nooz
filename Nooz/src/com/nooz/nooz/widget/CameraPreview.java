@@ -14,7 +14,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
 	private Context mContext;
 	private SurfaceHolder mHolder;
-	private Camera mCamera;	
+	private Camera mCamera;
+
+	private int mWidth;
+	private int mHeight;
 
 	public CameraPreview(Context context, Camera camera) {
 		super(context);
@@ -26,7 +29,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 		mHolder.addCallback(this);
 		// deprecated setting, but required on Android versions prior to 3.0
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		
+
 		mContext = context;
 	}
 
@@ -40,6 +43,15 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 			Log.d(TAG, "Error setting camera preview: " + e.getMessage());
 		}
 	}
+
+	// Don't do this yet
+	//@Override
+	//protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+	//	super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+	//	mWidth = MeasureSpec.getSize(widthMeasureSpec);
+	//	mHeight = mWidth;
+	//	setMeasuredDimension(mWidth, mWidth);
+	//}
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		// empty. Take care of releasing the Camera preview in your activity.
@@ -63,42 +75,36 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
 		// set preview size and make any resize, rotate or
 		// reformatting changes here
-		//Parameters parameters = mCamera.getParameters();
-	    //List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
-	    //Camera.Size previewSize = previewSizes.get(0);
-	    //parameters.setPreviewSize(previewSize.width, previewSize.height);
-	    
-	    /*
-        Display display = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		// Parameters parameters = mCamera.getParameters();
+		// List<Camera.Size> previewSizes =
+		// parameters.getSupportedPreviewSizes();
+		// Camera.Size previewSize = previewSizes.get(0);
+		// parameters.setPreviewSize(previewSize.width, previewSize.height);
 
-        if(display.getRotation() == Surface.ROTATION_0)
-        {
-            parameters.setPreviewSize(previewSize.height, previewSize.width);                           
-            mCamera.setDisplayOrientation(90);
-        }
-        if(display.getRotation() == Surface.ROTATION_90)
-        {
-            parameters.setPreviewSize(previewSize.width, previewSize.height);                           
-        }
-        if(display.getRotation() == Surface.ROTATION_180)
-        {
-            parameters.setPreviewSize(previewSize.height, previewSize.width);               
-        }
-        if(display.getRotation() == Surface.ROTATION_270)
-        {
-            parameters.setPreviewSize(previewSize.width, previewSize.height);
-            mCamera.setDisplayOrientation(180);
-        }
-        */
-        //mCamera.setParameters(parameters);
+		/*
+		 * Display display =
+		 * ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE
+		 * )).getDefaultDisplay();
+		 * 
+		 * if(display.getRotation() == Surface.ROTATION_0) {
+		 * parameters.setPreviewSize(previewSize.height, previewSize.width);
+		 * mCamera.setDisplayOrientation(90); } if(display.getRotation() ==
+		 * Surface.ROTATION_90) { parameters.setPreviewSize(previewSize.width,
+		 * previewSize.height); } if(display.getRotation() ==
+		 * Surface.ROTATION_180) { parameters.setPreviewSize(previewSize.height,
+		 * previewSize.width); } if(display.getRotation() ==
+		 * Surface.ROTATION_270) { parameters.setPreviewSize(previewSize.width,
+		 * previewSize.height); mCamera.setDisplayOrientation(180); }
+		 */
+		// mCamera.setParameters(parameters);
 		mCamera.autoFocus(new Camera.AutoFocusCallback() {
 
 			@Override
 			public void onAutoFocus(boolean success, Camera camera) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 		});
 
 		// start preview with new settings

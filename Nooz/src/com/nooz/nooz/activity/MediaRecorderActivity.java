@@ -72,6 +72,9 @@ public class MediaRecorderActivity extends Activity {
 
 		// Create an instance of Camera
 		mCamera = getCameraInstance();
+		if(mCamera==null) {
+			finish();
+		}
 		mCamera.setDisplayOrientation(90);
 		Camera.Parameters camParams = mCamera.getParameters();
 		camParams.setRotation(90);
@@ -82,9 +85,24 @@ public class MediaRecorderActivity extends Activity {
 		}
 		List<Camera.Size> pictureSizes = camParams.getSupportedPictureSizes();
 		camParams.setPictureSize(pictureSizes.get(0).width, pictureSizes.get(0).height);
+		/*
+		for (Camera.Size camPictureSize : pictureSizes) {
+			if(camPictureSize.width == camPictureSize.height) {
+				camParams.setPictureSize(camPictureSize.width, camPictureSize.height);
+				break;
+			}
+		}
+		*/
 		List<Camera.Size> previewSizes = camParams.getSupportedPreviewSizes();
 		camParams.setPictureSize(previewSizes.get(0).width, previewSizes.get(0).height);
-
+		/*
+		for (Camera.Size camPreviewSize : previewSizes) {
+			if(camPreviewSize.width == camPreviewSize.height) {
+				camParams.setPreviewSize(camPreviewSize.width, camPreviewSize.height);
+				break;
+			}
+		}
+		*/
 		
 		if (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
 			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
@@ -192,6 +210,7 @@ public class MediaRecorderActivity extends Activity {
 			c = Camera.open(); // attempt to get a Camera instance
 		} catch (Exception e) {
 			// Camera is not available (in use or does not exist)
+			Log.d(TAG, "Camera is not available (in use or does not exist) " + e.getMessage());
 		}
 		return c; // returns null if camera is unavailable
 	}
