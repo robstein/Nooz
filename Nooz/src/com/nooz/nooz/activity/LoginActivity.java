@@ -1,6 +1,5 @@
 package com.nooz.nooz.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,9 +18,8 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.Alert;
-import com.nooz.nooz.util.AuthService;
 
-public class LoginActivity extends Activity implements OnClickListener {
+public class LoginActivity extends BaseActivity implements OnClickListener {
 
 	private static final String TAG = "LoginActivity";
 
@@ -45,7 +43,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private Animation mSlideInBottom;
 	private Animation mSlideOutBottom;
 
-	private AuthService mAuthService;
 	ProgressDialog progress;
 
 	private Context mContext;
@@ -83,10 +80,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 		mButtonBackSignup.setOnClickListener(this);
 		mButtonSignupSubmit.setOnClickListener(this);
 
-		// Get authservice
-		mAuthService = new AuthService(this);
 		// If user is already authenticated, bypass logging in
-		if (mAuthService.isUserAuthenticated()) {
+		if (mNoozService.isUserAuthenticated()) {
 			Intent loggedInIntent = new Intent(getApplicationContext(), MapActivity.class);
 			startActivity(loggedInIntent);
 			finish();
@@ -133,7 +128,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			return;
 		}
 		splashLoadingScreen();
-		mAuthService.login(mInputTextLoginEmail.getText().toString(), mInputTextLoginPassword.getText().toString(),
+		mNoozService.login(mInputTextLoginEmail.getText().toString(), mInputTextLoginPassword.getText().toString(),
 				onLogin);
 	}
 
@@ -161,7 +156,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			return;
 		} else {
 			splashLoadingScreen();
-			mAuthService.registerUser(mInputTextSignupNameFirst.getText().toString(), mInputTextSignupNameLast
+			mNoozService.registerUser(mInputTextSignupNameFirst.getText().toString(), mInputTextSignupNameLast
 					.getText().toString(), mInputTextSignupEmail.getText().toString(), mInputTextSignupPassword
 					.getText().toString(), onRegisterUser);
 		}
@@ -173,7 +168,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			if (exception == null) {
 				String email = jsonObject.getAsJsonPrimitive("email").getAsString();
 				String password = jsonObject.getAsJsonPrimitive("password").getAsString();
-				mAuthService.login(email, password, onLogin);
+				mNoozService.login(email, password, onLogin);
 			} else {
 				Log.e(TAG, "There was an error registering the user: " + exception.getMessage());
 				Alert.createAndShowDialog(exception, "Error", mContext);
@@ -190,7 +185,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				// If they've registered successfully, we'll save
 				// and set the user and then show the logged in
 				// activity
-				mAuthService.setUserAndSaveDataLogin(jsonObject);
+				mNoozService.setUserAndSaveDataLogin(jsonObject);
 				Intent loggedInIntent = new Intent(getApplicationContext(), MapActivity.class);
 				startActivity(loggedInIntent);
 				finish();

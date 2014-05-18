@@ -8,7 +8,6 @@ import android.content.IntentSender;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -38,11 +37,12 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.nooz.nooz.R;
+import com.nooz.nooz.util.DisplayUserFullNameCallbackInterface;
 import com.nooz.nooz.util.SearchType;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.PagerContainer;
 
-public class MapActivity extends FragmentActivity implements OnClickListener,
+public class MapActivity extends BaseFragmentActivity implements OnClickListener,
 		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private PagerContainer mContainer;
@@ -53,13 +53,13 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 	private ImageView mButtonRefresh;
 	private ImageView mButtonNewStory;
 	private GoogleMap mMap;
-
 	private RelativeLayout mStoryFooter;
 	private RelativeLayout mMenuSettings;
+	private TextView mButtonProfile;
 
 	private LocationClient mLocationClient;
-	private Location mCurrentLocation;
 
+	private Location mCurrentLocation;
 	private SearchType mCurrentSearchType = SearchType.RELEVANT;
 	private Boolean settingsMenuIsOpen = false;
 
@@ -89,11 +89,11 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		// make this at least however many pages you can see
 		mPager.setOffscreenPageLimit(adapter.getCount());
 		// A little space between pages
-		mPager.setPageMargin((int)Tools.dipToPixels(this, 4));
+		mPager.setPageMargin((int) Tools.dipToPixels(this, 4));
 		// If hardware acceleration is enabled, you should also remove
 		// clipping on the pager for its children.
 		mPager.setClipChildren(false);
-		
+
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
@@ -101,9 +101,12 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		int height = size.y;
 		int footer_height = (int) (height * FOOTER_WEIGHT);
 		FrameLayout.LayoutParams footerLayoutParams = (FrameLayout.LayoutParams) mPager.getLayoutParams();
-		footerLayoutParams.setMargins((int)((width-footer_height)/2)+(int)Tools.dipToPixels(this, 4), 0, (int)((width-footer_height)/2)+(int)Tools.dipToPixels(this, 4), 0);
+		footerLayoutParams.setMargins((int) ((width - footer_height) / 2) + (int) Tools.dipToPixels(this, 4), 0,
+				(int) ((width - footer_height) / 2) + (int) Tools.dipToPixels(this, 4), 0);
 		mPager.setLayoutParams(footerLayoutParams);
 
+		mMenuSettings = (RelativeLayout) findViewById(R.id.menu_settings);
+		mStoryFooter = (RelativeLayout) findViewById(R.id.story_footer);
 		mButtonRelevant = (TextView) findViewById(R.id.button_relevant);
 		mButtonBreaking = (TextView) findViewById(R.id.button_breaking);
 		mButtonSettingsAndFilters = (ImageView) findViewById(R.id.button_settings);
@@ -114,20 +117,31 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		mButtonSettingsAndFilters.setOnClickListener(this);
 		mButtonRefresh.setOnClickListener(this);
 		mButtonNewStory.setOnClickListener(this);
-
 		mSlideInBottom = AnimationUtils.loadAnimation(this, R.anim.slide_in_bottom);
 		mSlideOutBottom = AnimationUtils.loadAnimation(this, R.anim.slide_out_bottom);
 		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 		mFadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
-		mMenuSettings = (RelativeLayout) findViewById(R.id.menu_settings);
-		mStoryFooter = (RelativeLayout) findViewById(R.id.story_footer);
-
 
 		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		setUpMapIfNeeded();
 		mLocationClient = new LocationClient(this, this, this);
 
 		drawCirlesOnMap();
+
+		displayUserFullName();
+	}
+
+	private void displayUserFullName() {
+		mNoozService.getUserFullName(new DisplayUserFullNameCallback());
+	}
+
+	private class DisplayUserFullNameCallback implements DisplayUserFullNameCallbackInterface {
+
+		@Override
+		public void displayUserFullName(String userName) {
+			mButtonProfile = (TextView) findViewById(R.id.button_profile);
+			mButtonProfile.setText(userName);
+		}
 
 	}
 
@@ -205,7 +219,7 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 		if (settingsMenuIsOpen) {
 			mStoryFooter.setVisibility(View.VISIBLE);
 			mStoryFooter.startAnimation(mFadeIn);
-			
+
 			// change color of settings icon and show relevant, breaking buttons
 			mButtonSettingsAndFilters.setImageResource(R.drawable.settings);
 
@@ -253,8 +267,6 @@ public class MapActivity extends FragmentActivity implements OnClickListener,
 			mButtonBreaking.setTextColor(SEARCH_TYPE_ACTIVE_COLOR);
 		}
 	}
-
-
 
 	// Nothing special about this adapter, just throwing up colored views for
 	// demo

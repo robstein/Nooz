@@ -25,20 +25,38 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.activity.LoginActivity;
 
-public class AuthService {
+public class NoozService {
 
-	private static final String TAG = "AuthService";
+	private static final String TAG = "NoozService";
 
 	private Context mContext;
 	private MobileServiceClient mClient;
 	private MobileServiceJsonTable mTableAccounts;
 
-	public String getUserName() {
-		return mClient.getCurrentUser().toString();
+	public void getUserFullName(final DisplayUserFullNameCallbackInterface displayUserFullNameCallback) {
+		MobileServiceUser currentUser = mClient.getCurrentUser();
+		if (currentUser != null) {
+
+			mTableAccounts.lookUp(mClient.getCurrentUser().getUserId(), new TableJsonOperationCallback() {
+
+				@Override
+				public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+					String fullname = "Default Name";
+					if (exception == null) {
+						String firstName = jsonObject.getAsJsonPrimitive("firstName").getAsString();
+						String lastName = jsonObject.getAsJsonPrimitive("lastName").getAsString();
+						fullname = firstName + " " + lastName;
+					} else {
+						Log.e(TAG, "There was an error getting the user's name: " + exception.getMessage());
+					}
+
+					displayUserFullNameCallback.displayUserFullName(fullname);
+				}
+			});
+		}
 	}
 
-	public AuthService(Context context) {
-
+	public NoozService(Context context) {
 		mContext = context;
 		try {
 			mClient = new MobileServiceClient("https://nooz.azure-mobile.net/", "TGeCQCabrSEBxuTBSAuJKqsXUnHBdb80",
@@ -49,6 +67,11 @@ public class AuthService {
 			Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
 		}
 
+	}
+
+	public void setContext(Context context) {
+		mContext = context;
+		mClient.setContext(context);
 	}
 
 	public boolean isUserAuthenticated() {
@@ -73,7 +96,8 @@ public class AuthService {
 		mTableAccounts.insert(customUser, parameters, callback);
 	}
 
-	public void registerUser(String firstName, String lastName, String email, String password, TableJsonOperationCallback callback) {
+	public void registerUser(String firstName, String lastName, String email, String password,
+			TableJsonOperationCallback callback) {
 		JsonObject newUser = new JsonObject();
 		newUser.addProperty("firstName", firstName);
 		newUser.addProperty("lastName", lastName);
