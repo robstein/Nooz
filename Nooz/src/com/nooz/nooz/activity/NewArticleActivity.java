@@ -1,14 +1,18 @@
 package com.nooz.nooz.activity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,6 +37,8 @@ import com.nooz.nooz.widget.SquareImageView;
 
 public class NewArticleActivity extends BaseActivity implements OnClickListener {
 
+	private static final String TAG = "NewArticleActivity";
+	
 	private LinearLayout mLayoutStoryDetails;
 	private SquareImageView mNewArticleImage;
 	private Spinner mCategorySpinner;
@@ -49,7 +55,7 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 	private EditText mInputTextHeadline;
 	private EditText mInputTextCaption;
 	private EditText mInputTextKeywords;
-	private LatLng mLocation;
+	private Location mLocation;
 	private boolean mShareOnFacebook = false;
 	private boolean mShareOnTwitter = false;
 	private boolean mShareOnTumblr = false;
@@ -149,23 +155,27 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		String category = mSpinnerCategorySelection;
 		String headline = mInputTextHeadline.getText().toString();
 		String caption = mInputTextCaption.getText().toString();
-		List<String> keywords = getKeywordList(mInputTextCaption.getText().toString());
-		LatLng location = mLocation;
+		List<String> keywords = getKeywordList(mInputTextKeywords.getText().toString());
+		LatLng location = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
 		boolean shareOnFacebook = mShareOnFacebook;
 		boolean shareOnTwitter = mShareOnTwitter;
 		boolean shareOnTumblr = mShareOnTumblr;
 
 		if ("Choose Category".equals(category)) {
 			Alert.createAndShowDialog("Please choose a category", "Invalid story", this);
+			return;
 		}
 		if ("".equals(headline)) {
 			Alert.createAndShowDialog("Please write a headline", "Invalid story", this);
+			return;
 		}
 		if ("".equals(caption)) {
 			Alert.createAndShowDialog("Please add a caption", "Invalid story", this);
+			return;
 		}
 		if ("".equals(keywords.get(0))) {
 			Alert.createAndShowDialog("Please add a keyword", "Invalid story", this);
+			return;
 		}
 
 		mNoozService.saveStory(category, headline, caption, keywords.get(0), keywords.get(1), keywords.get(2),
@@ -173,18 +183,21 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 	}
 
 	TableJsonOperationCallback onPostNooz = new TableJsonOperationCallback() {
-
 		@Override
-		public void onCompleted(JsonObject arg0, Exception arg1, ServiceFilterResponse arg2) {
-			// TODO Auto-generated method stub
-
+		public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+			if (exception == null) {
+				finish();
+			} else {
+				Log.e(TAG, "Error posting story in: " + exception.getMessage());
+				Alert.createAndShowDialog(exception, "Error", mContext);
+			}
 		}
 	};
 
 	private List<String> getKeywordList(String string) {
-		List<String> items = Arrays.asList(string.split("\\s*,\\s*"));
-		while(items.size() < 3) {
-			items.add(null);
+		List<String> items = new ArrayList<String>(Arrays.asList(string.split("\\s*,\\s*")));
+		while (items.size() < 3) {
+			items.add("null");
 		}
 		return items;
 	}

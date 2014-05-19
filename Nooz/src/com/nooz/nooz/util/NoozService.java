@@ -49,7 +49,7 @@ public class NoozService {
 
 	}
 
-	public void saveStory(String headline, String category, String caption, String keyword1, String keyword2,
+	public void saveStory(String category, String headline, String caption, String keyword1, String keyword2,
 			String keyword3, LatLng location, boolean sharefb, boolean sharetw, boolean sharetu, TableJsonOperationCallback callback) {
 		JsonObject story = new JsonObject();
 		story.addProperty("author_id", mClient.getCurrentUser().getUserId());
@@ -66,7 +66,7 @@ public class NoozService {
 		story.addProperty("sharetu", sharetu);
 		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("postStory", "true"));
-		mTableAccounts.insert(story, parameters, callback);
+		mTableStories.insert(story, parameters, callback);
 	}
 
 	public void getUserFullName(final DisplayUserFullNameCallbackInterface displayUserFullNameCallback) {

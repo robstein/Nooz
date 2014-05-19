@@ -38,8 +38,6 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
 	private static final String TAG = "MediaRecorderActivity";
 
-	private Context mContext;
-
 	private Camera mCamera;
 	private CameraPreview mCameraPreview;
 	private MediaRecorder mMediaRecorder;
@@ -63,8 +61,6 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_media_recorder);
-
-		mContext = this;
 
 		// Move the control buttons down to where they should be
 		Display display = getWindowManager().getDefaultDisplay();

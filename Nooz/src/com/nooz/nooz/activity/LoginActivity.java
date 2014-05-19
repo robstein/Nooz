@@ -45,13 +45,10 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 
 	ProgressDialog progress;
 
-	private Context mContext;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
-		mContext = this;
 
 		mLinearLayoutSignup = (LinearLayout) findViewById(R.id.linearlayout_signup);
 		mLinearLayoutLogin = (LinearLayout) findViewById(R.id.linearlayout_login);
