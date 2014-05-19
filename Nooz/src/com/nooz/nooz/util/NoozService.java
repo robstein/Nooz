@@ -33,6 +33,19 @@ public class NoozService {
 	private MobileServiceClient mClient;
 	private MobileServiceJsonTable mTableAccounts;
 
+	public NoozService(Context context) {
+		mContext = context;
+		try {
+			mClient = new MobileServiceClient("https://nooz.azure-mobile.net/", "TGeCQCabrSEBxuTBSAuJKqsXUnHBdb80",
+					mContext).withFilter(new MyServiceFilter());
+
+			mTableAccounts = mClient.getTable("accounts");
+		} catch (MalformedURLException e) {
+			Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
+		}
+
+	}
+
 	public void getUserFullName(final DisplayUserFullNameCallbackInterface displayUserFullNameCallback) {
 		MobileServiceUser currentUser = mClient.getCurrentUser();
 		if (currentUser != null) {
@@ -54,19 +67,6 @@ public class NoozService {
 				}
 			});
 		}
-	}
-
-	public NoozService(Context context) {
-		mContext = context;
-		try {
-			mClient = new MobileServiceClient("https://nooz.azure-mobile.net/", "TGeCQCabrSEBxuTBSAuJKqsXUnHBdb80",
-					mContext).withFilter(new MyServiceFilter());
-
-			mTableAccounts = mClient.getTable("accounts");
-		} catch (MalformedURLException e) {
-			Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
-		}
-
 	}
 
 	public void setContext(Context context) {

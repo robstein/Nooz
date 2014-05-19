@@ -2,4 +2,14 @@
 
     <string name="app_name">Nooz</string>
 
+    <string-array name="category_array">
+        <item>Choose Category</item>
+        <item>People</item>
+        <item>Community</item>
+        <item>Sports</item>
+        <item>Food</item>
+        <item>Public Saftey</item>
+        <item>Arts &amp; Life</item>
+    </string-array>
+
 </resources>

@@ -39,7 +39,8 @@
         android:background="#FFF"
         android:orientation="horizontal"
         android:paddingBottom="10dp"
-        android:paddingTop="10dp" >
+        android:paddingTop="10dp"
+        android:weightSum="1" >
 
         <ImageView
             android:id="@+id/btn_cancel_new_article"
@@ -49,7 +50,8 @@
             android:layout_marginLeft="20dp"
             android:contentDescription="Cancel"
             android:src="@drawable/cancel_new_article" />
-
+        <!--
+        Will eventually be a cool spinner
         <TextView
             android:id="@+id/btn_choose_category"
             android:layout_width="wrap_content"
@@ -66,6 +68,21 @@
             android:textColor="#222222"
             android:textSize="20dp"
             android:textStyle="bold" />
+        -->
+
+        <Spinner
+            android:id="@+id/spinner_choose_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="24dp"
+            android:background="@drawable/text_button"
+            android:gravity="center"
+            android:padding="9dp"
+            
+            android:layout_weight=".6"
+            
+             />
     </LinearLayout>
 
     <LinearLayout
@@ -77,8 +94,7 @@
         android:gravity="center"
         android:orientation="vertical"
         android:paddingBottom="5dp"
-        android:paddingTop="5dp" 
-        >
+        android:paddingTop="5dp" >
 
         <EditText
             android:id="@+id/caption"
@@ -109,40 +125,45 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="0dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:layout_weight="9"
             android:background="#FFF"
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingBottom="5dp"
-            android:paddingTop="5dp" >
+            android:paddingTop="5dp"
+            android:weightSum="1" >
 
             <ImageView
                 android:id="@+id/btn_share_facebook"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="7dp"
+                android:layout_weight=".233"
                 android:contentDescription="Share to Facebook"
                 android:padding="3dp"
                 android:src="@drawable/share_facebook_pressed" />
 
             <ImageView
                 android:id="@+id/btn_share_twitter"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="7dp"
+                android:layout_weight=".233"
                 android:contentDescription="Share to Twitter"
                 android:padding="3dp"
                 android:src="@drawable/share_twitter" />
 
             <ImageView
                 android:id="@+id/btn_share_tumblr"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="7dp"
+                android:layout_weight=".233"
                 android:contentDescription="Share to Tumblr"
                 android:padding="3dp"
                 android:src="@drawable/share_tumblr" />
@@ -153,11 +174,15 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="24dp"
-                android:background="@drawable/break_post"
+                android:layout_weight=".3"
+                android:background="@drawable/text_button"
                 android:clickable="true"
                 android:gravity="center_horizontal"
                 android:onClick="onClick"
-                android:padding="9dp"
+                android:paddingLeft="19dp"
+                android:paddingRight="19dp"
+                android:paddingTop="9dp"
+                android:paddingBottom="9dp"
                 android:text="BREAK!"
                 android:textAllCaps="true"
                 android:textColor="#222222"
