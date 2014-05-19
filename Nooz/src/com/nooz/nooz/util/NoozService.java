@@ -13,6 +13,7 @@ import android.util.Pair;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
@@ -32,6 +33,7 @@ public class NoozService {
 	private Context mContext;
 	private MobileServiceClient mClient;
 	private MobileServiceJsonTable mTableAccounts;
+	private MobileServiceJsonTable mTableStories;
 
 	public NoozService(Context context) {
 		mContext = context;
@@ -40,10 +42,31 @@ public class NoozService {
 					mContext).withFilter(new MyServiceFilter());
 
 			mTableAccounts = mClient.getTable("accounts");
+			mTableStories = mClient.getTable("stories");
 		} catch (MalformedURLException e) {
 			Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
 		}
 
+	}
+
+	public void saveStory(String headline, String category, String caption, String keyword1, String keyword2,
+			String keyword3, LatLng location, boolean sharefb, boolean sharetw, boolean sharetu, TableJsonOperationCallback callback) {
+		JsonObject story = new JsonObject();
+		story.addProperty("author_id", mClient.getCurrentUser().getUserId());
+		story.addProperty("category", category);
+		story.addProperty("headline", headline);
+		story.addProperty("caption", caption);
+		story.addProperty("keyword1", keyword1);
+		story.addProperty("keyword2", keyword2);
+		story.addProperty("keyword3", keyword3);
+		story.addProperty("lat", location.latitude);
+		story.addProperty("lng", location.longitude);
+		story.addProperty("sharefb", sharefb);
+		story.addProperty("sharetw", sharetw);
+		story.addProperty("sharetu", sharetu);
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("postStory", "true"));
+		mTableAccounts.insert(story, parameters, callback);
 	}
 
 	public void getUserFullName(final DisplayUserFullNameCallbackInterface displayUserFullNameCallback) {

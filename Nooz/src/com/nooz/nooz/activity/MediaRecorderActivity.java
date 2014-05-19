@@ -1,51 +1,54 @@
 package com.nooz.nooz.activity;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
+import android.content.IntentSender;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.location.Location;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.CameraPreview;
 
-public class MediaRecorderActivity extends Activity {
+public class MediaRecorderActivity extends BaseFragmentActivity implements
+		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
 	private static final String TAG = "MediaRecorderActivity";
 
 	private Context mContext;
-	
+
 	private Camera mCamera;
 	private CameraPreview mCameraPreview;
 	private MediaRecorder mMediaRecorder;
 	private LinearLayout mMediaControlLayer;
-	
+
+	private LocationClient mLocationClient;
+
+	private Location mCurrentLocation;
+
 	private int mScreenWidthInPixels;
 
 	public static final int MEDIA_TYPE_IMAGE = 1;
@@ -53,10 +56,14 @@ public class MediaRecorderActivity extends Activity {
 
 	public static final int TOP_BAR_HEIGHT = 61;
 
+	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+	private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_media_recorder);
+
 		mContext = this;
 
 		// Move the control buttons down to where they should be
@@ -72,13 +79,13 @@ public class MediaRecorderActivity extends Activity {
 
 		// Create an instance of Camera
 		mCamera = getCameraInstance();
-		if(mCamera==null) {
+		if (mCamera == null) {
 			finish();
 		}
 		mCamera.setDisplayOrientation(90);
 		Camera.Parameters camParams = mCamera.getParameters();
 		camParams.setRotation(90);
-		//camParams.set("orientation", "portrait");
+		// camParams.set("orientation", "portrait");
 		List<String> focusModes = camParams.getSupportedFocusModes();
 		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
 			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
@@ -86,40 +93,37 @@ public class MediaRecorderActivity extends Activity {
 		List<Camera.Size> pictureSizes = camParams.getSupportedPictureSizes();
 		camParams.setPictureSize(pictureSizes.get(0).width, pictureSizes.get(0).height);
 		/*
-		for (Camera.Size camPictureSize : pictureSizes) {
-			if(camPictureSize.width == camPictureSize.height) {
-				camParams.setPictureSize(camPictureSize.width, camPictureSize.height);
-				break;
-			}
-		}
-		*/
+		 * for (Camera.Size camPictureSize : pictureSizes) {
+		 * if(camPictureSize.width == camPictureSize.height) {
+		 * camParams.setPictureSize(camPictureSize.width,
+		 * camPictureSize.height); break; } }
+		 */
 		List<Camera.Size> previewSizes = camParams.getSupportedPreviewSizes();
 		camParams.setPictureSize(previewSizes.get(0).width, previewSizes.get(0).height);
 		/*
-		for (Camera.Size camPreviewSize : previewSizes) {
-			if(camPreviewSize.width == camPreviewSize.height) {
-				camParams.setPreviewSize(camPreviewSize.width, camPreviewSize.height);
-				break;
-			}
-		}
-		*/
-		
+		 * for (Camera.Size camPreviewSize : previewSizes) {
+		 * if(camPreviewSize.width == camPreviewSize.height) {
+		 * camParams.setPreviewSize(camPreviewSize.width,
+		 * camPreviewSize.height); break; } }
+		 */
+
 		if (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
 			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
 		} else if (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
 			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 		}
-		
+
 		mCamera.setParameters(camParams);
 
 		// Create our Preview view and set it as the content of our activity.
 		mCameraPreview = new CameraPreview(this, mCamera);
 		FrameLayout frameLayoutPreview = (FrameLayout) findViewById(R.id.camera_preview);
-		
-		//RelativeLayout.LayoutParams cameraFrameParams = (RelativeLayout.LayoutParams) frameLayoutPreview.getLayoutParams();
-		//cameraFrameParams.height = mScreenWidthInPixels;
-		//frameLayoutPreview.setLayoutParams(cameraFrameParams);
-		
+
+		// RelativeLayout.LayoutParams cameraFrameParams =
+		// (RelativeLayout.LayoutParams) frameLayoutPreview.getLayoutParams();
+		// cameraFrameParams.height = mScreenWidthInPixels;
+		// frameLayoutPreview.setLayoutParams(cameraFrameParams);
+
 		frameLayoutPreview.addView(mCameraPreview);
 
 		// Add a listener to the Capture button
@@ -131,6 +135,18 @@ public class MediaRecorderActivity extends Activity {
 				mCamera.takePicture(null, null, mPictureCallback);
 			}
 		});
+
+		mLocationClient = new LocationClient(this, this, this);
+	}
+
+	/*
+	 * Called when the Activity becomes visible.
+	 */
+	@Override
+	protected void onStart() {
+		super.onStart();
+		// Connect the client.
+		mLocationClient.connect();
 	}
 
 	@Override
@@ -140,34 +156,42 @@ public class MediaRecorderActivity extends Activity {
 		releaseCamera(); // release the camera immediately on pause event
 	}
 
+	/*
+	 * Called when the Activity is no longer visible.
+	 */
+	@Override
+	protected void onStop() {
+		// Disconnecting the client invalidates it.
+		mLocationClient.disconnect();
+		super.onStop();
+	}
+
 	private PictureCallback mPictureCallback = new PictureCallback() {
 
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
-			
-			//Save to file:
-	        /*
-			File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-			if (pictureFile == null) {
-				Log.d(TAG, "Error creating media file, check storage permissions");
-				return;
-			}
 
-			try {
-				FileOutputStream fos = new FileOutputStream(pictureFile);
-				fos.write(square);
-				fos.close();
-			} catch (FileNotFoundException e) {
-				Log.d(TAG, "File not found: " + e.getMessage());
-			} catch (IOException e) {
-				Log.d(TAG, "Error accessing file: " + e.getMessage());
-			}
-			*/
-			
+			// Save to file:
+			/*
+			 * File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE); if
+			 * (pictureFile == null) { Log.d(TAG,
+			 * "Error creating media file, check storage permissions"); return;
+			 * }
+			 * 
+			 * try { FileOutputStream fos = new FileOutputStream(pictureFile);
+			 * fos.write(square); fos.close(); } catch (FileNotFoundException e)
+			 * { Log.d(TAG, "File not found: " + e.getMessage()); } catch
+			 * (IOException e) { Log.d(TAG, "Error accessing file: " +
+			 * e.getMessage()); }
+			 */
+
 			// Pass byte array to NewArticleActivity
+			Bundle args = new Bundle();
+			args.putByteArray("image", data);
+			args.putParcelable("location", mCurrentLocation);
+
 			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
-			newStoryIntent.putExtra("image", data);
-			newStoryIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+			newStoryIntent.putExtra("bundle", args);
 			startActivity(newStoryIntent);
 			finish();
 		}
@@ -229,5 +253,111 @@ public class MediaRecorderActivity extends Activity {
 			mCamera.release(); // release the camera for other applications
 			mCamera = null;
 		}
+	}
+
+	/*
+	 * Handle results returned to the FragmentActivity by Google Play services
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// Decide what to do based on the original request code
+		switch (requestCode) {
+		case CONNECTION_FAILURE_RESOLUTION_REQUEST:
+			/*
+			 * If the result code is Activity.RESULT_OK, try to connect again
+			 */
+			switch (resultCode) {
+			case Activity.RESULT_OK:
+				/*
+				 * Try the request again
+				 */
+				break;
+			}
+		}
+	}
+
+	private boolean servicesConnected() {
+		// Check that Google Play services is available
+		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+		// If Google Play services is available
+		if (ConnectionResult.SUCCESS == resultCode) {
+			// In debug mode, log the status
+			Log.d("Location Updates", "Google Play services is available.");
+			// Continue
+			return true;
+			// Google Play services was not available for some reason
+		} else {
+			// Get the error dialog from Google Play services
+			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+					CONNECTION_FAILURE_RESOLUTION_REQUEST);
+
+			// If Google Play services can provide an error dialog
+			if (errorDialog != null) {
+				// Create a new DialogFragment for the error dialog
+				ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+				// Set the dialog in the DialogFragment
+				errorFragment.setDialog(errorDialog);
+				// Show the error dialog in the DialogFragment
+				errorFragment.show(getSupportFragmentManager(), "Location Updates");
+			}
+			return false;
+		}
+	}
+
+	/*
+	 * Called by Location Services when the request to connect the client
+	 * finishes successfully. At this point, you can request the current
+	 * location or start periodic updates
+	 */
+	@Override
+	public void onConnected(Bundle connectionHint) {
+		// Display the connection status
+		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+		mCurrentLocation = mLocationClient.getLastLocation();
+	}
+
+	/*
+	 * Called by Location Services if the connection to the location client
+	 * drops because of an error.
+	 */
+	@Override
+	public void onDisconnected() {
+		// Display the connection status
+		Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+	}
+
+	/*
+	 * Called by Location Services if the attempt to Location Services fails.
+	 */
+	@Override
+	public void onConnectionFailed(ConnectionResult connectionResult) {
+		/*
+		 * Google Play services can resolve some errors it detects. If the error
+		 * has a resolution, try sending an Intent to start a Google Play
+		 * services activity that can resolve error.
+		 */
+		if (connectionResult.hasResolution()) {
+			try {
+				// Start an Activity that tries to resolve the error
+				connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+				/*
+				 * Thrown if Google Play services canceled the original
+				 * PendingIntent
+				 */
+			} catch (IntentSender.SendIntentException e) {
+				// Log the error
+				e.printStackTrace();
+			}
+		} else {
+			/*
+			 * If no resolution is available, display a dialog to the user with
+			 * the error.
+			 */
+			showErrorDialog(connectionResult.getErrorCode());
+		}
+	}
+
+	void showErrorDialog(int code) {
+		GooglePlayServicesUtil.getErrorDialog(code, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
 	}
 }

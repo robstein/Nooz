@@ -16,7 +16,7 @@
             android:src="@drawable/example_article_picture" />
 
         <EditText
-            android:id="@+id/headline"
+            android:id="@+id/input_headline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/new_article_image"
@@ -50,25 +50,6 @@
             android:layout_marginLeft="20dp"
             android:contentDescription="Cancel"
             android:src="@drawable/cancel_new_article" />
-        <!--
-        Will eventually be a cool spinner
-        <TextView
-            android:id="@+id/btn_choose_category"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="24dp"
-            android:background="@drawable/choose_category"
-            android:clickable="true"
-            android:gravity="center_horizontal"
-            android:onClick="onClick"
-            android:padding="9dp"
-            android:text="CHOOSE A CATEGORY"
-            android:textAllCaps="true"
-            android:textColor="#222222"
-            android:textSize="20dp"
-            android:textStyle="bold" />
-        -->
 
         <Spinner
             android:id="@+id/spinner_choose_category"
@@ -76,13 +57,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="24dp"
+            android:layout_weight=".6"
             android:background="@drawable/text_button"
             android:gravity="center"
-            android:padding="9dp"
-            
-            android:layout_weight=".6"
-            
-             />
+            android:padding="9dp" />
     </LinearLayout>
 
     <LinearLayout
@@ -97,7 +75,7 @@
         android:paddingTop="5dp" >
 
         <EditText
-            android:id="@+id/caption"
+            android:id="@+id/input_caption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
@@ -110,7 +88,7 @@
             android:singleLine="true" />
 
         <EditText
-            android:id="@+id/keywords"
+            android:id="@+id/input_keywords"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="0dp"
@@ -142,9 +120,10 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="7dp"
                 android:layout_weight=".233"
+                android:clickable="true"
                 android:contentDescription="Share to Facebook"
                 android:padding="3dp"
-                android:src="@drawable/share_facebook_pressed" />
+                android:src="@drawable/share_facebook" />
 
             <ImageView
                 android:id="@+id/btn_share_twitter"
@@ -153,6 +132,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="7dp"
                 android:layout_weight=".233"
+                android:clickable="true"
                 android:contentDescription="Share to Twitter"
                 android:padding="3dp"
                 android:src="@drawable/share_twitter" />
@@ -164,6 +144,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="7dp"
                 android:layout_weight=".233"
+                android:clickable="true"
                 android:contentDescription="Share to Tumblr"
                 android:padding="3dp"
                 android:src="@drawable/share_tumblr" />
@@ -179,10 +160,10 @@
                 android:clickable="true"
                 android:gravity="center_horizontal"
                 android:onClick="onClick"
+                android:paddingBottom="9dp"
                 android:paddingLeft="19dp"
                 android:paddingRight="19dp"
                 android:paddingTop="9dp"
-                android:paddingBottom="9dp"
                 android:text="BREAK!"
                 android:textAllCaps="true"
                 android:textColor="#222222"
