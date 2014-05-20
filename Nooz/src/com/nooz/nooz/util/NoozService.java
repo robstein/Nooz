@@ -1,5 +1,6 @@
 package com.nooz.nooz.util;
 
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,11 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
@@ -25,6 +30,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.activity.LoginActivity;
+import com.nooz.nooz.model.Story;
 
 public class NoozService {
 
@@ -50,7 +56,8 @@ public class NoozService {
 	}
 
 	public void saveStory(String category, String headline, String caption, String keyword1, String keyword2,
-			String keyword3, LatLng location, boolean sharefb, boolean sharetw, boolean sharetu, TableJsonOperationCallback callback) {
+			String keyword3, LatLng location, boolean sharefb, boolean sharetw, boolean sharetu,
+			TableJsonOperationCallback callback) {
 		JsonObject story = new JsonObject();
 		story.addProperty("author_id", mClient.getCurrentUser().getUserId());
 		story.addProperty("category", category);
@@ -188,4 +195,23 @@ public class NoozService {
 		((Activity) mContext).finish();
 	}
 
+	public void getAllStories(final GetStoriesCallbackInterface getStoriesCallback) {
+
+		mClient.invokeApi("getnooz", new ApiJsonOperationCallback() {
+
+			@Override
+			public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+				if (exception == null) {
+					Type listType = new TypeToken<List<Story>>() {}.getType();
+					List<Story> stories = new Gson().fromJson(jsonObject, listType);
+					
+					getStoriesCallback.onComplete(stories);
+				} else {
+					Log.e(TAG, "There was an error retrieving stories: " + exception.getMessage());
+				}
+			}
+
+		});
+
+	}
 }

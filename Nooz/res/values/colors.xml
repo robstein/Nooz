@@ -4,9 +4,11 @@
     <color name="category_color_black">#222222</color>
     <color name="category_people">#32B4FF</color>
     <color name="category_community">#377DEC</color>
-    <color name="category_sports">#E94D3E</color>
+    <color name="category_sports">#E84C3D</color>
     <color name="category_food">#3CB34B</color>
     <color name="category_public_safety">#ED7B22</color>
     <color name="category_arts_and_life">#9A55BF</color>
+    
+    <color name="category_sports_wrong">#E94D3E</color>
 
 </resources>

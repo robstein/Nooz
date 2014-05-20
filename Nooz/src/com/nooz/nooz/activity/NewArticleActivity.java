@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -59,6 +60,8 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 	private boolean mShareOnFacebook = false;
 	private boolean mShareOnTwitter = false;
 	private boolean mShareOnTumblr = false;
+	
+	ProgressDialog progress;
 
 	public static final int TOP_BAR_HEIGHT = 61;
 
@@ -131,6 +134,14 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		mInputTextKeywords = (EditText) findViewById(R.id.input_keywords);
 	}
 
+	private void splashLoadingScreen() {
+		progress = ProgressDialog.show(this, "Submitting to Nooz", "Please wait", true);
+	}
+
+	private void removeSplashLoadingScreen() {
+		progress.dismiss();
+	}
+	
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -178,6 +189,7 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 			return;
 		}
 
+		splashLoadingScreen();
 		mNoozService.saveStory(category, headline, caption, keywords.get(0), keywords.get(1), keywords.get(2),
 				location, shareOnFacebook, shareOnTwitter, shareOnTumblr, onPostNooz);
 	}
@@ -185,6 +197,7 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 	TableJsonOperationCallback onPostNooz = new TableJsonOperationCallback() {
 		@Override
 		public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+			removeSplashLoadingScreen();
 			if (exception == null) {
 				finish();
 			} else {

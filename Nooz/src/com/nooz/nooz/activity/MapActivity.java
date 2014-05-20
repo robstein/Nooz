@@ -1,5 +1,8 @@
 package com.nooz.nooz.activity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -10,6 +13,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -37,7 +41,9 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.nooz.nooz.R;
+import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.DisplayUserFullNameCallbackInterface;
+import com.nooz.nooz.util.GetStoriesCallbackInterface;
 import com.nooz.nooz.util.SearchType;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.PagerContainer;
@@ -63,6 +69,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private SearchType mCurrentSearchType = SearchType.RELEVANT;
 	private Boolean settingsMenuIsOpen = false;
 
+	private Integer mCurrentStory = 0;
+
 	private Animation mSlideInBottom;
 	private Animation mSlideOutBottom;
 	private Animation mFadeIn;
@@ -76,14 +84,17 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
 	private static final float FOOTER_WEIGHT = 0.29f;
 
+	private List<Story> mStories;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
 
+		mStories = new ArrayList<Story>();
 		mContainer = (PagerContainer) findViewById(R.id.pager_container);
 		mPager = mContainer.getViewPager();
-		PagerAdapter adapter = new MyPagerAdapter(this);
+		PagerAdapter adapter = new StoryAdapter(this);
 		mPager.setAdapter(adapter);
 		// Necessary or the pager will only have one extra page to show
 		// make this at least however many pages you can see
@@ -93,6 +104,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		// If hardware acceleration is enabled, you should also remove
 		// clipping on the pager for its children.
 		mPager.setClipChildren(false);
+		mPager.setOnPageChangeListener(onStorySwipe);
 
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
@@ -128,23 +140,9 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 		drawCirlesOnMap();
 
-		displayUserFullName();
+		// displayUserFullName();
 	}
-
-	private void displayUserFullName() {
-		mNoozService.getUserFullName(new DisplayUserFullNameCallback());
-	}
-
-	private class DisplayUserFullNameCallback implements DisplayUserFullNameCallbackInterface {
-
-		@Override
-		public void displayUserFullName(String userName) {
-			mButtonProfile = (TextView) findViewById(R.id.button_profile);
-			mButtonProfile.setText(userName);
-		}
-
-	}
-
+	
 	private void drawCirlesOnMap() {
 		CircleOptions circleOptions;
 
@@ -165,6 +163,134 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mMap.addGroundOverlay(new GroundOverlayOptions()
 				.image(BitmapDescriptorFactory.fromResource(R.drawable.food_white)).anchor(0.5f, 0.5f)
 				.position(new LatLng(40.103766, -88.235417), 20f, 20f));
+
+	}
+
+	private void populateInitialStories() {
+		mNoozService.getAllStories(new GetStoriesCallback());
+	}
+
+	private class GetStoriesCallback implements GetStoriesCallbackInterface {
+
+		@Override
+		public void onComplete(List<Story> stories) {
+			mStories = stories;
+			PagerAdapter adapter = new StoryAdapter(mContext);
+			mPager.setAdapter(adapter);
+			mPager.setOffscreenPageLimit(adapter.getCount());
+
+		}
+	}
+
+	private OnPageChangeListener onStorySwipe = new OnPageChangeListener() {
+
+		@Override
+		public void onPageScrollStateChanged(int state) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void onPageSelected(int position) {
+			// Shade old view
+			View layout = mPager.findViewWithTag(mCurrentStory);
+			View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
+			storyItemShader.setBackgroundColor(0xC0000000);
+
+			// Change current selected view
+			mCurrentStory = position;
+
+			// Brighten current view
+			layout = mPager.findViewWithTag(mCurrentStory);
+			storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
+			storyItemShader.setBackgroundColor(0x40000000);
+
+		}
+
+	};
+
+	private class StoryAdapter extends PagerAdapter {
+
+		private Context mContext;
+
+		public StoryAdapter(Context context) {
+			this.mContext = context;
+		}
+
+		@Override
+		public Object instantiateItem(ViewGroup container, int position) {
+
+			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View layout = inflater.inflate(R.layout.story_item, null);
+
+			TextView title = (TextView) layout.findViewById(R.id.story_item_title);
+			TextView author = (TextView) layout.findViewById(R.id.story_item_author);
+			View categoryRuler = (View) layout.findViewById(R.id.categoryRuler);
+
+			title.setText(mStories.get(position).headline);
+			author.setText(mStories.get(position).firstName + " " + mStories.get(position).lastName);
+			categoryRuler.setBackgroundColor(getRulerColorByCategory(mStories.get(position).category));
+			if (position == 0) {
+				View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
+				storyItemShader.setBackgroundColor(0x80000000);
+			}
+
+			layout.setTag(position);
+
+			((ViewPager) container).addView(layout);
+
+			return layout;
+		}
+
+		private int getRulerColorByCategory(String category) {
+			if ("People".equals(category)) {
+				return getResources().getColor(R.color.category_people);
+			} else if ("Community".equals(category)) {
+				return getResources().getColor(R.color.category_community);
+			} else if ("Sports".equals(category)) {
+				return getResources().getColor(R.color.category_sports);
+			} else if ("Food".equals(category)) {
+				return getResources().getColor(R.color.category_food);
+			} else if ("Public Saftey".equals(category)) {
+				return getResources().getColor(R.color.category_public_safety);
+			} else { // Arts and Life
+				return getResources().getColor(R.color.category_arts_and_life);
+			}
+		}
+
+		@Override
+		public void destroyItem(ViewGroup container, int position, Object object) {
+			container.removeView((View) object);
+		}
+
+		@Override
+		public int getCount() {
+			return mStories.size();
+		}
+
+		@Override
+		public boolean isViewFromObject(View view, Object object) {
+			return (view == object);
+		}
+	}
+
+	private void displayUserFullName() {
+		mNoozService.getUserFullName(new DisplayUserFullNameCallback());
+	}
+
+	private class DisplayUserFullNameCallback implements DisplayUserFullNameCallbackInterface {
+
+		@Override
+		public void displayUserFullName(String userName) {
+			mButtonProfile = (TextView) findViewById(R.id.button_profile);
+			mButtonProfile.setText(userName);
+		}
 
 	}
 
@@ -268,65 +394,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		}
 	}
 
-	// Nothing special about this adapter, just throwing up colored views for
-	// demo
-	private class MyPagerAdapter extends PagerAdapter {
-
-		private Context mContext;
-
-		public MyPagerAdapter(Context context) {
-			this.mContext = context;
-		}
-
-		@Override
-		public void setPrimaryItem(ViewGroup container, int position, Object object) {
-			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(mContext.LAYOUT_INFLATER_SERVICE);
-			View layout = inflater.inflate(R.layout.story_item, null);
-			View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
-			storyItemShader.setBackgroundColor(0x80000000);
-		}
-
-		@Override
-		public Object instantiateItem(ViewGroup container, int position) {
-
-			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(mContext.LAYOUT_INFLATER_SERVICE);
-			View layout = inflater.inflate(R.layout.story_item, null);
-
-			TextView title = (TextView) layout.findViewById(R.id.story_item_title);
-			TextView author = (TextView) layout.findViewById(R.id.story_item_author);
-			View categoryRuler = (View) layout.findViewById(R.id.categoryRuler);
-
-			if (position != 0) {
-				title.setText("Illinois Men's Wrestling Wins 1st");
-				author.setText("Drew Smith");
-				categoryRuler.setBackgroundColor(0xFFE84C3D);
-			} else {
-				title.setText("Spring Engineering Career Fair");
-				author.setText("Matt Birkel");
-				categoryRuler.setBackgroundColor(0xFF377DEC);
-			}
-
-			((ViewPager) container).addView(layout);
-
-			return layout;
-		}
-
-		@Override
-		public void destroyItem(ViewGroup container, int position, Object object) {
-			container.removeView((View) object);
-		}
-
-		@Override
-		public int getCount() {
-			return 5;
-		}
-
-		@Override
-		public boolean isViewFromObject(View view, Object object) {
-			return (view == object);
-		}
-	}
-
 	private void setUpMapIfNeeded() {
 		// Do a null check to confirm that we have not already instantiated the
 		// map.
@@ -410,6 +477,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mCurrentLocation = mLocationClient.getLastLocation();
 		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mCurrentLocation.getLatitude(),
 				mCurrentLocation.getLongitude()), 12.0f));
+		populateInitialStories();
 	}
 
 	/*

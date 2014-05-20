@@ -180,6 +180,7 @@ containing a value of this type.
         public static final int category_people=0x7f05000b;
         public static final int category_public_safety=0x7f05000f;
         public static final int category_sports=0x7f05000d;
+        public static final int category_sports_wrong=0x7f050011;
         public static final int common_action_bar_splitter=0x7f050009;
         /**  Sign-in Button Colors 
          */
@@ -192,8 +193,8 @@ containing a value of this type.
         public static final int common_signin_btn_light_text_disabled=0x7f050006;
         public static final int common_signin_btn_light_text_focused=0x7f050007;
         public static final int common_signin_btn_light_text_pressed=0x7f050005;
-        public static final int common_signin_btn_text_dark=0x7f050011;
-        public static final int common_signin_btn_text_light=0x7f050012;
+        public static final int common_signin_btn_text_dark=0x7f050012;
+        public static final int common_signin_btn_text_light=0x7f050013;
     }
     public static final class drawable {
         public static final int arts_and_life_solid=0x7f020000;
