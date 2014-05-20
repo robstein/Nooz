@@ -34,22 +34,28 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.DisplayUserFullNameCallbackInterface;
 import com.nooz.nooz.util.GetStoriesCallbackInterface;
+import com.nooz.nooz.util.GlobeTrigonometry;
 import com.nooz.nooz.util.SearchType;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.PagerContainer;
 
-public class MapActivity extends BaseFragmentActivity implements OnClickListener,
-		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
+public class MapActivity extends BaseFragmentActivity implements OnClickListener, OnMapClickListener,
+		OnCameraChangeListener, GooglePlayServicesClient.ConnectionCallbacks,
+		GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private PagerContainer mContainer;
 	private ViewPager mPager;
@@ -66,10 +72,13 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private LocationClient mLocationClient;
 
 	private Location mCurrentLocation;
+
+	private float mPreviousZoomLevel = -1.0f; // Initialize to a non-valid zoom
+												// value
+	private boolean mIsZooming = false;
+
 	private SearchType mCurrentSearchType = SearchType.RELEVANT;
 	private Boolean settingsMenuIsOpen = false;
-
-	private Integer mCurrentStory = 0;
 
 	private Animation mSlideInBottom;
 	private Animation mSlideOutBottom;
@@ -80,11 +89,35 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private static final int SEARCH_TYPE_FADED_COLOR = 0xFF979797;
 	private static final LatLng USA = new LatLng(37.09024, -95.712891);
 	private static final int ZOOM_USA = 3;
-	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
 	private static final float FOOTER_WEIGHT = 0.29f;
 
+	private static int COLOR_PEOPLE;
+	private static int COLOR_COMMUNITY;
+	private static int COLOR_SPORTS;
+	private static int COLOR_FOOD;
+	private static int COLOR_PUBLIC_SAFETY;
+	private static int COLOR_ARTS_AND_LIFE;
+
+	private static final int COLOR_PEOPLE_STROKE = 0xFF8DCFFF;
+	private static final int COLOR_COMMUNITY_STROKE = 0xFF6B9EF1;
+	private static final int COLOR_SPORTS_STROKE = 0xFFBE9ABD;
+	private static final int COLOR_FOOD_STROKE = 0xFF83D193;
+	private static final int COLOR_PUBLIC_SAFETY_STROKE = 0xFFEEAF7A;
+	private static final int COLOR_ARTS_AND_LIFE_STROKE = 0xFFAE7DCE;
+
+	private static final boolean HIGHLIGHT = true;
+	private static final boolean SHADE = false;
+
 	private List<Story> mStories;
+	private List<Circle> mCircles;
+	private List<GroundOverlay> mGroundOverlays;
+	private Integer mCurrentStory = 0;
+	private int mScreenWidthInPixels;
+	private double mMapWidthInMeters;
+	
+	protected boolean circlesAreOnMap;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +125,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		setContentView(R.layout.activity_map);
 
 		mStories = new ArrayList<Story>();
+		mCircles = new ArrayList<Circle>();
+		mGroundOverlays = new ArrayList<GroundOverlay>();
 		mContainer = (PagerContainer) findViewById(R.id.pager_container);
 		mPager = mContainer.getViewPager();
 		PagerAdapter adapter = new StoryAdapter(this);
@@ -109,12 +144,13 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
-		int width = size.x;
+		mScreenWidthInPixels = size.x;
 		int height = size.y;
 		int footer_height = (int) (height * FOOTER_WEIGHT);
 		FrameLayout.LayoutParams footerLayoutParams = (FrameLayout.LayoutParams) mPager.getLayoutParams();
-		footerLayoutParams.setMargins((int) ((width - footer_height) / 2) + (int) Tools.dipToPixels(this, 4), 0,
-				(int) ((width - footer_height) / 2) + (int) Tools.dipToPixels(this, 4), 0);
+		footerLayoutParams.setMargins(
+				(int) ((mScreenWidthInPixels - footer_height) / 2) + (int) Tools.dipToPixels(this, 4), 0,
+				(int) ((mScreenWidthInPixels - footer_height) / 2) + (int) Tools.dipToPixels(this, 4), 0);
 		mPager.setLayoutParams(footerLayoutParams);
 
 		mMenuSettings = (RelativeLayout) findViewById(R.id.menu_settings);
@@ -138,32 +174,83 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		setUpMapIfNeeded();
 		mLocationClient = new LocationClient(this, this, this);
 
-		drawCirlesOnMap();
+		COLOR_PEOPLE = getResources().getColor(R.color.category_people);
+		COLOR_COMMUNITY = getResources().getColor(R.color.category_community);
+		COLOR_SPORTS = getResources().getColor(R.color.category_sports);
+		COLOR_FOOD = getResources().getColor(R.color.category_food);
+		COLOR_PUBLIC_SAFETY = getResources().getColor(R.color.category_public_safety);
+		COLOR_ARTS_AND_LIFE = getResources().getColor(R.color.category_arts_and_life);
+
+		// drawCirlesOnMap();
 
 		// displayUserFullName();
 	}
-	
+
+	@Override
+	public void onCameraChange(CameraPosition position) {
+		Log.d("Zoom", "Zoom: " + position.zoom);
+
+		if (mPreviousZoomLevel != position.zoom) {
+			mMapWidthInMeters = GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, position.zoom);
+			updateBubbleSizes();
+		}
+
+		mPreviousZoomLevel = position.zoom;
+	}
+
+	private void updateBubbleSizes() {
+		int i = 0;
+		for (Story s : mStories) {
+			double newRadius = ((mMapWidthInMeters * 10 + (4 * i) * (10 / mStories.size())) / 100) / 3;
+			s.setRadius(newRadius);
+			mCircles.get(i).setRadius(newRadius);
+			mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int) (newRadius * 3 / 4));
+			i++;
+		}
+	}
+
+	@Override
+	public void onMapClick(LatLng point) {
+		for (Story s : mStories) {
+			if (GlobeTrigonometry.distBetween(s.lat, s.lng, point.latitude, point.longitude) < s.radius) {
+				Bundle args = new Bundle();
+				args.putParcelable("story", s);
+				Intent readStoryIntent = new Intent(getApplicationContext(), ArticleActivity.class);
+				readStoryIntent.putExtra("bundle", args);
+				startActivity(readStoryIntent);
+			}
+		}
+	}
+
 	private void drawCirlesOnMap() {
+
+		// drawBubble(40.1012894, -88.2358381, 100, "Community");
+		// drawBubble(40.103766, -88.235417, 25, "Food");
+
+		for (Story s : mStories) {
+			s.setRadius(50.0);
+			drawBubble(s.lat, s.lng, s.radius, s.category);
+		}
+		circlesAreOnMap = true;
+	}
+
+	private void drawBubble(double lat, double lng, double radius, String category) {
 		CircleOptions circleOptions;
-
-		circleOptions = new CircleOptions().center(new LatLng(40.1012894, -88.2358381)).radius(100);
-		Circle bluecircle = mMap.addCircle(circleOptions);
-		bluecircle.setStrokeColor(0xC06DA3ED);
-		bluecircle.setFillColor(0xC0377DEC);
-
-		mMap.addGroundOverlay(new GroundOverlayOptions()
-				.image(BitmapDescriptorFactory.fromResource(R.drawable.community_white)).anchor(0.5f, 0.5f)
-				.position(new LatLng(40.1012894, -88.2358381), 60f, 60f));
-
-		circleOptions = new CircleOptions().center(new LatLng(40.103766, -88.235417)).radius(25);
-		Circle greencircle = mMap.addCircle(circleOptions);
-		greencircle.setStrokeColor(0xC03CB34B);
-		greencircle.setFillColor(0xC08DC88E);
-
-		mMap.addGroundOverlay(new GroundOverlayOptions()
-				.image(BitmapDescriptorFactory.fromResource(R.drawable.food_white)).anchor(0.5f, 0.5f)
-				.position(new LatLng(40.103766, -88.235417), 20f, 20f));
-
+		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(radius);
+		Circle c = mMap.addCircle(circleOptions);
+		mCircles.add(c);
+		if (mCircles.indexOf(c) == 0) {
+			c.setFillColor(getColorByCategory(category, HIGHLIGHT));
+			c.setStrokeColor(getStrokeColorByCategory(category, HIGHLIGHT));
+		} else {
+			c.setFillColor(getColorByCategory(category, SHADE));
+			c.setStrokeColor(getStrokeColorByCategory(category, SHADE));
+		}
+		GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
+				.image(BitmapDescriptorFactory.fromResource(getGroundOverlayByCategory(category))).anchor(0.5f, 0.5f)
+				.position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
+		GroundOverlay icon = mMap.addGroundOverlay(groundOverlayOptions);
+		mGroundOverlays.add(icon);
 	}
 
 	private void populateInitialStories() {
@@ -178,7 +265,9 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			PagerAdapter adapter = new StoryAdapter(mContext);
 			mPager.setAdapter(adapter);
 			mPager.setOffscreenPageLimit(adapter.getCount());
-
+			if (!circlesAreOnMap) {
+				drawCirlesOnMap();
+			}
 		}
 	}
 
@@ -202,6 +291,9 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			View layout = mPager.findViewWithTag(mCurrentStory);
 			View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
 			storyItemShader.setBackgroundColor(0xC0000000);
+			mCircles.get(mCurrentStory).setFillColor(getColorByCategory(mStories.get(mCurrentStory).category, SHADE));
+			mCircles.get(mCurrentStory).setStrokeColor(
+					getStrokeColorByCategory(mStories.get(mCurrentStory).category, SHADE));
 
 			// Change current selected view
 			mCurrentStory = position;
@@ -210,10 +302,67 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			layout = mPager.findViewWithTag(mCurrentStory);
 			storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
 			storyItemShader.setBackgroundColor(0x40000000);
+			mCircles.get(mCurrentStory).setFillColor(
+					getColorByCategory(mStories.get(mCurrentStory).category, HIGHLIGHT));
+			mCircles.get(mCurrentStory).setStrokeColor(
+					getStrokeColorByCategory(mStories.get(mCurrentStory).category, HIGHLIGHT));
 
 		}
 
 	};
+
+	protected int getColorByCategory(String category, boolean highlight) {
+		int retval;
+		if ("People".equals(category)) {
+			retval = COLOR_PEOPLE;
+		} else if ("Community".equals(category)) {
+			retval = COLOR_COMMUNITY;
+		} else if ("Sports".equals(category)) {
+			retval = COLOR_SPORTS;
+		} else if ("Food".equals(category)) {
+			retval = COLOR_FOOD;
+		} else if ("Public Saftey".equals(category)) {
+			retval = COLOR_PUBLIC_SAFETY;
+		} else { // Arts and Life
+			retval = COLOR_ARTS_AND_LIFE;
+		}
+		return highlight ? retval : retval & 0xC0FFFFFF;
+	}
+
+	private int getStrokeColorByCategory(String category, boolean highlight) {
+		int retval;
+		if ("People".equals(category)) {
+			retval = COLOR_PEOPLE_STROKE;
+		} else if ("Community".equals(category)) {
+			retval = COLOR_COMMUNITY_STROKE;
+		} else if ("Sports".equals(category)) {
+			retval = COLOR_SPORTS_STROKE;
+		} else if ("Food".equals(category)) {
+			retval = COLOR_FOOD_STROKE;
+		} else if ("Public Saftey".equals(category)) {
+			retval = COLOR_PUBLIC_SAFETY_STROKE;
+		} else { // Arts and Life
+			retval = COLOR_ARTS_AND_LIFE_STROKE;
+		}
+		return highlight ? retval : retval & 0xC0FFFFFF;
+
+	}
+
+	private int getGroundOverlayByCategory(String category) {
+		if ("People".equals(category)) {
+			return R.drawable.people_white;
+		} else if ("Community".equals(category)) {
+			return R.drawable.community_white;
+		} else if ("Sports".equals(category)) {
+			return R.drawable.sports_white;
+		} else if ("Food".equals(category)) {
+			return R.drawable.food_white;
+		} else if ("Public Saftey".equals(category)) {
+			return R.drawable.public_saftey_white;
+		} else { // Arts and Life
+			return R.drawable.arts_and_life_white;
+		}
+	}
 
 	private class StoryAdapter extends PagerAdapter {
 
@@ -235,7 +384,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 			title.setText(mStories.get(position).headline);
 			author.setText(mStories.get(position).firstName + " " + mStories.get(position).lastName);
-			categoryRuler.setBackgroundColor(getRulerColorByCategory(mStories.get(position).category));
+			categoryRuler.setBackgroundColor(getColorByCategory(mStories.get(position).category, HIGHLIGHT));
 			if (position == 0) {
 				View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
 				storyItemShader.setBackgroundColor(0x80000000);
@@ -246,22 +395,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			((ViewPager) container).addView(layout);
 
 			return layout;
-		}
-
-		private int getRulerColorByCategory(String category) {
-			if ("People".equals(category)) {
-				return getResources().getColor(R.color.category_people);
-			} else if ("Community".equals(category)) {
-				return getResources().getColor(R.color.category_community);
-			} else if ("Sports".equals(category)) {
-				return getResources().getColor(R.color.category_sports);
-			} else if ("Food".equals(category)) {
-				return getResources().getColor(R.color.category_food);
-			} else if ("Public Saftey".equals(category)) {
-				return getResources().getColor(R.color.category_public_safety);
-			} else { // Arts and Life
-				return getResources().getColor(R.color.category_arts_and_life);
-			}
 		}
 
 		@Override
@@ -411,6 +544,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 	private void setUpMap() {
 		mMap.setMyLocationEnabled(true);
+		mMap.setOnCameraChangeListener(this);
 		// CameraPosition cameraPosition = new
 		// CameraPosition.Builder().target(USA).zoom(ZOOM_USA).build();
 		// mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
@@ -524,4 +658,5 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	void showErrorDialog(int code) {
 		GooglePlayServicesUtil.getErrorDialog(code, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
 	}
+
 }

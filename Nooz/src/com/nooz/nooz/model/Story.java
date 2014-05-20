@@ -1,9 +1,14 @@
 package com.nooz.nooz.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
-public class Story {
+public class Story implements Parcelable {
 
+	@SerializedName("id")
+	public String id;
 	@SerializedName("firstName")
 	public String firstName;
 	@SerializedName("lastName")
@@ -26,6 +31,74 @@ public class Story {
 	public Double lng;
 	@SerializedName("__createdAt")
 	public String __createdAt;
+
+	public Double radius;
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(id);
+		dest.writeString(firstName);
+		dest.writeString(lastName);
+		dest.writeString(category);
+		dest.writeString(headline);
+		dest.writeString(caption);
+		dest.writeString(keyword1);
+		dest.writeString(keyword2);
+		dest.writeString(keyword3);
+		dest.writeDouble(lat);
+		dest.writeDouble(lng);
+		dest.writeString(__createdAt);
+
+		dest.writeDouble(radius);
+	}
+
+	/* Constructor from Parcel, reads back fields IN THE ORDER they were written */
+	public Story(Parcel pc) {
+		id = pc.readString();
+		firstName = pc.readString();
+		lastName = pc.readString();
+		category = pc.readString();
+		headline = pc.readString();
+		caption = pc.readString();
+		keyword1 = pc.readString();
+		keyword2 = pc.readString();
+		keyword3 = pc.readString();
+		lat = pc.readDouble();
+		lng = pc.readDouble();
+		__createdAt = pc.readString();
+		radius = pc.readDouble();
+	}
+
+	public static final Parcelable.Creator<Story> CREATOR = new Parcelable.Creator<Story>() {
+		public Story createFromParcel(Parcel pc) {
+			return new Story(pc);
+		}
+
+		public Story[] newArray(int size) {
+			return new Story[size];
+		}
+	};
+
+	public Double getRadius() {
+		return radius;
+	}
+
+	public void setRadius(Double radius) {
+		this.radius = radius;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public String getFirstName() {
 		return firstName;
