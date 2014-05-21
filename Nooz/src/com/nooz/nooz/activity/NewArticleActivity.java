@@ -271,7 +271,7 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		} else if ("Food".equals(mSpinnerCategorySelection)) {
 			changeThemeColor(chooseCategoryAdapterView, R.drawable.text_button_food, R.color.category_food,
 					R.drawable.food_solid);
-		} else if ("Public Saftey".equals(mSpinnerCategorySelection)) {
+		} else if ("Public Safety".equals(mSpinnerCategorySelection)) {
 			changeThemeColor(chooseCategoryAdapterView, R.drawable.text_button_public_safety,
 					R.color.category_public_safety, R.drawable.public_saftey_solid);
 		} else { // Arts and Life

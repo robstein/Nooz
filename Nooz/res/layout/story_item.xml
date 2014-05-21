@@ -9,56 +9,55 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:src="@drawable/example_article_picture" />
+
     <View
         android:id="@+id/story_item_shader"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#C0000000" />
-    
-    <LinearLayout
-        android:layout_width="match_parent"
+
+    <!-- Image view for camera icon/microphone icon -->
+
+    <ImageView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/ic_action_camera" />
 
-        <!-- Image view for camera icon/microphone icon -->
+    <TextView
+        android:id="@+id/story_item_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/new_article_image"
+        android:layout_marginBottom="30dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginTop="4dp"
+        android:text="Drew Smith"
+        android:textColor="#BBBBBB"
+        android:textSize="14dp"
+        android:textStyle="bold" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_camera" />
+    <View
+        android:id="@+id/categoryRuler"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_above="@id/story_item_author"
+        android:layout_marginTop="4dp"
+        android:background="#FFE84C3D" />
 
-        <TextView
-            android:id="@+id/story_item_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:layout_marginTop="30dp"
-            android:text="Illinois Men&apos;s Wrestling Wins 1st"
-            android:textColor="#FFFFFF"
-            android:textSize="14dp"
-            android:textStyle="bold" />
-
-        <View
-            android:id="@+id/categoryRuler"
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:layout_marginTop="4dp"
-            android:background="#FFE84C3D" />
-
-        <TextView
-            android:id="@+id/story_item_author"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:layout_marginTop="4dp"
-            android:text="Drew Smith"
-            android:textColor="#BBBBBB"
-            android:textSize="14dp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-
+    <TextView
+        android:id="@+id/story_item_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/categoryRuler"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginTop="30dp"
+        android:text="Illinois Men&apos;s Wrestling Wins 1st"
+        android:textColor="#FFFFFF"
+        android:textSize="14dp"
+        android:textStyle="bold" />
 
 </RelativeLayout>

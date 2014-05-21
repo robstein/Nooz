@@ -8,8 +8,10 @@
         <item>Community</item>
         <item>Sports</item>
         <item>Food</item>
-        <item>Public Saftey</item>
+        <item>Public Safety</item>
         <item>Arts &amp; Life</item>
     </string-array>
 
+    <string name="example_caption">University of Illinois professor Anne Sautman gave a brief lecture on 18th century French portraits today. She discussed the difference in style between Italian painters during the late Renaissance. The museum\'s galleries are optn to the public daily and</string>
+    
 </resources>

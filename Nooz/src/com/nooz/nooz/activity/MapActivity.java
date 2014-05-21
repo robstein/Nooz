@@ -116,7 +116,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private Integer mCurrentStory = 0;
 	private int mScreenWidthInPixels;
 	private double mMapWidthInMeters;
-	
+
 	protected boolean circlesAreOnMap;
 
 	@Override
@@ -203,6 +203,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		for (Story s : mStories) {
 			double newRadius = ((mMapWidthInMeters * 10 + (4 * i) * (10 / mStories.size())) / 100) / 3;
 			s.setRadius(newRadius);
+			mStories.get(i).setRadius(newRadius);
 			mCircles.get(i).setRadius(newRadius);
 			mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int) (newRadius * 3 / 4));
 			i++;
@@ -223,15 +224,25 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	}
 
 	private void drawCirlesOnMap() {
-
-		// drawBubble(40.1012894, -88.2358381, 100, "Community");
-		// drawBubble(40.103766, -88.235417, 25, "Food");
-
+		int i = 0;
 		for (Story s : mStories) {
-			s.setRadius(50.0);
+			double newRadius = ((mMapWidthInMeters * 10 + (4 * i) * (10 / mStories.size())) / 100) / 3;
+			s.setRadius(newRadius);
+			mStories.get(i).setRadius(newRadius);
 			drawBubble(s.lat, s.lng, s.radius, s.category);
+			i++;
+
 		}
 		circlesAreOnMap = true;
+	}
+	
+	private void setRadii() {
+		int i = 0;
+		for (Story s : mStories) {	
+			double newRadius = ((mMapWidthInMeters * 10 + (4 * i) * (10 / mStories.size())) / 100) / 3;
+			s.setRadius(newRadius);
+			i++;
+		}
 	}
 
 	private void drawBubble(double lat, double lng, double radius, String category) {
@@ -239,16 +250,21 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(radius);
 		Circle c = mMap.addCircle(circleOptions);
 		mCircles.add(c);
+
+		GroundOverlayOptions groundOverlayOptions;
 		if (mCircles.indexOf(c) == 0) {
 			c.setFillColor(getColorByCategory(category, HIGHLIGHT));
 			c.setStrokeColor(getStrokeColorByCategory(category, HIGHLIGHT));
+			groundOverlayOptions = new GroundOverlayOptions()
+					.image(BitmapDescriptorFactory.fromResource(getActiveGroundOverlayByCategory(category)))
+					.anchor(0.5f, 0.5f).position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
 		} else {
 			c.setFillColor(getColorByCategory(category, SHADE));
 			c.setStrokeColor(getStrokeColorByCategory(category, SHADE));
+			groundOverlayOptions = new GroundOverlayOptions()
+					.image(BitmapDescriptorFactory.fromResource(getGroundOverlayByCategory(category)))
+					.anchor(0.5f, 0.5f).position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
 		}
-		GroundOverlayOptions groundOverlayOptions = new GroundOverlayOptions()
-				.image(BitmapDescriptorFactory.fromResource(getGroundOverlayByCategory(category))).anchor(0.5f, 0.5f)
-				.position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
 		GroundOverlay icon = mMap.addGroundOverlay(groundOverlayOptions);
 		mGroundOverlays.add(icon);
 	}
@@ -265,6 +281,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			PagerAdapter adapter = new StoryAdapter(mContext);
 			mPager.setAdapter(adapter);
 			mPager.setOffscreenPageLimit(adapter.getCount());
+			setRadii();
 			if (!circlesAreOnMap) {
 				drawCirlesOnMap();
 			}
@@ -294,6 +311,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			mCircles.get(mCurrentStory).setFillColor(getColorByCategory(mStories.get(mCurrentStory).category, SHADE));
 			mCircles.get(mCurrentStory).setStrokeColor(
 					getStrokeColorByCategory(mStories.get(mCurrentStory).category, SHADE));
+			mGroundOverlays
+					.get(mCurrentStory)
+					.setImage(
+							BitmapDescriptorFactory.fromResource(getGroundOverlayByCategory(mStories.get(mCurrentStory).category)));
 
 			// Change current selected view
 			mCurrentStory = position;
@@ -306,6 +327,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 					getColorByCategory(mStories.get(mCurrentStory).category, HIGHLIGHT));
 			mCircles.get(mCurrentStory).setStrokeColor(
 					getStrokeColorByCategory(mStories.get(mCurrentStory).category, HIGHLIGHT));
+			mGroundOverlays.get(mCurrentStory)
+					.setImage(
+							BitmapDescriptorFactory.fromResource(getActiveGroundOverlayByCategory(mStories
+									.get(mCurrentStory).category)));
 
 		}
 
@@ -321,7 +346,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			retval = COLOR_SPORTS;
 		} else if ("Food".equals(category)) {
 			retval = COLOR_FOOD;
-		} else if ("Public Saftey".equals(category)) {
+		} else if ("Public Safety".equals(category)) {
 			retval = COLOR_PUBLIC_SAFETY;
 		} else { // Arts and Life
 			retval = COLOR_ARTS_AND_LIFE;
@@ -339,7 +364,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			retval = COLOR_SPORTS_STROKE;
 		} else if ("Food".equals(category)) {
 			retval = COLOR_FOOD_STROKE;
-		} else if ("Public Saftey".equals(category)) {
+		} else if ("Public Safety".equals(category)) {
 			retval = COLOR_PUBLIC_SAFETY_STROKE;
 		} else { // Arts and Life
 			retval = COLOR_ARTS_AND_LIFE_STROKE;
@@ -357,10 +382,26 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			return R.drawable.sports_white;
 		} else if ("Food".equals(category)) {
 			return R.drawable.food_white;
-		} else if ("Public Saftey".equals(category)) {
+		} else if ("Public Safety".equals(category)) {
 			return R.drawable.public_saftey_white;
 		} else { // Arts and Life
 			return R.drawable.arts_and_life_white;
+		}
+	}
+
+	private int getActiveGroundOverlayByCategory(String category) {
+		if ("People".equals(category)) {
+			return R.drawable.people_white_active;
+		} else if ("Community".equals(category)) {
+			return R.drawable.community_white_active;
+		} else if ("Sports".equals(category)) {
+			return R.drawable.sports_white_active;
+		} else if ("Food".equals(category)) {
+			return R.drawable.food_white_active;
+		} else if ("Public Safety".equals(category)) {
+			return R.drawable.public_saftey_white_active;
+		} else { // Arts and Life
+			return R.drawable.arts_and_life_white_active;
 		}
 	}
 
@@ -545,6 +586,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private void setUpMap() {
 		mMap.setMyLocationEnabled(true);
 		mMap.setOnCameraChangeListener(this);
+		mMap.setOnMapClickListener(this);
 		// CameraPosition cameraPosition = new
 		// CameraPosition.Builder().target(USA).zoom(ZOOM_USA).build();
 		// mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
