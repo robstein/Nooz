@@ -65,9 +65,16 @@
         <activity
             android:name="com.nooz.nooz.activity.ArticleActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="MediaRecorderActivity"
+            android:label="ArticleActivity"
             android:windowSoftInputMode="adjustPan" >
         </activity>
+        <activity
+            android:name="com.nooz.nooz.activity.FilterActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="FiltersActivity"
+            android:windowSoftInputMode="adjustPan" >
+        </activity>
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyBIAe1vgQPS1Z--ZGIQanwKG8-3yNSuI9k" />

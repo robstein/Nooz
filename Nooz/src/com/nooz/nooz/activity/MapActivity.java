@@ -68,6 +68,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private RelativeLayout mStoryFooter;
 	private RelativeLayout mMenuSettings;
 	private TextView mButtonProfile;
+	private TextView mButtonMapFilters;
 
 	private LocationClient mLocationClient;
 
@@ -169,6 +170,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mSlideOutBottom = AnimationUtils.loadAnimation(this, R.anim.slide_out_bottom);
 		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 		mFadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+		mButtonMapFilters = (TextView) findViewById(R.id.button_map_filters);
+		mButtonMapFilters.setOnClickListener(this);
 
 		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		setUpMapIfNeeded();
@@ -181,9 +184,35 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		COLOR_PUBLIC_SAFETY = getResources().getColor(R.color.category_public_safety);
 		COLOR_ARTS_AND_LIFE = getResources().getColor(R.color.category_arts_and_life);
 
+		
 		// drawCirlesOnMap();
 
 		// displayUserFullName();
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.button_relevant:
+			switchSearchTypes(R.id.button_relevant);
+			break;
+		case R.id.button_breaking:
+			switchSearchTypes(R.id.button_breaking);
+			break;
+		case R.id.button_settings:
+			hideOrShowSettingsMenu();
+			break;
+		case R.id.button_refresh:
+			break;
+		case R.id.button_new_story:
+			Intent mediaRecorderIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
+			startActivity(mediaRecorderIntent);
+			break;
+		case R.id.button_map_filters:
+			Intent filtersIntent = new Intent(getApplicationContext(), FilterActivity.class);
+			startActivity(filtersIntent);
+			break;
+		}
 	}
 
 	@Override
@@ -235,10 +264,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		}
 		circlesAreOnMap = true;
 	}
-	
+
 	private void setRadii() {
 		int i = 0;
-		for (Story s : mStories) {	
+		for (Story s : mStories) {
 			double newRadius = ((mMapWidthInMeters * 10 + (4 * i) * (10 / mStories.size())) / 100) / 3;
 			s.setRadius(newRadius);
 			i++;
@@ -492,27 +521,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		// Disconnecting the client invalidates it.
 		mLocationClient.disconnect();
 		super.onStop();
-	}
-
-	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.button_relevant:
-			switchSearchTypes(R.id.button_relevant);
-			break;
-		case R.id.button_breaking:
-			switchSearchTypes(R.id.button_breaking);
-			break;
-		case R.id.button_settings:
-			hideOrShowSettingsMenu();
-			break;
-		case R.id.button_refresh:
-			break;
-		case R.id.button_new_story:
-			Intent mediaRecorderIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
-			startActivity(mediaRecorderIntent);
-			break;
-		}
 	}
 
 	private void hideOrShowSettingsMenu() {

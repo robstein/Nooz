@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="61dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#FFF"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp" >
+
+        <ImageView
+            android:id="@+id/button_back_from_filter"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Category Logo"
+            android:src="@drawable/back" />
+
+        <TextView
+            android:id="@+id/filters_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_gravity="left"
+            android:layout_marginLeft="6dp"
+            android:gravity="center"
+            android:padding="4dp"
+            android:text="MAP FILTERS"
+            android:textSize="23sp" />
+
+        <ImageView
+            android:id="@+id/filters_search"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Search"
+            android:src="@drawable/filters_search" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:background="@drawable/filter_category"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:text="TIME"
+        android:textColor="#212121"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="61dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#FFF"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp" >
+
+        <TextView
+            android:id="@+id/seek_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="1 year"
+            android:textColor="#212121"
+            android:textSize="13sp" />
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/seek_status" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:background="@drawable/filter_category"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:text="MEDIUM"
+        android:textColor="#212121"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="61dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:background="#FFF"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp" >
+
+        <ImageView
+            android:id="@+id/button_filter_mic"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Audio"
+            android:src="@drawable/filter_mic" />
+
+        <ImageView
+            android:id="@+id/button_filter_camera"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Image"
+            android:src="@drawable/filter_camera" />
+
+        <ImageView
+            android:id="@+id/button_filter_video"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Video"
+            android:src="@drawable/filter_video" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:background="@drawable/filter_category"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:text="CATEGORY"
+        android:textColor="#212121"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="61dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:background="#FFF"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp" >
+
+        <ImageView
+            android:id="@+id/button_filter_community"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Community"
+            android:src="@drawable/filter_community" />
+
+        <ImageView
+            android:id="@+id/button_filter_people"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="People"
+            android:src="@drawable/filter_people" />
+
+        <ImageView
+            android:id="@+id/button_filter_public_safety"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Public Safety"
+            android:src="@drawable/filter_public_safety" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="61dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:background="#FFF"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp" >
+
+        <ImageView
+            android:id="@+id/button_filter_arts_and_life"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Arts and Life"
+            android:src="@drawable/filter_arts_and_life" />
+
+        <ImageView
+            android:id="@+id/button_filter_sports"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Sports"
+            android:src="@drawable/filter_sports" />
+
+        <ImageView
+            android:id="@+id/button_filter_food"
+            android:layout_width="41dp"
+            android:layout_height="41dp"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Food"
+            android:src="@drawable/filter_food" />
+    </RelativeLayout>
+
+</LinearLayout>
