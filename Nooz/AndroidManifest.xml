@@ -69,9 +69,9 @@
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
-            android:name="com.nooz.nooz.activity.FilterActivity"
+            android:name="com.nooz.nooz.activity.ProfileActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="FiltersActivity"
+            android:label="ProfileActivity"
             android:windowSoftInputMode="adjustPan" >
         </activity>
 

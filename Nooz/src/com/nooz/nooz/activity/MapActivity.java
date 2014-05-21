@@ -3,7 +3,9 @@ package com.nooz.nooz.activity;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +18,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,6 +27,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,6 +73,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private RelativeLayout mMenuSettings;
 	private TextView mButtonProfile;
 	private TextView mButtonMapFilters;
+	private ImageView mButtonMapFiltersBack;
 
 	private LocationClient mLocationClient;
 
@@ -78,11 +83,16 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 												// value
 	private boolean mIsZooming = false;
 
+	private LinearLayout mLayoutFilters;
+
 	private SearchType mCurrentSearchType = SearchType.RELEVANT;
 	private Boolean settingsMenuIsOpen = false;
+	private Boolean filtersMenuIsOpen = false;
 
 	private Animation mSlideInBottom;
 	private Animation mSlideOutBottom;
+	private Animation mSlideInLeft;
+	private Animation mSlideOutLeft;
 	private Animation mFadeIn;
 	private Animation mFadeOut;
 
@@ -168,11 +178,17 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mButtonNewStory.setOnClickListener(this);
 		mSlideInBottom = AnimationUtils.loadAnimation(this, R.anim.slide_in_bottom);
 		mSlideOutBottom = AnimationUtils.loadAnimation(this, R.anim.slide_out_bottom);
+		mSlideInLeft = AnimationUtils.loadAnimation(this, R.anim.slide_in_left);
+		mSlideOutLeft = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
 		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 		mFadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+		mButtonProfile = (TextView) findViewById(R.id.button_profile);
+		mButtonProfile.setOnClickListener(this);
 		mButtonMapFilters = (TextView) findViewById(R.id.button_map_filters);
 		mButtonMapFilters.setOnClickListener(this);
-
+		mLayoutFilters = (LinearLayout) findViewById(R.id.filters_layout);
+		mButtonMapFiltersBack = (ImageView) findViewById(R.id.button_back_from_filter);
+		mButtonMapFiltersBack.setOnClickListener(this);
 		mMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 		setUpMapIfNeeded();
 		mLocationClient = new LocationClient(this, this, this);
@@ -184,12 +200,12 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		COLOR_PUBLIC_SAFETY = getResources().getColor(R.color.category_public_safety);
 		COLOR_ARTS_AND_LIFE = getResources().getColor(R.color.category_arts_and_life);
 
-		
 		// drawCirlesOnMap();
 
 		// displayUserFullName();
 	}
 
+	@SuppressLint("NewApi")
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -209,9 +225,32 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			startActivity(mediaRecorderIntent);
 			break;
 		case R.id.button_map_filters:
-			Intent filtersIntent = new Intent(getApplicationContext(), FilterActivity.class);
-			startActivity(filtersIntent);
+			showFiltersLayout();
 			break;
+		case R.id.button_back_from_filter:
+			hideFiltersLayout();
+			break;
+		case R.id.button_profile:
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+				Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
+				Bundle bndlanimation = ActivityOptions.makeCustomAnimation(getApplicationContext(),
+						R.anim.slide_in_left, R.anim.fade_out).toBundle();
+				startActivity(profileIntent, bndlanimation);
+			} else {
+				Intent profileIntent = new Intent(getApplicationContext(), ProfileActivity.class);
+				startActivity(profileIntent);
+			}
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (filtersMenuIsOpen) {
+			hideFiltersLayout();
+		} else if (settingsMenuIsOpen) {
+			hideOrShowSettingsMenu();
+		} else {
+			super.onBackPressed();
 		}
 	}
 
@@ -457,7 +496,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			categoryRuler.setBackgroundColor(getColorByCategory(mStories.get(position).category, HIGHLIGHT));
 			if (position == 0) {
 				View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
-				storyItemShader.setBackgroundColor(0x80000000);
+				storyItemShader.setBackgroundColor(0x40000000);
 			}
 
 			layout.setTag(position);
@@ -521,6 +560,18 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		// Disconnecting the client invalidates it.
 		mLocationClient.disconnect();
 		super.onStop();
+	}
+
+	private void hideFiltersLayout() {
+		filtersMenuIsOpen = false;
+		mLayoutFilters.setVisibility(View.GONE);
+		mLayoutFilters.startAnimation(mSlideOutLeft);
+	}
+
+	private void showFiltersLayout() {
+		filtersMenuIsOpen = true;
+		mLayoutFilters.setVisibility(View.VISIBLE);
+		mLayoutFilters.startAnimation(mSlideInLeft);
 	}
 
 	private void hideOrShowSettingsMenu() {

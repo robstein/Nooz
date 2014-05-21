@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ImageView
+        android:id="@+id/button_back_from_profile"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignParentLeft="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="20dp"
+        android:clickable="true"
+        android:contentDescription="Category Logo"
+        android:layout_marginBottom="13dp"
+        android:layout_marginTop="13dp"
+        android:src="@drawable/back" />
+
+    <TextView
+        android:id="@+id/profile_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:paddingTop="10dp"
+        android:text="Michael Ochoa"
+        android:textColor="#222222"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/profile_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/profile_name"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="2dp"
+        android:text="Urbana, IL"
+        android:textColor="#656565"
+        android:textSize="16sp" />
+
+    <ImageView
+        android:id="@+id/profile_picture_full"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@id/profile_location"
+        android:layout_centerHorizontal="true"
+        android:clickable="true"
+        android:contentDescription="Profile Picture"
+        android:paddingTop="16dp"
+        android:src="@drawable/profile_example" />
+
+    <View
+        android:id="@+id/strut"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:id="@+id/button_profile_cup"
+        android:layout_width="41dp"
+        android:layout_height="41dp"
+        android:layout_below="@id/profile_picture_full"
+        android:layout_marginRight="9dp"
+        android:layout_marginTop="34dp"
+        android:layout_toLeftOf="@id/strut"
+        android:clickable="true"
+        android:contentDescription=""
+        android:src="@drawable/profile_cup" />
+
+    <TextView
+        android:id="@+id/button_profile_numbers"
+        android:layout_width="41dp"
+        android:layout_height="41dp"
+        android:layout_below="@id/profile_picture_full"
+        android:layout_marginRight="18dp"
+        android:layout_marginTop="34dp"
+        android:layout_toLeftOf="@id/button_profile_cup"
+        android:background="@drawable/profile_score_active"
+        android:clickable="true"
+        android:gravity="center"
+        android:singleLine="true"
+        android:text="24"
+        android:textColor="#FFF"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/button_profile_persons"
+        android:layout_width="41dp"
+        android:layout_height="41dp"
+        android:layout_below="@id/profile_picture_full"
+        android:layout_marginLeft="9dp"
+        android:layout_marginTop="34dp"
+        android:layout_toRightOf="@id/strut"
+        android:clickable="true"
+        android:contentDescription=""
+        android:src="@drawable/profile_persons" />
+
+    <ImageView
+        android:id="@+id/button_profile_settings"
+        android:layout_width="41dp"
+        android:layout_height="41dp"
+        android:layout_below="@id/profile_picture_full"
+        android:layout_marginLeft="18dp"
+        android:layout_marginTop="34dp"
+        android:layout_toRightOf="@id/button_profile_persons"
+        android:clickable="true"
+        android:contentDescription=""
+        android:src="@drawable/profile_settings" />
+
+    <GridView
+        android:id="@+id/gridview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/button_profile_numbers"
+        android:layout_marginTop="10dp"
+        android:columnWidth="90dp"
+        android:gravity="center"
+        android:horizontalSpacing="8dp"
+        android:numColumns="2"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="8dp" />
+
+</RelativeLayout>

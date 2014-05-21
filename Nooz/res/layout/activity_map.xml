@@ -1,238 +1,245 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="1" >
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight=".61" >
-
-        <fragment
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.MapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            map:cameraTargetLat="37.09024"
-            map:cameraTargetLng="-95.712891"
-            map:cameraZoom="3"
-            map:mapType="normal"
-            map:uiCompass="false"
-            map:uiRotateGestures="false"
-            map:uiScrollGestures="true"
-            map:uiTiltGestures="false"
-            map:uiZoomControls="false"
-            map:uiZoomGestures="true" />
-
-        <TextView
-            android:id="@+id/region"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/region_label"
-            android:clickable="true"
-            android:gravity="center_horizontal"
-            android:onClick="onClick"
-            android:paddingBottom="9dp"
-            android:paddingLeft="18dp"
-            android:paddingRight="18dp"
-            android:paddingTop="9dp"
-            android:text="CHAMPAIGN"
-            android:textAllCaps="true"
-            android:textColor="#FFFFFF"
-            android:textSize="16dp"
-            android:textStyle="bold" />
-    </RelativeLayout>
+    android:layout_height="match_parent" >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_margin="0dp"
-        android:layout_weight=".1"
-        android:background="#FFF"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp" >
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="1" >
 
-        <!-- the padding left/right won't be right on tablet screens: -->
-
-        <TextView
-            android:id="@+id/button_relevant"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingRight="25dp"
-            android:text="RELEVANT"
-            android:textColor="#000"
-            android:textSize="16dp" />
-
-        <ImageView
-            android:id="@+id/button_settings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="SettingsAndFilters"
-            android:src="@drawable/settings" />
-
-        <TextView
-            android:id="@+id/button_breaking"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="25dp"
-            android:text="BREAKING"
-            android:textColor="#979797"
-            android:textSize="16dp" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="4dp"
-        android:background="#FFDDDDDD" />
-
-    <RelativeLayout
-        android:id="@+id/story_footer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight=".29" >
-
-        <com.nooz.nooz.widget.PagerContainer
-            android:id="@+id/pager_container"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="0dp"
-            android:background="#FFDDDDDD"
-            android:padding="0dp" >
+            android:layout_height="0dp"
+            android:layout_weight=".61" >
 
-            <android.support.v4.view.ViewPager
-                android:id="@+id/view_pager"
+            <fragment
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.MapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_gravity="center_horizontal"
-                android:layout_margin="0dp"
-                android:padding="0dp" />
-        </com.nooz.nooz.widget.PagerContainer>
+                map:cameraTargetLat="37.09024"
+                map:cameraTargetLng="-95.712891"
+                map:cameraZoom="3"
+                map:mapType="normal"
+                map:uiCompass="false"
+                map:uiRotateGestures="false"
+                map:uiScrollGestures="true"
+                map:uiTiltGestures="false"
+                map:uiZoomControls="false"
+                map:uiZoomGestures="true" />
 
-        <ImageView
-            android:id="@+id/button_refresh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerInParent="true"
-            android:clickable="true"
-            android:src="@drawable/refresh" />
-
-        <ImageView
-            android:id="@+id/button_new_story"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerInParent="true"
-            android:clickable="true"
-            android:src="@drawable/new_story" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/menu_settings"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight=".29"
-        android:background="#DDDDDD"
-        android:visibility="gone" >
-
-        <ImageView
-            android:id="@+id/icon_profile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="6dp"
-            android:contentDescription="Profile Picture"
-            android:src="@drawable/thumb_profile_example" />
-
-        <ImageView
-            android:id="@+id/icon_map_filters"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="62dp"
-            android:contentDescription="Filters Picture"
-            android:src="@drawable/map_filters" />
-
-        <ImageView
-            android:id="@+id/icon_top_nooz"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="122dp"
-            android:contentDescription="Top Nooz Picture"
-            android:src="@drawable/top_nooz" />
+            <TextView
+                android:id="@+id/region"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/region_label"
+                android:clickable="true"
+                android:gravity="center_horizontal"
+                android:onClick="onClick"
+                android:paddingBottom="9dp"
+                android:paddingLeft="18dp"
+                android:paddingRight="18dp"
+                android:paddingTop="9dp"
+                android:text="CHAMPAIGN"
+                android:textAllCaps="true"
+                android:textColor="#FFFFFF"
+                android:textSize="16dp"
+                android:textStyle="bold" />
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#00FFFFFF"
-            android:orientation="vertical" >
+            android:layout_height="0dp"
+            android:layout_margin="0dp"
+            android:layout_weight=".1"
+            android:background="#FFF"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp" >
+
+            <!-- the padding left/right won't be right on tablet screens: -->
 
             <TextView
-                android:id="@+id/button_profile"
-                android:layout_width="match_parent"
+                android:id="@+id/button_relevant"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="20dp"
-                android:clickable="true"
-                android:gravity="center"
-                android:text="Michael Ochoa"
-                android:textColor="#202020"
-                android:textSize="13sp" />
+                android:layout_gravity="center_vertical"
+                android:paddingRight="25dp"
+                android:text="RELEVANT"
+                android:textColor="#000"
+                android:textSize="16dp" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:background="#BABABA" />
+            <ImageView
+                android:id="@+id/button_settings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="SettingsAndFilters"
+                android:src="@drawable/settings" />
 
             <TextView
-                android:id="@+id/button_map_filters"
-                android:layout_width="match_parent"
+                android:id="@+id/button_breaking"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="20dp"
-                android:clickable="true"
-                android:gravity="center"
-                android:text="Map Filters"
-                android:textColor="#202020"
-                android:textSize="13dp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:background="#BABABA" />
-
-            <TextView
-                android:id="@+id/button_top_nooz"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:layout_marginTop="20dp"
-                android:clickable="true"
-                android:gravity="center"
-                android:text="Top Nooz"
-                android:textColor="#202020"
-                android:textSize="13dp" />
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="25dp"
+                android:text="BREAKING"
+                android:textColor="#979797"
+                android:textSize="16dp" />
         </LinearLayout>
-    </RelativeLayout>
 
-</LinearLayout>
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="4dp"
+            android:background="#FFDDDDDD" />
+
+        <RelativeLayout
+            android:id="@+id/story_footer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".29" >
+
+            <com.nooz.nooz.widget.PagerContainer
+                android:id="@+id/pager_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="0dp"
+                android:background="#FFDDDDDD"
+                android:padding="0dp" >
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/view_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="0dp"
+                    android:padding="0dp" />
+            </com.nooz.nooz.widget.PagerContainer>
+
+            <ImageView
+                android:id="@+id/button_refresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerInParent="true"
+                android:clickable="true"
+                android:src="@drawable/refresh" />
+
+            <ImageView
+                android:id="@+id/button_new_story"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerInParent="true"
+                android:clickable="true"
+                android:src="@drawable/new_story" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/menu_settings"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".29"
+            android:background="#DDDDDD"
+            android:visibility="gone" >
+
+            <ImageView
+                android:id="@+id/icon_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="6dp"
+                android:contentDescription="Profile Picture"
+                android:src="@drawable/thumb_profile_example" />
+
+            <ImageView
+                android:id="@+id/icon_map_filters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="62dp"
+                android:contentDescription="Filters Picture"
+                android:src="@drawable/map_filters" />
+
+            <ImageView
+                android:id="@+id/icon_top_nooz"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="122dp"
+                android:contentDescription="Top Nooz Picture"
+                android:src="@drawable/top_nooz" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#00FFFFFF"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/button_profile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="20dp"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="Michael Ochoa"
+                    android:textColor="#202020"
+                    android:textSize="13sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="#BABABA" />
+
+                <TextView
+                    android:id="@+id/button_map_filters"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="20dp"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="Map Filters"
+                    android:textColor="#202020"
+                    android:textSize="13dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="#BABABA" />
+
+                <TextView
+                    android:id="@+id/button_top_nooz"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginTop="20dp"
+                    android:clickable="true"
+                    android:gravity="center"
+                    android:text="Top Nooz"
+                    android:textColor="#202020"
+                    android:textSize="13dp" />
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <include layout="@layout/activity_filter" />
+
+</RelativeLayout>

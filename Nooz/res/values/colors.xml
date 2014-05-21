@@ -8,7 +8,7 @@
     <color name="category_food">#FF3CB34B</color>
     <color name="category_public_safety">#FFED7B22</color>
     <color name="category_arts_and_life">#FF9A55BF</color>
-    
     <color name="category_sports_wrong">#FFE94D3E</color>
+    <color name="almost_black">#FF222222</color>
 
 </resources>

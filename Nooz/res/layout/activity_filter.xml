@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/filters_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:background="#FFF"
+    android:orientation="vertical"
+    android:visibility="gone" >
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -15,10 +18,13 @@
 
         <ImageView
             android:id="@+id/button_back_from_filter"
-            android:layout_width="41dp"
-            android:layout_height="41dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_alignParentLeft="true"
             android:layout_gravity="center_vertical"
+            android:layout_marginBottom="3dp"
+            android:layout_marginTop="3dp"
+            android:clickable="true"
             android:contentDescription="Category Logo"
             android:src="@drawable/back" />
 
@@ -57,12 +63,12 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="61dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:background="#FFF"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp" >
+        android:layout_marginTop="20dp"
+        android:background="#FFF" >
 
         <TextView
             android:id="@+id/seek_status"
@@ -76,7 +82,8 @@
         <SeekBar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/seek_status" />
+            android:layout_below="@id/seek_status"
+            android:layout_marginTop="3dp" />
     </RelativeLayout>
 
     <TextView
@@ -92,12 +99,12 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="61dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
         android:layout_marginLeft="60dp"
         android:layout_marginRight="60dp"
-        android:background="#FFF"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp" >
+        android:layout_marginTop="20dp"
+        android:background="#FFF" >
 
         <ImageView
             android:id="@+id/button_filter_mic"
@@ -112,7 +119,7 @@
             android:id="@+id/button_filter_camera"
             android:layout_width="41dp"
             android:layout_height="41dp"
-            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
             android:layout_gravity="center_vertical"
             android:contentDescription="Image"
             android:src="@drawable/filter_camera" />
@@ -141,11 +148,11 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="61dp"
+        android:layout_marginBottom="20dp"
         android:layout_marginLeft="60dp"
         android:layout_marginRight="60dp"
-        android:background="#FFF"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp" >
+        android:layout_marginTop="20dp"
+        android:background="#FFF" >
 
         <ImageView
             android:id="@+id/button_filter_community"
@@ -160,7 +167,7 @@
             android:id="@+id/button_filter_people"
             android:layout_width="41dp"
             android:layout_height="41dp"
-            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
             android:layout_gravity="center_vertical"
             android:contentDescription="People"
             android:src="@drawable/filter_people" />
@@ -174,14 +181,15 @@
             android:contentDescription="Public Safety"
             android:src="@drawable/filter_public_safety" />
     </RelativeLayout>
-    <RelativeLayout
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="61dp"
+        android:layout_marginBottom="20dp"
         android:layout_marginLeft="60dp"
         android:layout_marginRight="60dp"
-        android:background="#FFF"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp" >
+        android:layout_marginTop="20dp"
+        android:background="#FFF" >
 
         <ImageView
             android:id="@+id/button_filter_arts_and_life"
@@ -196,7 +204,7 @@
             android:id="@+id/button_filter_sports"
             android:layout_width="41dp"
             android:layout_height="41dp"
-            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
             android:layout_gravity="center_vertical"
             android:contentDescription="Sports"
             android:src="@drawable/filter_sports" />
