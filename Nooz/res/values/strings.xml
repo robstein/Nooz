@@ -1,6 +1,14 @@
 <resources>
 
     <string name="app_name">Nooz</string>
+    <string name="relevant">RELEVANT</string>
+    <string name="breaking">BREAKING</string>
+    <string name="map_filters_title">MAP FILTERS</string>
+    <string name="medium">MEDIUM</string>
+    <string name="category">CATEGORY</string>
+    <string name="default_name">Michael Ochoa</string>
+    <string name="map_filters_button">Map Filters</string>
+    <string name="top_nooz">Top Nooz</string>
 
     <string-array name="category_array">
         <item>Choose Category</item>
@@ -13,5 +21,5 @@
     </string-array>
 
     <string name="example_caption">University of Illinois professor Anne Sautman gave a brief lecture on 18th century French portraits today. She discussed the difference in style between Italian painters during the late Renaissance. The museum\'s galleries are optn to the public daily and</string>
-    
+
 </resources>
