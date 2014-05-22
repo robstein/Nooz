@@ -393,7 +393,7 @@ containing a value of this type.
         public static final int button_top_nooz=0x7f060061;
         public static final int camera_preview=0x7f060031;
         public static final int caption=0x7f06000c;
-        public static final int categoryRuler=0x7f060065;
+        public static final int categoryRuler=0x7f060066;
         public static final int customSpinnerItemTextView=0x7f060062;
         public static final int filters_layout=0x7f06004c;
         public static final int filters_search=0x7f06004f;
@@ -440,9 +440,10 @@ containing a value of this type.
         public static final int seekbar=0x7f060051;
         public static final int spinner_choose_category=0x7f06003a;
         public static final int story_footer=0x7f06002c;
-        public static final int story_item_author=0x7f060064;
-        public static final int story_item_shader=0x7f060063;
-        public static final int story_item_title=0x7f060066;
+        public static final int story_item_author=0x7f060065;
+        public static final int story_item_layout=0x7f060063;
+        public static final int story_item_shader=0x7f060064;
+        public static final int story_item_title=0x7f060067;
         public static final int strut=0x7f060046;
         public static final int terrain=0x7f060003;
         public static final int text_input_signup_password_confirm=0x7f060025;

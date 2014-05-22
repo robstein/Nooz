@@ -10,6 +10,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
@@ -18,7 +19,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.Display;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -50,7 +50,6 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
-import com.nooz.nooz.util.DisplayUserFullNameCallbackInterface;
 import com.nooz.nooz.util.GetStoriesCallbackInterface;
 import com.nooz.nooz.util.GlobeTrigonometry;
 import com.nooz.nooz.util.SearchType;
@@ -135,6 +134,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private Boolean filtersMenuIsOpen = false;
 	private int mScreenWidthInPixels;
 	private double mMapWidthInMeters;
+	private int mResumeStory = 0;
 
 	/* ***** APP SETUP BEGIN ***** */
 
@@ -152,8 +152,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mLocationClient = new LocationClient(this, this, this);
 
 		// Main map views
-		setUpMapIfNeeded();
-		//
 		mButtonRelevant = (TextView) findViewById(R.id.button_relevant);
 		mButtonRelevant.setOnClickListener(this);
 		//
@@ -242,6 +240,24 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	protected void onResume() {
 		super.onResume();
 		setUpMapIfNeeded();
+
+		SharedPreferences settings = getSharedPreferences("map_settings", MODE_PRIVATE);
+		double latitude;
+		double longitude;
+		float zoom;
+		if (mCurrentLocation == null) {
+			// Move Gmaps camera to USA
+			latitude = settings.getFloat("latitude", (float) USA.latitude);
+			longitude = settings.getFloat("longitude", (float) USA.longitude);
+			zoom = settings.getFloat("zoom", (float) ZOOM_USA);
+		} else {
+			// Move Gmaps camera to current location
+			latitude = settings.getFloat("latitude", (float) mCurrentLocation.getLatitude());
+			longitude = settings.getFloat("longitude", (float) mCurrentLocation.getLongitude());
+			zoom = settings.getFloat("zoom", (float) 12.0f);
+		}
+		mResumeStory = settings.getInt("current_story", 0);
+		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
 	}
 
 	/*
@@ -251,6 +267,29 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	protected void onStop() {
 		// Disconnecting the client invalidates it.
 		mLocationClient.disconnect();
+
+		CameraPosition camPosition = mMap.getCameraPosition();
+		double longitude = camPosition.target.longitude;
+		double latitude = camPosition.target.latitude;
+		double zoom = camPosition.zoom;
+		SharedPreferences settings = getSharedPreferences("map_settings", MODE_PRIVATE);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putFloat("latitude", (float) latitude);
+		editor.putFloat("longitude", (float) longitude);
+		editor.putFloat("zoom", (float) zoom);
+		editor.putInt("current_story", mCurrentStory);
+		editor.commit();
+
+		mStories.clear();
+		for (Circle c : mCircles) {
+			c.remove();
+		}
+		mCircles.clear();
+		for (GroundOverlay g : mGroundOverlays) {
+			g.remove();
+		}
+		mGroundOverlays.clear();
+
 		super.onStop();
 	}
 
@@ -264,15 +303,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		// Display the connection status
 		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
 		mCurrentLocation = mLocationClient.getLastLocation();
-		if (mCurrentLocation == null) {
-			// Move Gmaps camera to USA
-			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(USA.latitude, USA.longitude), ZOOM_USA));
-		} else {
-			// Move Gmaps camera to current location
-			mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mCurrentLocation.getLatitude(),
-					mCurrentLocation.getLongitude()), 12.0f));
-		}
-		populateInitialStories();
 	}
 
 	private void setUpMapIfNeeded() {
@@ -283,11 +313,16 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			// Check if we were successful in obtaining the map.
 			if (mMap != null) {
 				// The Map is verified. It is now safe to manipulate the map.
-				setUpMap();
+				setUpMapAndPopulateInitialStories();
 			}
 		} else {
-			setUpMap();
+			setUpMapAndPopulateInitialStories();
 		}
+	}
+
+	private void setUpMapAndPopulateInitialStories() {
+		setUpMap();
+		populateInitialStories();
 	}
 
 	private void setUpMap() {
@@ -318,6 +353,13 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		case R.id.button_new_story:
 			Intent mediaRecorderIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
 			startActivity(mediaRecorderIntent);
+			break;
+		case R.id.story_item_layout:
+			Bundle args = new Bundle();
+			args.putParcelable("story", mStories.get(mCurrentStory));
+			Intent readStoryIntent = new Intent(getApplicationContext(), ArticleActivity.class);
+			readStoryIntent.putExtra("bundle", args);
+			startActivity(readStoryIntent);
 			break;
 		case R.id.button_map_filters:
 			showFiltersLayout();
@@ -376,6 +418,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 	/* ***** LISTENERS END ***** */
 
+	/* ***** STORIES BEGIN ***** */
+
 	private void populateInitialStories() {
 		mNoozService.getAllStories(new GetStoriesCallback());
 	}
@@ -385,22 +429,12 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		@Override
 		public void onComplete(List<Story> stories) {
 			mStories = stories;
+			// Reset footer
 			PagerAdapter adapter = new StoryAdapter(mContext);
 			mPager.setAdapter(adapter);
 			mPager.setOffscreenPageLimit(adapter.getCount());
-			setRadii();
-			if (!circlesAreOnMap) {
-				drawCirlesOnMap();
-			}
-		}
-	}
-
-	private void setRadii() {
-		int i = 0;
-		for (Story s : mStories) {
-			double newRadius = ((mMapWidthInMeters * 10 + (4 * i) * (10 / mStories.size())) / 100) / 3;
-			s.setRadius(newRadius);
-			i++;
+			drawCirlesOnMap();
+			mPager.setCurrentItem(mResumeStory);
 		}
 	}
 
@@ -413,7 +447,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			drawBubble(s.lat, s.lng, s.radius, s.category);
 			i++;
 		}
-		circlesAreOnMap = true;
+		// circlesAreOnMap = true;
 	}
 
 	private void drawBubble(double lat, double lng, double radius, String category) {
@@ -423,7 +457,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mCircles.add(c);
 
 		GroundOverlayOptions groundOverlayOptions;
-		if (mCircles.indexOf(c) == 0) {
+		if (mCircles.indexOf(c) == mResumeStory) {
 			c.setFillColor(getColorByCategory(category, HIGHLIGHT));
 			c.setStrokeColor(getStrokeColorByCategory(category, HIGHLIGHT));
 			groundOverlayOptions = new GroundOverlayOptions()
@@ -452,6 +486,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		}
 	}
 
+	/* ***** STORIES END ***** */
+
+	/* ***** FOOTER ADAPTER AND ONPAGECHANGELISTENER BEGIN ***** */
+
 	private class StoryAdapter extends PagerAdapter {
 
 		private Context mContext;
@@ -465,6 +503,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View layout = inflater.inflate(R.layout.story_item, null);
+			layout.setOnClickListener((OnClickListener) mContext);
 
 			TextView title = (TextView) layout.findViewById(R.id.story_item_title);
 			TextView author = (TextView) layout.findViewById(R.id.story_item_author);
@@ -473,7 +512,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			title.setText(mStories.get(position).headline);
 			author.setText(mStories.get(position).firstName + " " + mStories.get(position).lastName);
 			categoryRuler.setBackgroundColor(getColorByCategory(mStories.get(position).category, HIGHLIGHT));
-			if (position == 0) {
+			if (position == mResumeStory) {
 				View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
 				storyItemShader.setBackgroundColor(0x40000000);
 			}
@@ -544,6 +583,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		}
 
 	};
+
+	/* ***** FOOTER ADAPTER AND ONPAGECHANGELISTENER END ***** */
 
 	/* ***** EXTRA MENUS HIDE/SHOW BEGIN ***** */
 
