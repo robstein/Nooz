@@ -54,6 +54,7 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
+import com.nooz.nooz.util.BubbleSizer;
 import com.nooz.nooz.util.GetStoriesCallbackInterface;
 import com.nooz.nooz.util.GlobeTrigonometry;
 import com.nooz.nooz.util.SearchType;
@@ -454,7 +455,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private void drawCirlesOnMap() {
 		int i = 0;
 		for (Story s : mStories) {
-			double newRadius = ((mMapWidthInMeters * 10 + (4 * i) * (10 / mStories.size())) / 100) / 3;
+			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
 			s.setRadius(newRadius);
 			mStories.get(i).setRadius(newRadius);
 			drawBubble(s.lat, s.lng, s.radius, s.category);
@@ -476,6 +477,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 		CircleOptions circleOptions;
 		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(startRadius);
+		//circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(targetRadius);
 		final Circle c = mMap.addCircle(circleOptions);
 		mCircles.add(c);
 
@@ -495,7 +497,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		}
 		GroundOverlay icon = mMap.addGroundOverlay(groundOverlayOptions);
 		mGroundOverlays.add(icon);
-		
+
 		handler.post(new Runnable() {
 		    @Override
 		    public void run() {
@@ -511,12 +513,13 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		        }
 		    }
 		});
+
 	}
 
 	private void updateBubbleSizes() {
 		int i = 0;
 		for (Story s : mStories) {
-			double newRadius = ((mMapWidthInMeters * 10 + (4 * i) * (10 / mStories.size())) / 100) / 3;
+			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
 			s.setRadius(newRadius);
 			mStories.get(i).setRadius(newRadius);
 			mCircles.get(i).setRadius(newRadius);
@@ -524,6 +527,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			i++;
 		}
 	}
+	
+
 
 	/* ***** STORIES END ***** */
 

@@ -4,17 +4,25 @@ import android.annotation.SuppressLint;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.JsonObject;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
+import com.nooz.nooz.NoozApplication;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
+import com.nooz.nooz.util.Alert;
 
 public class ArticleActivity extends BaseActivity implements OnClickListener {
+	private static final String TAG = "ArticleActivity";
 
 	private static int COLOR_PEOPLE;
 	private static int COLOR_COMMUNITY;
@@ -110,6 +118,20 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		mRelevanceLabel.setTextColor(getColorByCategory(mStory.category));
 		mIrrelevanceLabel.setTextColor(getColorByCategory(mStory.category));
 		mButtonComments.setImageResource(getCommentsByCategory(mStory.category));
+		
+		if(mStory.userRelevance == 1) {
+			invertRelevant();
+		} else if(mStory.userRelevance == -1) {
+			invertIrrelevant();
+		}
+		
+		mRelevanceScore.setText(mStory.scoreRelevance.toString());
+		mIrrelevanceScore.setText(mStory.scoreIrrelevance.toString());
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
 	}
 
 	@Override
@@ -125,28 +147,56 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 	}
 
 	private void clickRelevant() {
-		if(mIrrelevant) {
+		if (mIrrelevant) {
 			invertIrrelevant();
-			Integer newScore = Integer.parseInt((String) mIrrelevanceScore.getText())-1;
+			Integer newScore = Integer.parseInt((String) mIrrelevanceScore.getText()) - 1;
 			mIrrelevanceScore.setText(newScore.toString());
 		}
 		invertRelevant();
 		Integer change = mRelevant ? 1 : -1;
-		Integer newScore = Integer.parseInt((String) mRelevanceScore.getText())+change;
+		Integer newScore = Integer.parseInt((String) mRelevanceScore.getText()) + change;
 		mRelevanceScore.setText(newScore.toString());
+		
+		saveRelevanceInput();
 	}
 
 	private void clickIrrelevant() {
-		if(mRelevant) {
+		if (mRelevant) {
 			invertRelevant();
-			Integer newScore = Integer.parseInt((String) mRelevanceScore.getText())-1;
+			Integer newScore = Integer.parseInt((String) mRelevanceScore.getText()) - 1;
 			mRelevanceScore.setText(newScore.toString());
 		}
 		invertIrrelevant();
 		Integer change = mIrrelevant ? 1 : -1;
-		Integer newScore = Integer.parseInt((String) mIrrelevanceScore.getText())+change;
+		Integer newScore = Integer.parseInt((String) mIrrelevanceScore.getText()) + change;
 		mIrrelevanceScore.setText(newScore.toString());
+		
+		saveRelevanceInput();
 	}
+	
+	private void saveRelevanceInput() {
+		Integer input = 0;
+		if (mRelevant) {
+			input = 1;
+		} else if (mIrrelevant) {
+			input = -1;
+		}
+		mNoozService.saveRelevanceInput(mStory.id, input, onSaveRelevance);
+	}
+
+	TableJsonOperationCallback onSaveRelevance = new TableJsonOperationCallback() {
+
+		@Override
+		public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+			if (exception == null) {
+				Toast.makeText(mContext, "Sumbitted Relevance", Toast.LENGTH_SHORT).show();
+				Log.d(TAG, "Submitted Relevance!");
+			} else {
+				Log.e(TAG, "Error submitting relevance: " + exception.getMessage());
+				Alert.createAndShowDialog(exception, "Error", mContext);
+			}
+		}
+	};
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {

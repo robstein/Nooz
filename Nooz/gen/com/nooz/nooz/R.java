@@ -491,7 +491,7 @@ containing a value of this type.
          */
         public static final int auth_client_using_bad_version_title=0x7f070014;
         public static final int breaking=0x7f07001d;
-        public static final int category=0x7f070020;
+        public static final int category=0x7f070021;
         /**  Button in confirmation dialog to enable Google Play services.  Clicking it
         will direct user to application settings of Google Play services where they
         can enable it [CHAR LIMIT=40] 
@@ -563,16 +563,17 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f070013;
-        public static final int default_name=0x7f070021;
-        public static final int example_caption=0x7f070024;
+        public static final int default_name=0x7f070022;
+        public static final int example_caption=0x7f070025;
         /**  Location client code resources (prefix with location_client) 
          */
         public static final int location_client_powered_by_google=0x7f07001a;
-        public static final int map_filters_button=0x7f070022;
+        public static final int map_filters_button=0x7f070023;
         public static final int map_filters_title=0x7f07001e;
-        public static final int medium=0x7f07001f;
+        public static final int medium=0x7f070020;
         public static final int relevant=0x7f07001c;
-        public static final int top_nooz=0x7f070023;
+        public static final int time=0x7f07001f;
+        public static final int top_nooz=0x7f070024;
     }
     public static final class style {
         /** 

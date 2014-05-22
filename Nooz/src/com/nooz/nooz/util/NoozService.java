@@ -40,6 +40,7 @@ public class NoozService {
 	private MobileServiceClient mClient;
 	private MobileServiceJsonTable mTableAccounts;
 	private MobileServiceJsonTable mTableStories;
+	private MobileServiceJsonTable mTableRelevance;
 
 	public NoozService(Context context) {
 		mContext = context;
@@ -49,10 +50,21 @@ public class NoozService {
 
 			mTableAccounts = mClient.getTable("accounts");
 			mTableStories = mClient.getTable("stories");
+			mTableRelevance = mClient.getTable("relevance");
 		} catch (MalformedURLException e) {
 			Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
 		}
 
+	}
+
+	public void saveRelevanceInput(String storyId, Integer input, TableJsonOperationCallback callback) {
+		JsonObject story = new JsonObject();
+		story.addProperty("story_id", storyId);
+		story.addProperty("user_id", mClient.getCurrentUser().getUserId());
+		story.addProperty("input", input);
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("postRelevanceInput", "true"));
+		mTableRelevance.insert(story, parameters, callback);
 	}
 
 	public void saveStory(String category, String headline, String caption, String keyword1, String keyword2,
@@ -197,13 +209,22 @@ public class NoozService {
 
 	public void getAllStories(final GetStoriesCallbackInterface getStoriesCallback) {
 
-		mClient.invokeApi("getnooz", new ApiJsonOperationCallback() {
+		JsonObject body = new JsonObject();
+		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
+		mClient.invokeApi("getnooz", body, new ApiJsonOperationCallback() {
 
 			@Override
 			public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
 				if (exception == null) {
-					Type listType = new TypeToken<List<Story>>() {}.getType();
+					Type listType = new TypeToken<List<Story>>() {
+					}.getType();
 					List<Story> stories = new Gson().fromJson(jsonObject, listType);
+
+					// In case we don't have user_relevance
+					for(Story s : stories) {
+						if(s.userRelevance == null)
+						s.setUserRelevance(0);
+					}
 					
 					getStoriesCallback.onComplete(stories);
 				} else {

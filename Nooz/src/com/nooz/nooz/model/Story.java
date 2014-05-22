@@ -32,6 +32,13 @@ public class Story implements Parcelable {
 	@SerializedName("__createdAt")
 	public String __createdAt;
 
+	@SerializedName("user_relevance")
+	public Integer userRelevance;
+	@SerializedName("relevantScore")
+	public Integer scoreRelevance;
+	@SerializedName("irrelevantScore")
+	public Integer scoreIrrelevance;
+
 	public Double radius;
 
 	@Override
@@ -53,6 +60,9 @@ public class Story implements Parcelable {
 		dest.writeDouble(lat);
 		dest.writeDouble(lng);
 		dest.writeString(__createdAt);
+		dest.writeInt(userRelevance);
+		dest.writeInt(scoreRelevance);
+		dest.writeInt(scoreIrrelevance);
 
 		dest.writeDouble(radius);
 	}
@@ -71,7 +81,12 @@ public class Story implements Parcelable {
 		lat = pc.readDouble();
 		lng = pc.readDouble();
 		__createdAt = pc.readString();
+		userRelevance = pc.readInt();
+		scoreRelevance = pc.readInt();
+		scoreIrrelevance = pc.readInt();
+
 		radius = pc.readDouble();
+
 	}
 
 	public static final Parcelable.Creator<Story> CREATOR = new Parcelable.Creator<Story>() {
@@ -83,6 +98,16 @@ public class Story implements Parcelable {
 			return new Story[size];
 		}
 	};
+
+	/* ***** GETTERS AND SETTERS ***** */
+
+	public Integer getUserRelevance() {
+		return userRelevance;
+	}
+
+	public void setUserRelevance(Integer userRelevance) {
+		this.userRelevance = userRelevance;
+	}
 
 	public Double getRadius() {
 		return radius;
@@ -186,6 +211,22 @@ public class Story implements Parcelable {
 
 	public void set__createdAt(String __createdAt) {
 		this.__createdAt = __createdAt;
+	}
+
+	public Integer getScoreRelevance() {
+		return scoreRelevance;
+	}
+
+	public void setScoreRelevance(Integer scoreRelevance) {
+		this.scoreRelevance = scoreRelevance;
+	}
+
+	public Integer getScoreIrrelevance() {
+		return scoreIrrelevance;
+	}
+
+	public void setScoreIrrelevance(Integer scoreIrrelevance) {
+		this.scoreIrrelevance = scoreIrrelevance;
 	}
 
 }
