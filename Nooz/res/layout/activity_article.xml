@@ -41,6 +41,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
+            android:clickable="true"
             android:contentDescription="Category Logo"
             android:src="@drawable/info_arts_and_life" />
     </RelativeLayout>
@@ -142,6 +143,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:background="@drawable/text_button"
+            android:clickable="true"
             android:gravity="center"
             android:orientation="horizontal" >
 
@@ -177,6 +179,7 @@
             android:layout_gravity="left"
             android:layout_marginLeft="8dp"
             android:background="@drawable/text_button"
+            android:clickable="true"
             android:gravity="center"
             android:orientation="horizontal" >
 
@@ -210,6 +213,7 @@
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:layout_marginLeft="8dp"
+            android:clickable="true"
             android:src="@drawable/comments_arts_and_life_fullsize" />
     </LinearLayout>
 

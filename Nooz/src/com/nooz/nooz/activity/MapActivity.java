@@ -14,6 +14,8 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -25,6 +27,8 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -261,12 +265,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	}
 
 	/*
-	 * Called when the Activity is no longer visible.
+	 * Called when the Activity is partially visible.
 	 */
 	@Override
-	protected void onStop() {
-		// Disconnecting the client invalidates it.
-		mLocationClient.disconnect();
+	protected void onPause() {
 
 		CameraPosition camPosition = mMap.getCameraPosition();
 		double longitude = camPosition.target.longitude;
@@ -289,6 +291,17 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			g.remove();
 		}
 		mGroundOverlays.clear();
+
+		super.onPause();
+	}
+	
+	/*
+	 * Called when the Activity is no longer visible.
+	 */
+	@Override
+	protected void onStop() {
+		// Disconnecting the client invalidates it.
+		mLocationClient.disconnect();
 
 		super.onStop();
 	}
@@ -451,9 +464,19 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	}
 
 	private void drawBubble(double lat, double lng, double radius, String category) {
+
+		final double targetRadius = radius;
+		final long duration = 400;
+		final Handler handler = new Handler();
+		final long start = SystemClock.uptimeMillis();
+		final double startRadius = 0;
+		final Interpolator interpolator = new LinearInterpolator();
+		
+		
+
 		CircleOptions circleOptions;
-		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(radius);
-		Circle c = mMap.addCircle(circleOptions);
+		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(startRadius);
+		final Circle c = mMap.addCircle(circleOptions);
 		mCircles.add(c);
 
 		GroundOverlayOptions groundOverlayOptions;
@@ -472,6 +495,22 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		}
 		GroundOverlay icon = mMap.addGroundOverlay(groundOverlayOptions);
 		mGroundOverlays.add(icon);
+		
+		handler.post(new Runnable() {
+		    @Override
+		    public void run() {
+		        long elapsed = SystemClock.uptimeMillis() - start;
+		        float t = interpolator.getInterpolation((float) elapsed / duration);
+		        double r = Math.max(0, t * targetRadius + (1 - t) * startRadius);
+		        c.setRadius(r);
+		        if (t < 1.0) {
+		            // Post again 16ms later == 60 frames per second
+		            handler.postDelayed(this, 16);
+		        } else {
+		            // animation ended
+		        }
+		    }
+		});
 	}
 
 	private void updateBubbleSizes() {

@@ -1,8 +1,12 @@
 package com.nooz.nooz.activity;
 
 import android.annotation.SuppressLint;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -10,9 +14,15 @@ import android.widget.TextView;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
 
-public class ArticleActivity extends BaseActivity {
+public class ArticleActivity extends BaseActivity implements OnClickListener {
 
-	private Story mStory;
+	private static int COLOR_PEOPLE;
+	private static int COLOR_COMMUNITY;
+	private static int COLOR_SPORTS;
+	private static int COLOR_FOOD;
+	private static int COLOR_PUBLIC_SAFETY;
+	private static int COLOR_ARTS_AND_LIFE;
+	private static final int COLOR_WHITE = 0xFFFFFFFF;
 
 	private ImageView mArticleCategoryLogo;
 	private TextView mArticleCategory;
@@ -30,12 +40,11 @@ public class ArticleActivity extends BaseActivity {
 	private TextView mIrrelevanceLabel;
 	private ImageView mButtonComments;
 
-	private static int COLOR_PEOPLE;
-	private static int COLOR_COMMUNITY;
-	private static int COLOR_SPORTS;
-	private static int COLOR_FOOD;
-	private static int COLOR_PUBLIC_SAFETY;
-	private static int COLOR_ARTS_AND_LIFE;
+	private Story mStory;
+	private Boolean mRelevant = false;
+	private Boolean mIrrelevant = false;
+	private Integer mScoreRel = 0;
+	private Integer mScoreIrr = 0;
 
 	@SuppressLint("NewApi")
 	@Override
@@ -68,6 +77,11 @@ public class ArticleActivity extends BaseActivity {
 		mIrrelevanceLabel = (TextView) findViewById(R.id.irrelevance_label);
 		mButtonComments = (ImageView) findViewById(R.id.btn_comments);
 
+		mArticleInfo.setOnClickListener(this);
+		mButtonRelevant.setOnClickListener(this);
+		mButtonIrrelevant.setOnClickListener(this);
+		mButtonComments.setOnClickListener(this);
+
 		mArticleCategoryLogo.setImageResource(getLogoByCategory(mStory.category));
 		mArticleCategory.setText(mStory.category);
 		mArticleCategory.setTextColor(getColorByCategory(mStory.category));
@@ -99,11 +113,117 @@ public class ArticleActivity extends BaseActivity {
 	}
 
 	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.button_relevant:
+			clickRelevant();
+			break;
+		case R.id.button_irrelevant:
+			clickIrrelevant();
+			break;
+		}
+	}
+
+	private void clickRelevant() {
+		if(mIrrelevant) {
+			invertIrrelevant();
+			Integer newScore = Integer.parseInt((String) mIrrelevanceScore.getText())-1;
+			mIrrelevanceScore.setText(newScore.toString());
+		}
+		invertRelevant();
+		Integer change = mRelevant ? 1 : -1;
+		Integer newScore = Integer.parseInt((String) mRelevanceScore.getText())+change;
+		mRelevanceScore.setText(newScore.toString());
+	}
+
+	private void clickIrrelevant() {
+		if(mRelevant) {
+			invertRelevant();
+			Integer newScore = Integer.parseInt((String) mRelevanceScore.getText())-1;
+			mRelevanceScore.setText(newScore.toString());
+		}
+		invertIrrelevant();
+		Integer change = mIrrelevant ? 1 : -1;
+		Integer newScore = Integer.parseInt((String) mIrrelevanceScore.getText())+change;
+		mIrrelevanceScore.setText(newScore.toString());
+	}
+
+	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if ((keyCode == KeyEvent.KEYCODE_BACK)) {
 			finish();
 		}
 		return super.onKeyDown(keyCode, event);
+	}
+
+	@SuppressLint("NewApi")
+	private void invertRelevant() {
+		if (mRelevant) {
+			int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+			Drawable button = getResources().getDrawable(getButtonBorderByCategory(mStory.category));
+			Drawable scoreCircle = getResources().getDrawable(getScoreBackgroundByCategory(mStory.category));
+			if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+				mButtonRelevant.setBackground(button);
+				mRelevanceScore.setBackground(scoreCircle);
+			} else {
+				mButtonRelevant.setBackgroundDrawable(button);
+				mRelevanceScore.setBackgroundDrawable(scoreCircle);
+			}
+			mRelevanceScore.setTextColor(COLOR_WHITE);
+			mRelevanceLabel.setTextColor(getColorByCategory(mStory.category));
+			mRelevant = false;
+		} else {
+			int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+			Drawable button = getResources().getDrawable(getButtonBorderByCategory(mStory.category));
+			Drawable scoreCircle = getResources().getDrawable(getScoreBackgroundByCategory(mStory.category));
+			button.setColorFilter(getColorByCategory(mStory.category), Mode.MULTIPLY);
+			scoreCircle.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+			if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+				mButtonRelevant.setBackground(button);
+				mRelevanceScore.setBackground(scoreCircle);
+			} else {
+				mButtonRelevant.setBackgroundDrawable(button);
+				mRelevanceScore.setBackgroundDrawable(scoreCircle);
+			}
+			mRelevanceScore.setTextColor(getColorByCategory(mStory.category));
+			mRelevanceLabel.setTextColor(COLOR_WHITE);
+			mRelevant = true;
+		}
+	}
+
+	@SuppressLint("NewApi")
+	private void invertIrrelevant() {
+		if (mIrrelevant) {
+			int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+			Drawable button = getResources().getDrawable(getButtonBorderByCategory(mStory.category));
+			Drawable scoreCircle = getResources().getDrawable(getScoreBackgroundByCategory(mStory.category));
+			if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+				mButtonIrrelevant.setBackground(button);
+				mIrrelevanceScore.setBackground(scoreCircle);
+			} else {
+				mButtonIrrelevant.setBackgroundDrawable(button);
+				mIrrelevanceScore.setBackgroundDrawable(scoreCircle);
+			}
+			mIrrelevanceScore.setTextColor(COLOR_WHITE);
+			mIrrelevanceLabel.setTextColor(getColorByCategory(mStory.category));
+			mIrrelevant = false;
+		} else {
+			int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+			Drawable button = getResources().getDrawable(getButtonBorderByCategory(mStory.category));
+			Drawable scoreCircle = getResources().getDrawable(getScoreBackgroundByCategory(mStory.category));
+			button.setColorFilter(getColorByCategory(mStory.category), Mode.MULTIPLY);
+			scoreCircle.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+			if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+				mButtonIrrelevant.setBackground(button);
+				mIrrelevanceScore.setBackground(scoreCircle);
+			} else {
+				mButtonIrrelevant.setBackgroundDrawable(button);
+				mIrrelevanceScore.setBackgroundDrawable(scoreCircle);
+			}
+			mIrrelevanceScore.setTextColor(getColorByCategory(mStory.category));
+			mIrrelevanceLabel.setTextColor(COLOR_WHITE);
+			mIrrelevant = true;
+		}
 	}
 
 	private int getCommentsByCategory(String category) {
@@ -203,4 +323,5 @@ public class ArticleActivity extends BaseActivity {
 			return R.drawable.arts_and_life_solid_fullsize;
 		}
 	}
+
 }
