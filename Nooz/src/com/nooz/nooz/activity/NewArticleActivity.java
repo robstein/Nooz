@@ -1,18 +1,30 @@
 package com.nooz.nooz.activity;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.Location;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -39,9 +51,10 @@ import com.nooz.nooz.widget.SquareImageView;
 public class NewArticleActivity extends BaseActivity implements OnClickListener {
 
 	private static final String TAG = "NewArticleActivity";
-	
+	private static final String CONTAINER_NAME = "media";
+
 	private LinearLayout mLayoutStoryDetails;
-	private SquareImageView mNewArticleImage;
+	private ImageView mNewArticleImage;
 	private Spinner mCategorySpinner;
 	private TextView mTextButtonBreak;
 	private TextView mSpinnerCustom;
@@ -60,8 +73,11 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 	private boolean mShareOnFacebook = false;
 	private boolean mShareOnTwitter = false;
 	private boolean mShareOnTumblr = false;
-	
+
 	ProgressDialog progress;
+
+	byte[] mImageData;
+	Bitmap mBitmap;
 
 	public static final int TOP_BAR_HEIGHT = 61;
 
@@ -93,30 +109,14 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		mLayoutStoryDetails.setLayoutParams(controlLayoutParams);
 
 		// display the image
-		byte[] image_data = bundle.getByteArray("image");
-		// the size of the array is the dimensions of the sub-photo
-		int[] pixels = new int[mScreenWidthInPixels * mScreenWidthInPixels];
-		// ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		Bitmap bitmap = BitmapFactory.decodeByteArray(image_data, 0, image_data.length);
-		bitmap.getPixels(pixels, 0, mScreenWidthInPixels, 0, (int) Tools.dipToPixels(this, 81), mScreenWidthInPixels,
-				mScreenWidthInPixels);// the stride value is (in my case) the
-										// width value
-		bitmap = Bitmap.createBitmap(pixels, 0, mScreenWidthInPixels, mScreenWidthInPixels, mScreenWidthInPixels,
-				Config.ARGB_8888);// ARGB_8888 is a good quality configuration
-		// bitmap.compress(CompressFormat.JPEG, 100, bos);//100 is the best
-		// quality possible
-		// byte[] square = bos.toByteArray();
+		mImageData = bundle.getByteArray("image");
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inMutable = true;
+		mBitmap = BitmapFactory.decodeByteArray(mImageData, 0, mImageData.length, options);
+		mNewArticleImage = (ImageView) findViewById(R.id.new_article_image);
+		mNewArticleImage.setImageBitmap(mBitmap);
 
-		mNewArticleImage = (SquareImageView) findViewById(R.id.new_article_image);
-		// Bitmap bmp = BitmapFactory.decodeByteArray(image_data, 0,
-		// image_data.length);
-		mNewArticleImage.setImageBitmap(bitmap);
-
-		/*
-		 * IMPORTANT I need to clip the image. but for now I'm going to save the
-		 * whole thing. (more than just the square
-		 */
-
+		//
 		mTextButtonBreak = (TextView) findViewById(R.id.btn_break_post);
 		mNewArticleLogo = (ImageView) findViewById(R.id.btn_new_article_logo);
 		mTogglerShareFacebook = (ImageView) findViewById(R.id.btn_share_facebook);
@@ -141,7 +141,7 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 	private void removeSplashLoadingScreen() {
 		progress.dismiss();
 	}
-	
+
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -197,10 +197,11 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 	TableJsonOperationCallback onPostNooz = new TableJsonOperationCallback() {
 		@Override
 		public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
-			removeSplashLoadingScreen();
 			if (exception == null) {
-				finish();
+				String story_id = jsonObject.getAsJsonPrimitive("id").getAsString();
+				mNoozService.getSasForNewBlob(CONTAINER_NAME, story_id);
 			} else {
+				removeSplashLoadingScreen();
 				Log.e(TAG, "Error posting story in: " + exception.getMessage());
 				Alert.createAndShowDialog(exception, "Error", mContext);
 			}
@@ -295,6 +296,89 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		((TextView) chooseCategoryAdapterView.getChildAt(0)).setTextColor(getResources().getColor(textColor));
 		mNewArticleLogo.setImageResource(logo);
 
+	}
+
+	/* ***** Blob uploading ***** */
+
+	/***
+	 * Register for broadcasts
+	 */
+	@Override
+	protected void onResume() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("blob.created");
+		registerReceiver(receiver, filter);
+		super.onResume();
+	}
+
+	/***
+	 * Unregister for broadcasts
+	 */
+	@Override
+	protected void onPause() {
+		unregisterReceiver(receiver);
+		super.onPause();
+	}
+
+	/***
+	 * Broadcast receiver handles a new blob being created
+	 */
+	private BroadcastReceiver receiver = new BroadcastReceiver() {
+		public void onReceive(Context context, android.content.Intent intent) {
+			String intentAction = intent.getAction();
+			if (intentAction.equals("blob.created")) {
+				// If a blob has been created, upload the image
+				JsonObject blob = mNoozService.getLoadedBlob();
+				String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();
+				(new ImageUploaderTask(sasUrl)).execute();
+			}
+		}
+	};
+
+	/***
+	 * Handles uploading an image to a specified url
+	 */
+	class ImageUploaderTask extends AsyncTask<Void, Void, Boolean> {
+		private String mUrl;
+
+		public ImageUploaderTask(String url) {
+			mUrl = url;
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			try {
+				// Post our image data (byte array) to the server
+				URL url = new URL(mUrl.replace("\"", ""));
+				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+				urlConnection.setDoOutput(true);
+				urlConnection.setRequestMethod("PUT");
+				urlConnection.addRequestProperty("Content-Type", "image/jpeg");
+				urlConnection.setRequestProperty("Content-Length", "" + mImageData.length);
+				// Write image data to server
+				DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+				wr.write(mImageData);
+				wr.flush();
+				wr.close();
+				int response = urlConnection.getResponseCode();
+				// If we successfully uploaded, return true
+				if (response == 201 && urlConnection.getResponseMessage().equals("Created")) {
+					return true;
+				}
+			} catch (Exception ex) {
+				Log.e(TAG, ex.getMessage());
+			}
+			return false;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean uploaded) {
+			if (uploaded) {
+				removeSplashLoadingScreen();
+				Log.d(TAG, "Blob uploaded");
+				finish();
+			}
+		}
 	}
 
 }

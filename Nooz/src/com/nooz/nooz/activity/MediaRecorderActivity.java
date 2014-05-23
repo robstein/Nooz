@@ -1,5 +1,6 @@
 package com.nooz.nooz.activity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,6 +11,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -20,6 +23,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,28 +38,30 @@ import com.nooz.nooz.R;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.CameraPreview;
 
-public class MediaRecorderActivity extends BaseFragmentActivity implements
+public class MediaRecorderActivity extends BaseFragmentActivity implements OnClickListener,
 		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
+
 	private static final String TAG = "MediaRecorderActivity";
+	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+	private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
+	public static final int MEDIA_TYPE_AUDIO = 0;
+	public static final int MEDIA_TYPE_IMAGE = 1;
+	public static final int MEDIA_TYPE_VIDEO = 2;
+	public static final int TOP_BAR_HEIGHT = 61;
 
 	private Camera mCamera;
 	private CameraPreview mCameraPreview;
+	private FrameLayout mFrameLayoutPreview;
+
+	private ImageView mButtonCancelNewMedia;
+	private ImageView mButtonCapturePicture;
+
 	private MediaRecorder mMediaRecorder;
 	private LinearLayout mMediaControlLayer;
 
 	private LocationClient mLocationClient;
-
 	private Location mCurrentLocation;
-
 	private int mScreenWidthInPixels;
-
-	public static final int MEDIA_TYPE_IMAGE = 1;
-	public static final int MEDIA_TYPE_VIDEO = 2;
-
-	public static final int TOP_BAR_HEIGHT = 61;
-
-	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-	private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -81,58 +87,51 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 		mCamera.setDisplayOrientation(90);
 		Camera.Parameters camParams = mCamera.getParameters();
 		camParams.setRotation(90);
-		// camParams.set("orientation", "portrait");
 		List<String> focusModes = camParams.getSupportedFocusModes();
 		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
 			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 		}
 		List<Camera.Size> pictureSizes = camParams.getSupportedPictureSizes();
 		camParams.setPictureSize(pictureSizes.get(0).width, pictureSizes.get(0).height);
-		/*
-		 * for (Camera.Size camPictureSize : pictureSizes) {
-		 * if(camPictureSize.width == camPictureSize.height) {
-		 * camParams.setPictureSize(camPictureSize.width,
-		 * camPictureSize.height); break; } }
-		 */
-		List<Camera.Size> previewSizes = camParams.getSupportedPreviewSizes();
-		camParams.setPictureSize(previewSizes.get(0).width, previewSizes.get(0).height);
-		/*
-		 * for (Camera.Size camPreviewSize : previewSizes) {
-		 * if(camPreviewSize.width == camPreviewSize.height) {
-		 * camParams.setPreviewSize(camPreviewSize.width,
-		 * camPreviewSize.height); break; } }
-		 */
 
-		if (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-		} else if (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-		}
+		/*
+		 * if
+		 * (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
+		 * )) {
+		 * camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
+		 * ); } else if
+		 * (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+		 * camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO); }
+		 */
 
 		mCamera.setParameters(camParams);
 
 		// Create our Preview view and set it as the content of our activity.
 		mCameraPreview = new CameraPreview(this, mCamera);
-		FrameLayout frameLayoutPreview = (FrameLayout) findViewById(R.id.camera_preview);
+		mFrameLayoutPreview = (FrameLayout) findViewById(R.id.camera_preview);
+		mFrameLayoutPreview.addView(mCameraPreview);
 
-		// RelativeLayout.LayoutParams cameraFrameParams =
-		// (RelativeLayout.LayoutParams) frameLayoutPreview.getLayoutParams();
-		// cameraFrameParams.height = mScreenWidthInPixels;
-		// frameLayoutPreview.setLayoutParams(cameraFrameParams);
-
-		frameLayoutPreview.addView(mCameraPreview);
-
+		// Add a listener to the cancel button
+		mButtonCancelNewMedia = (ImageView) findViewById(R.id.btn_cancel_new_media);
+		mButtonCancelNewMedia.setOnClickListener(this);
 		// Add a listener to the Capture button
-		ImageView captureButton = (ImageView) findViewById(R.id.btn_snap_picture);
-		captureButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// get an image from the camera
-				mCamera.takePicture(null, null, mPictureCallback);
-			}
-		});
+		mButtonCapturePicture = (ImageView) findViewById(R.id.btn_snap_picture);
+		mButtonCapturePicture.setOnClickListener(this);
 
+		//
 		mLocationClient = new LocationClient(this, this, this);
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btn_cancel_new_media:
+			finish();
+			break;
+		case R.id.btn_snap_picture:
+			mCamera.takePicture(null, null, mPictureCallback);
+			break;
+		}
 	}
 
 	/*
@@ -168,22 +167,15 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 		public void onPictureTaken(byte[] data, Camera camera) {
 
 			// Save to file:
-			/*
-			 * File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE); if
-			 * (pictureFile == null) { Log.d(TAG,
-			 * "Error creating media file, check storage permissions"); return;
-			 * }
-			 * 
-			 * try { FileOutputStream fos = new FileOutputStream(pictureFile);
-			 * fos.write(square); fos.close(); } catch (FileNotFoundException e)
-			 * { Log.d(TAG, "File not found: " + e.getMessage()); } catch
-			 * (IOException e) { Log.d(TAG, "Error accessing file: " +
-			 * e.getMessage()); }
-			 */
+			Bitmap bmp = scaleDownBitmap(BitmapFactory.decodeByteArray(data, 0, data.length), mScreenWidthInPixels/3, mContext);
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			// compress because when we don't we get a failed binder transaction
+			bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+			byte[] bytes = stream.toByteArray();
 
 			// Pass byte array to NewArticleActivity
 			Bundle args = new Bundle();
-			args.putByteArray("image", data);
+			args.putByteArray("image", bytes);
 			args.putParcelable("location", mCurrentLocation);
 
 			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
@@ -192,6 +184,14 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 			finish();
 		}
 	};
+
+	private static Bitmap scaleDownBitmap(Bitmap photo, int newHeight, Context context) {
+		final float densityMultiplier = context.getResources().getDisplayMetrics().density;
+		int h = (int) (newHeight * densityMultiplier);
+		int w = (int) (h * photo.getWidth() / ((double) photo.getHeight()));
+		photo = Bitmap.createScaledBitmap(photo, w, h, true);
+		return photo;
+	}
 
 	/** Create a File for saving the image */
 	private static File getOutputMediaFile(int type) {
@@ -356,4 +356,5 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	void showErrorDialog(int code) {
 		GooglePlayServicesUtil.getErrorDialog(code, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
 	}
+
 }

@@ -6,6 +6,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="61dp"
         >
 
         <FrameLayout
@@ -29,6 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
+            android:clickable="true"
             android:contentDescription="Cancel"
             android:src="@drawable/cancel_new_media_white" />
     </LinearLayout>

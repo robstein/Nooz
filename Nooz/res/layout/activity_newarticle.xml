@@ -10,9 +10,9 @@
 
         <com.nooz.nooz.widget.SquareImageView
             android:id="@+id/new_article_image"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scaleType="fitCenter"
+            android:scaleType="centerCrop"
             android:src="@drawable/example_article_picture" />
 
         <EditText

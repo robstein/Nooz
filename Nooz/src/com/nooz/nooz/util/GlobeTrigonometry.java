@@ -21,4 +21,8 @@ public class GlobeTrigonometry {
 	public static double mapWidthInMeters(int screenWidthInPixels, float zoomlevel) {
 		return ((EQUATOR_LENGTH / 256) / (Math.pow(2, zoomlevel))) * screenWidthInPixels;
 	}
+	
+	public static double mapHeightInMeters(int mapHeightInPixels, float zoomlevel) {
+		return ((EQUATOR_LENGTH / 256) / (Math.pow(2, zoomlevel))) * mapHeightInPixels;
+	}
 }

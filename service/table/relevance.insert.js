@@ -7,7 +7,6 @@ function insert(item, user, request) {
                     // We already have a record, we need to update it
                     results[0].input = item.input;
                     relevanceTable.update(results[0]);
-                    request.respond(200, results[0]);
                     console.log('Updated relevance');
                     request.respond(200, results[0]);
 				} else {

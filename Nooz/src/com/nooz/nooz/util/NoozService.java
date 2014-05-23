@@ -15,6 +15,7 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -28,6 +29,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.activity.LoginActivity;
 import com.nooz.nooz.model.Story;
@@ -41,6 +43,7 @@ public class NoozService {
 	private MobileServiceJsonTable mTableAccounts;
 	private MobileServiceJsonTable mTableStories;
 	private MobileServiceJsonTable mTableRelevance;
+	private MobileServiceJsonTable mTableBlobs;
 
 	public NoozService(Context context) {
 		mContext = context;
@@ -51,6 +54,7 @@ public class NoozService {
 			mTableAccounts = mClient.getTable("accounts");
 			mTableStories = mClient.getTable("stories");
 			mTableRelevance = mClient.getTable("relevance");
+			mTableBlobs = mClient.getTable("BlobBlobs");
 		} catch (MalformedURLException e) {
 			Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
 		}
@@ -207,7 +211,7 @@ public class NoozService {
 		((Activity) mContext).finish();
 	}
 
-	public void getAllStories(final GetStoriesCallbackInterface getStoriesCallback) {
+	public void getAllStories(LatLngBounds bounds, final GetStoriesCallbackInterface getStoriesCallback) {
 
 		JsonObject body = new JsonObject();
 		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
@@ -235,4 +239,71 @@ public class NoozService {
 		});
 
 	}
+	
+	/* ***** BLOB STORAGE ***** */
+	
+	private JsonObject mLoadedBlob;
+	
+	public JsonObject getLoadedBlob() {
+		return this.mLoadedBlob;
+	}
+	
+	/** Inserting blobs **/
+	public void getSasForNewBlob(String containerName, String blobName) {
+		//Create the json Object we'll send over and fill it with the required
+		//id property - otherwise we'll get kicked back
+		JsonObject blob = new JsonObject();		
+		blob.addProperty("id", 0);
+		//Create parameters to pass in the blob details.  We do this with params
+		//because it would be stripped out if we put it on the blob object
+		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("containerName", containerName));
+		parameters.add(new Pair<String, String>("blobName", blobName));		
+		mTableBlobs.insert(blob, parameters, new TableJsonOperationCallback() {			
+			@Override
+			public void onCompleted(JsonObject jsonObject, Exception exception,
+					ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				//Set the loaded blob
+				mLoadedBlob = jsonObject;
+				//Broadcast that we are ready to upload the blob data
+				Intent broadcast = new Intent();
+				broadcast.setAction("blob.created");
+				mContext.sendBroadcast(broadcast);
+			}
+		});
+	}
+	
+	/** Loading individual blob data **/
+	public void getBlobSas(String containerName, String blobName) {
+		//Create the json Object we'll send over and fill it with the required
+		//id property - otherwise we'll get kicked back
+		JsonObject blob = new JsonObject();		
+		blob.addProperty("id", 0);
+		//Create parameters to pass in the blob details.  We do this with params
+		//because it would be stripped out if we put it on the blob object
+		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("containerName", containerName));
+		parameters.add(new Pair<String, String>("blobName", blobName));		
+		mTableBlobs.insert(blob, parameters, new TableJsonOperationCallback() {			
+			@Override
+			public void onCompleted(JsonObject jsonObject, Exception exception,
+					ServiceFilterResponse response) {
+				if (exception != null) {
+					Log.e(TAG, exception.getCause().getMessage());
+					return;
+				}
+				//Set the loaded blob
+				mLoadedBlob = jsonObject;
+				//Broadcast that the blob is loaded
+				Intent broadcast = new Intent();
+				broadcast.setAction("blob.loaded");
+				mContext.sendBroadcast(broadcast);
+			}
+		});
+	}
+	
 }

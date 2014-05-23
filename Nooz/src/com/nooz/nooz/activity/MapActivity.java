@@ -52,6 +52,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.BubbleSizer;
@@ -74,6 +75,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private static final int ZOOM_USA = 3;
 	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
+	private static final int TOP_LEFT = 0;
+	private static final int TOP_RIGHT = 1;
+	private static final int BOTTOM_LEFT = 2;
+	private static final int BOTTOM_RIGHT = 3;
 
 	// Animations
 	private Animation mSlideInBottom;
@@ -100,6 +105,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private static final int COLOR_ARTS_AND_LIFE_STROKE = 0xFFAE7DCE;
 
 	// Main map views
+	private RelativeLayout mapContainer;
 	private GoogleMap mMap;
 	private TextView mRegion;
 	private TextView mButtonRelevant;
@@ -157,6 +163,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mLocationClient = new LocationClient(this, this, this);
 
 		// Main map views
+		mapContainer = (RelativeLayout) findViewById(R.id.map_container);
+		//
 		mButtonRelevant = (TextView) findViewById(R.id.button_relevant);
 		mButtonRelevant.setOnClickListener(this);
 		//
@@ -435,7 +443,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	/* ***** STORIES BEGIN ***** */
 
 	private void populateInitialStories() {
-		mNoozService.getAllStories(new GetStoriesCallback());
+		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;	
+		mNoozService.getAllStories(bounds, new GetStoriesCallback());
 	}
 
 	private class GetStoriesCallback implements GetStoriesCallbackInterface {
@@ -473,8 +482,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		final double startRadius = 0;
 		final Interpolator interpolator = new LinearInterpolator();
 		
-		
-
 		CircleOptions circleOptions;
 		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(startRadius);
 		//circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(targetRadius);
@@ -520,9 +527,34 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		int i = 0;
 		for (Story s : mStories) {
 			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
-			s.setRadius(newRadius);
+			
+			final double targetRadius = newRadius;
+			final long duration = 400;
+			final Handler handler = new Handler();
+			final long start = SystemClock.uptimeMillis();
+			final double startRadius = s.radius;
+			final Interpolator interpolator = new LinearInterpolator();
+			
+			final Circle c = mCircles.get(i);
+			
+			handler.post(new Runnable() {
+			    @Override
+			    public void run() {
+			        long elapsed = SystemClock.uptimeMillis() - start;
+			        float t = interpolator.getInterpolation((float) elapsed / duration);
+			        double r = Math.max(0, t * targetRadius + (1 - t) * startRadius);
+			        c.setRadius(r);
+			        if (t < 1.0) {
+			            // Post again 16ms later == 60 frames per second
+			            handler.postDelayed(this, 16);
+			        } else {
+			            // animation ended
+			        }
+			    }
+			});
+			
 			mStories.get(i).setRadius(newRadius);
-			mCircles.get(i).setRadius(newRadius);
+			//mCircles.get(i).setRadius(newRadius);
 			mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int) (newRadius * 3 / 4));
 			i++;
 		}

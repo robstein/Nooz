@@ -1,6 +1,7 @@
 package com.nooz.nooz.widget;
 
 import java.io.IOException;
+import java.util.List;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -16,8 +17,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 	private SurfaceHolder mHolder;
 	private Camera mCamera;
 
-	private int mWidth;
-	private int mHeight;
+	//private int mWidth;
+	//private int mHeight;
+
+	private boolean mIsPreviewRunning = false;
 
 	public CameraPreview(Context context, Camera camera) {
 		super(context);
@@ -31,6 +34,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		mContext = context;
+		
+		//mWidth = width;
+		//mHeight = height;
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
@@ -43,15 +49,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 			Log.d(TAG, "Error setting camera preview: " + e.getMessage());
 		}
 	}
-
-	// Don't do this yet
-	//@Override
-	//protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-	//	super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-	//	mWidth = MeasureSpec.getSize(widthMeasureSpec);
-	//	mHeight = mWidth;
-	//	setMeasuredDimension(mWidth, mWidth);
-	//}
+	/*
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		//mWidth = MeasureSpec.getSize(widthMeasureSpec);
+		//mHeight = mWidth;
+		//setMeasuredDimension(mWidth, mWidth);
+		setMeasuredDimension(mHeight,mWidth);
+	}
+	*/
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		// empty. Take care of releasing the Camera preview in your activity.
@@ -67,36 +74,31 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 		}
 
 		// stop preview before making changes
-		try {
-			mCamera.stopPreview();
-		} catch (Exception e) {
-			// ignore: tried to stop a non-existent preview
+		if (mIsPreviewRunning) {
+			try {
+				mCamera.stopPreview();
+			} catch (Exception e) {
+				// ignore: tried to stop a non-existent preview
+			}
 		}
 
 		// set preview size and make any resize, rotate or
 		// reformatting changes here
-		// Parameters parameters = mCamera.getParameters();
-		// List<Camera.Size> previewSizes =
-		// parameters.getSupportedPreviewSizes();
-		// Camera.Size previewSize = previewSizes.get(0);
-		// parameters.setPreviewSize(previewSize.width, previewSize.height);
+		List<Camera.Size> sizes = mCamera.getParameters().getSupportedPreviewSizes();
+		Double ratio = (double) (width / height);
+		Double smallestDifference = Double.MAX_VALUE;
+		Camera.Size previewSize = sizes.get(0);
+		for(Camera.Size cs : sizes) {
+			Double diff = Math.abs((cs.width/cs.height) - ratio);
+			if (diff < smallestDifference) {
+				previewSize = cs;
+				smallestDifference = diff;
+			}
+		}
+        Camera.Parameters parameters = mCamera.getParameters();
+		parameters.setPreviewSize(previewSize.width, previewSize.height);
+		mCamera.setParameters(parameters);
 
-		/*
-		 * Display display =
-		 * ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE
-		 * )).getDefaultDisplay();
-		 * 
-		 * if(display.getRotation() == Surface.ROTATION_0) {
-		 * parameters.setPreviewSize(previewSize.height, previewSize.width);
-		 * mCamera.setDisplayOrientation(90); } if(display.getRotation() ==
-		 * Surface.ROTATION_90) { parameters.setPreviewSize(previewSize.width,
-		 * previewSize.height); } if(display.getRotation() ==
-		 * Surface.ROTATION_180) { parameters.setPreviewSize(previewSize.height,
-		 * previewSize.width); } if(display.getRotation() ==
-		 * Surface.ROTATION_270) { parameters.setPreviewSize(previewSize.width,
-		 * previewSize.height); mCamera.setDisplayOrientation(180); }
-		 */
-		// mCamera.setParameters(parameters);
 		mCamera.autoFocus(new Camera.AutoFocusCallback() {
 
 			@Override
@@ -111,7 +113,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 		try {
 			mCamera.setPreviewDisplay(mHolder);
 			mCamera.startPreview();
-
+			mIsPreviewRunning = true;
 		} catch (Exception e) {
 			Log.d(TAG, "Error starting camera preview: " + e.getMessage());
 		}
