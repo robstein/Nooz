@@ -2,6 +2,9 @@ package com.nooz.nooz.activity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -14,16 +17,22 @@ import android.content.IntentSender;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.location.Location;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,10 +44,11 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.nooz.nooz.R;
+import com.nooz.nooz.util.MediaMode;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.CameraPreview;
 
-public class MediaRecorderActivity extends BaseFragmentActivity implements OnClickListener,
+public class MediaRecorderActivity extends BaseFragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private static final String TAG = "MediaRecorderActivity";
@@ -48,21 +58,28 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 	public static final int MEDIA_TYPE_IMAGE = 1;
 	public static final int MEDIA_TYPE_VIDEO = 2;
 	public static final int TOP_BAR_HEIGHT = 61;
+	private static final int COLOR_RED = 0xFFFF0000;
+	private static final int COLOR_WHITE = 0xFFFFFFFF;
 
 	private Camera mCamera;
 	private CameraPreview mCameraPreview;
 	private FrameLayout mFrameLayoutPreview;
 
 	private ImageView mButtonCancelNewMedia;
+	private LinearLayout mMediaControlLayer;
+	private ImageView mButtonRecordAudio;
 	private ImageView mButtonCapturePicture;
+	private ImageView mButtonRecordVideo;
 
 	private MediaRecorder mMediaRecorder;
-	private LinearLayout mMediaControlLayer;
-
 	private LocationClient mLocationClient;
 	private Location mCurrentLocation;
 	private int mScreenWidthInPixels;
+	protected MediaMode mMode = MediaMode.PICTURE;
+	public boolean mIsRecordingAudio = false;
+	public boolean mIsRecordingVideo = false;
 
+	/* ***** ACTIVITY SETUP BEGIN ***** */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,23 +104,12 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 		mCamera.setDisplayOrientation(90);
 		Camera.Parameters camParams = mCamera.getParameters();
 		camParams.setRotation(90);
-		List<String> focusModes = camParams.getSupportedFocusModes();
-		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-		}
+		// List<String> focusModes = camParams.getSupportedFocusModes();
+		// if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+		// camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+		// }
 		List<Camera.Size> pictureSizes = camParams.getSupportedPictureSizes();
 		camParams.setPictureSize(pictureSizes.get(0).width, pictureSizes.get(0).height);
-
-		/*
-		 * if
-		 * (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
-		 * )) {
-		 * camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
-		 * ); } else if
-		 * (pictureSizes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-		 * camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO); }
-		 */
-
 		mCamera.setParameters(camParams);
 
 		// Create our Preview view and set it as the content of our activity.
@@ -113,25 +119,36 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 
 		// Add a listener to the cancel button
 		mButtonCancelNewMedia = (ImageView) findViewById(R.id.btn_cancel_new_media);
-		mButtonCancelNewMedia.setOnClickListener(this);
+		mButtonCancelNewMedia.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
+		// Add a listener to the audio record button
+		mButtonRecordAudio = (ImageView) findViewById(R.id.btn_record_audio);
+		mButtonRecordAudio.setOnTouchListener(new AudioButtonTouchListner());
 		// Add a listener to the Capture button
 		mButtonCapturePicture = (ImageView) findViewById(R.id.btn_snap_picture);
-		mButtonCapturePicture.setOnClickListener(this);
+		mButtonCapturePicture.setOnTouchListener(new CameraButtonTouchListner());
+		// Add a listener to the Capture button
+		mButtonRecordVideo = (ImageView) findViewById(R.id.btn_record_video);
+		mButtonRecordVideo.setOnTouchListener(new VideoButtonTouchListner());
 
 		//
 		mLocationClient = new LocationClient(this, this, this);
 	}
 
-	@Override
-	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.btn_cancel_new_media:
-			finish();
-			break;
-		case R.id.btn_snap_picture:
-			mCamera.takePicture(null, null, mPictureCallback);
-			break;
+	/** A safe way to get an instance of the Camera object. */
+	public static Camera getCameraInstance() {
+		Camera c = null;
+		try {
+			c = Camera.open(); // attempt to get a Camera instance
+		} catch (Exception e) {
+			// Camera is not available (in use or does not exist)
+			Log.d(TAG, "Camera is not available (in use or does not exist) " + e.getMessage());
 		}
+		return c; // returns null if camera is unavailable
 	}
 
 	/*
@@ -141,7 +158,21 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 	protected void onStart() {
 		super.onStart();
 		// Connect the client.
-		mLocationClient.connect();
+		if (servicesConnected()) {
+			mLocationClient.connect();
+		}
+	}
+
+	/*
+	 * Called by Location Services when the request to connect the client
+	 * finishes successfully. At this point, you can request the current
+	 * location or start periodic updates
+	 */
+	@Override
+	public void onConnected(Bundle connectionHint) {
+		// Display the connection status
+		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+		mCurrentLocation = mLocationClient.getLastLocation();
 	}
 
 	@Override
@@ -149,6 +180,22 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 		super.onPause();
 		// releaseMediaRecorder(); // release MediaRecorder first
 		releaseCamera(); // release the camera immediately on pause event
+	}
+
+	private void releaseMediaRecorder() {
+		if (mMediaRecorder != null) {
+			mMediaRecorder.reset(); // clear recorder configuration
+			mMediaRecorder.release(); // release the recorder object
+			mMediaRecorder = null;
+			mCamera.lock(); // lock camera for later use
+		}
+	}
+
+	private void releaseCamera() {
+		if (mCamera != null) {
+			mCamera.release(); // release the camera for other applications
+			mCamera = null;
+		}
 	}
 
 	/*
@@ -161,13 +208,111 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 		super.onStop();
 	}
 
+	/*
+	 * Called by Location Services if the connection to the location client
+	 * drops because of an error.
+	 */
+	@Override
+	public void onDisconnected() {
+		// Display the connection status
+		Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+	}
+
+	/* ***** ACTIVITY SETUP END ***** */
+
+	/* ***** AUDIO RECORDING BEGIN ***** */
+	private static final int RECORDER_SAMPLERATE = 8000;
+	private static final int RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
+	private static final int RECORDER_AUDIO_ENCODING = AudioFormat.ENCODING_PCM_16BIT;
+	private AudioRecord recorder = null;
+	private Thread recordingThread = null;
+
+	int BufferElements2Rec = 1024; // want to play 2048 (2K) since 2 bytes we
+									// use only 1024
+	int BytesPerElement = 2; // 2 bytes in 16bit format
+
+	private void startRecording() {
+
+		recorder = new AudioRecord(MediaRecorder.AudioSource.MIC, RECORDER_SAMPLERATE, RECORDER_CHANNELS,
+				RECORDER_AUDIO_ENCODING, BufferElements2Rec * BytesPerElement);
+
+		recorder.startRecording();
+		mIsRecordingAudio = true;
+		recordingThread = new Thread(new Runnable() {
+			public void run() {
+				writeAudioDataToFile();
+			}
+		}, "AudioRecorder Thread");
+		recordingThread.start();
+	}
+
+	private void writeAudioDataToFile() {
+		// Write the output audio in byte
+
+		String filePath = "/sdcard/voice8K16bitmono.pcm";
+		short sData[] = new short[BufferElements2Rec];
+
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(filePath);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		while (mIsRecordingAudio) {
+			// gets the voice output from microphone to byte format
+
+			recorder.read(sData, 0, BufferElements2Rec);
+			System.out.println("Short wirting to file" + sData.toString());
+			try {
+				// writes the data to file from buffer
+				// stores the voice buffer
+				byte bData[] = short2byte(sData);
+				fos.write(bData, 0, BufferElements2Rec * BytesPerElement);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			fos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// convert short to byte
+	private byte[] short2byte(short[] sData) {
+		int shortArrsize = sData.length;
+		byte[] bytes = new byte[shortArrsize * 2];
+		for (int i = 0; i < shortArrsize; i++) {
+			bytes[i * 2] = (byte) (sData[i] & 0x00FF);
+			bytes[(i * 2) + 1] = (byte) (sData[i] >> 8);
+			sData[i] = 0;
+		}
+		return bytes;
+	}
+
+	private void stopRecording() {
+		// stops the recording activity
+		if (null != recorder) {
+			mIsRecordingAudio = false;
+			recorder.stop();
+			recorder.release();
+			recorder = null;
+			recordingThread = null;
+		}
+	}
+	
+	/* ***** AUDIO RECORDING END ***** */
+
 	private PictureCallback mPictureCallback = new PictureCallback() {
 
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
 
 			// Save to file:
-			Bitmap bmp = scaleDownBitmap(BitmapFactory.decodeByteArray(data, 0, data.length), mScreenWidthInPixels/3, mContext);
+			Bitmap bmp = scaleDownBitmap(BitmapFactory.decodeByteArray(data, 0, data.length), mScreenWidthInPixels / 3,
+					mContext);
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			// compress because when we don't we get a failed binder transaction
 			bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -177,6 +322,7 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 			Bundle args = new Bundle();
 			args.putByteArray("image", bytes);
 			args.putParcelable("location", mCurrentLocation);
+			args.putCharSequence("medium", mMode.toString());
 
 			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
 			newStoryIntent.putExtra("bundle", args);
@@ -223,33 +369,191 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 		return mediaFile;
 	}
 
-	/** A safe way to get an instance of the Camera object. */
-	public static Camera getCameraInstance() {
-		Camera c = null;
-		try {
-			c = Camera.open(); // attempt to get a Camera instance
-		} catch (Exception e) {
-			// Camera is not available (in use or does not exist)
-			Log.d(TAG, "Camera is not available (in use or does not exist) " + e.getMessage());
+	/* ***** CONTROL BUTTON ONTOUCHLISTENERS BEGIN ***** */
+
+	private class AudioButtonTouchListner implements OnTouchListener {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				if (mMode != MediaMode.AUDIO) {
+					// If we aren't in audio record mode
+					// Do nothing until release
+				} else {
+					// If we are in audio record mode
+					if (!mIsRecordingAudio) {
+						// If we aren't recording, but we just clicked to do so
+					} else {
+						// If we were just recording, but just clicked to stop
+					}
+				}
+				return true;
+			}
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				if (mMode != MediaMode.AUDIO) {
+					// If we aren't in audio record mode
+					// Change highlight circle
+					switch (mMode) {
+					case PICTURE:
+						// Un-highlight camera
+						mButtonCapturePicture.setImageResource(R.drawable.camera_grey);
+						break;
+					case VIDEO:
+						// Un-highlight video recorder
+						mButtonRecordVideo.setImageResource(R.drawable.recorder_grey);
+						break;
+					default:
+						break;
+					}
+					// Highlight Mic
+					mButtonRecordAudio.setImageResource(R.drawable.mic_active);
+					// then put us in audio record mode
+					mMode = MediaMode.AUDIO;
+				} else {
+					// If we are in audio record mode
+					if (!mIsRecordingAudio) {
+						// If we literally just clicked to record
+						Drawable button = getResources().getDrawable(R.drawable.mic_active);
+						button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
+						((ImageView) v).setImageDrawable(button);
+
+						// start doing recording stuff
+						startRecording();
+					} else {
+						// If we literally just clicked to stop
+						Drawable button = getResources().getDrawable(R.drawable.mic_active);
+						button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+						((ImageView) v).setImageDrawable(button);
+
+						// start saving it and moving on
+						stopRecording();
+					}
+				}
+				return true;
+			}
+			return false;
 		}
-		return c; // returns null if camera is unavailable
 	}
 
-	private void releaseMediaRecorder() {
-		if (mMediaRecorder != null) {
-			mMediaRecorder.reset(); // clear recorder configuration
-			mMediaRecorder.release(); // release the recorder object
-			mMediaRecorder = null;
-			mCamera.lock(); // lock camera for later use
+	private class CameraButtonTouchListner implements OnTouchListener {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				if (mMode != MediaMode.PICTURE) {
+					// If we aren't in cameara mode
+					// Do nothing until release
+				} else {
+					// If we are in camera mode
+					// We just clicked so make it show that
+					Drawable button = getResources().getDrawable(R.drawable.camera_active);
+					button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
+					((ImageView) v).setImageDrawable(button);
+
+					// take the picture
+					// mCamera.takePicture(null, null, mPictureCallback);
+
+					// start saving it and moving on
+				}
+				return true;
+			}
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				if (mMode != MediaMode.PICTURE) {
+					// If we aren't in picture mode
+					// Change highlight circle
+					switch (mMode) {
+					case AUDIO:
+						// Un-highlight mic
+						mButtonRecordAudio.setImageResource(R.drawable.mic_grey);
+						break;
+					case VIDEO:
+						// Un-highlight video recorder
+						mButtonRecordVideo.setImageResource(R.drawable.recorder_grey);
+						break;
+					default:
+						break;
+					}
+					// Highlight camera
+					mButtonCapturePicture.setImageResource(R.drawable.camera_active);
+					// then put us in picture mode
+					mMode = MediaMode.PICTURE;
+				} else {
+					// If we are in picture mode:
+					// Draw the button back
+					Drawable button = getResources().getDrawable(R.drawable.camera_active);
+					button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+					((ImageView) v).setImageDrawable(button);
+				}
+				return true;
+			}
+			return false;
 		}
 	}
 
-	private void releaseCamera() {
-		if (mCamera != null) {
-			mCamera.release(); // release the camera for other applications
-			mCamera = null;
+	private class VideoButtonTouchListner implements OnTouchListener {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				if (mMode != MediaMode.VIDEO) {
+					// If we aren't in video record mode
+					// Do nothing until release
+				} else {
+					// If we are in video record mode
+					if (!mIsRecordingVideo) {
+						// If we aren't recording, but we just clicked to do so
+					} else {
+						// If we were just recording, but just clicked to stop
+					}
+				}
+				return true;
+			}
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				if (mMode != MediaMode.VIDEO) {
+					// If we aren't in video record mode
+					// Change highlight circle
+					switch (mMode) {
+					case AUDIO:
+						// Un-highlight mic
+						mButtonRecordAudio.setImageResource(R.drawable.mic_grey);
+						break;
+					case PICTURE:
+						// Un-highlight camera
+						mButtonCapturePicture.setImageResource(R.drawable.camera_grey);
+						break;
+					default:
+						break;
+					}
+					// Highlight Video recorder
+					mButtonRecordVideo.setImageResource(R.drawable.recorder_active);
+					// then put us in video record mode
+					mMode = MediaMode.VIDEO;
+				} else {
+					// If we are in video record mode
+					if (!mIsRecordingVideo) {
+						// If we literally just clicked to record
+						Drawable button = getResources().getDrawable(R.drawable.recorder_active);
+						button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
+						((ImageView) v).setImageDrawable(button);
+						mIsRecordingVideo = true;
+
+						// start doing recording stuff
+					} else {
+						// If we literally just clicked to stop
+						Drawable button = getResources().getDrawable(R.drawable.recorder_active);
+						button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+						((ImageView) v).setImageDrawable(button);
+						mIsRecordingVideo = false;
+
+						// start saving it and moving on
+					}
+				}
+				return true;
+			}
+			return false;
 		}
 	}
+
+	/* ***** CONTROL BUTTON ONTOUCHLISTENERS END ***** */
+
+	/* ***** GOOGLE PLAY SERVICES BLOAT BEGIN ***** */
 
 	/*
 	 * Handle results returned to the FragmentActivity by Google Play services
@@ -301,28 +605,6 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 	}
 
 	/*
-	 * Called by Location Services when the request to connect the client
-	 * finishes successfully. At this point, you can request the current
-	 * location or start periodic updates
-	 */
-	@Override
-	public void onConnected(Bundle connectionHint) {
-		// Display the connection status
-		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-		mCurrentLocation = mLocationClient.getLastLocation();
-	}
-
-	/*
-	 * Called by Location Services if the connection to the location client
-	 * drops because of an error.
-	 */
-	@Override
-	public void onDisconnected() {
-		// Display the connection status
-		Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
-	}
-
-	/*
 	 * Called by Location Services if the attempt to Location Services fails.
 	 */
 	@Override
@@ -356,5 +638,7 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements OnCli
 	void showErrorDialog(int code) {
 		GooglePlayServicesUtil.getErrorDialog(code, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
 	}
+
+	/* ***** GOOGLE PLAY SERVICES BLOAT END ***** */
 
 }
