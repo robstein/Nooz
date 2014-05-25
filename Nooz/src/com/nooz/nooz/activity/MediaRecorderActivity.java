@@ -76,8 +76,9 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	private Location mCurrentLocation;
 	private int mScreenWidthInPixels;
 	protected MediaMode mMode = MediaMode.PICTURE;
-	public boolean mIsRecordingAudio = false;
-	public boolean mIsRecordingVideo = false;
+	protected boolean mIsRecordingAudio = false;
+	protected boolean mIsCapturingPicture = false;
+	protected boolean mIsRecordingVideo = false;
 
 	/* ***** ACTIVITY SETUP BEGIN ***** */
 	@Override
@@ -302,7 +303,7 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 			recordingThread = null;
 		}
 	}
-	
+
 	/* ***** AUDIO RECORDING END ***** */
 
 	private PictureCallback mPictureCallback = new PictureCallback() {
@@ -374,61 +375,70 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	private class AudioButtonTouchListner implements OnTouchListener {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				if (mMode != MediaMode.AUDIO) {
-					// If we aren't in audio record mode
-					// Do nothing until release
-				} else {
-					// If we are in audio record mode
-					if (!mIsRecordingAudio) {
-						// If we aren't recording, but we just clicked to do so
+			// Disable if using another mode
+			if (!mIsCapturingPicture && !mIsRecordingVideo) {
+				// If not disabled:
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					if (mMode != MediaMode.AUDIO) {
+						// If we aren't in audio record mode
+						// Do nothing until release
 					} else {
-						// If we were just recording, but just clicked to stop
+						// If we are in audio record mode
+						if (!mIsRecordingAudio) {
+							// If we aren't recording, but we just clicked to do
+							// so
+						} else {
+							// If we were just recording, but just clicked to
+							// stop
+						}
 					}
+					return true;
 				}
-				return true;
-			}
-			if (event.getAction() == MotionEvent.ACTION_UP) {
-				if (mMode != MediaMode.AUDIO) {
-					// If we aren't in audio record mode
-					// Change highlight circle
-					switch (mMode) {
-					case PICTURE:
-						// Un-highlight camera
-						mButtonCapturePicture.setImageResource(R.drawable.camera_grey);
-						break;
-					case VIDEO:
-						// Un-highlight video recorder
-						mButtonRecordVideo.setImageResource(R.drawable.recorder_grey);
-						break;
-					default:
-						break;
-					}
-					// Highlight Mic
-					mButtonRecordAudio.setImageResource(R.drawable.mic_active);
-					// then put us in audio record mode
-					mMode = MediaMode.AUDIO;
-				} else {
-					// If we are in audio record mode
-					if (!mIsRecordingAudio) {
-						// If we literally just clicked to record
-						Drawable button = getResources().getDrawable(R.drawable.mic_active);
-						button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
-						((ImageView) v).setImageDrawable(button);
 
-						// start doing recording stuff
-						startRecording();
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+
+					if (mMode != MediaMode.AUDIO) {
+						// If we aren't in audio record mode
+						// Change highlight circle
+						switch (mMode) {
+						case PICTURE:
+							// Un-highlight camera
+							mButtonCapturePicture.setImageResource(R.drawable.camera_grey);
+							break;
+						case VIDEO:
+							// Un-highlight video recorder
+							mButtonRecordVideo.setImageResource(R.drawable.recorder_grey);
+							break;
+						default:
+							break;
+						}
+						// Highlight Mic
+						mButtonRecordAudio.setImageResource(R.drawable.mic_active);
+						// then put us in audio record mode
+						mMode = MediaMode.AUDIO;
+
 					} else {
-						// If we literally just clicked to stop
-						Drawable button = getResources().getDrawable(R.drawable.mic_active);
-						button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
-						((ImageView) v).setImageDrawable(button);
+						// If we are in audio record mode
+						if (!mIsRecordingAudio) {
+							// If we literally just clicked to record
+							Drawable button = getResources().getDrawable(R.drawable.mic_active);
+							button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
+							((ImageView) v).setImageDrawable(button);
 
-						// start saving it and moving on
-						stopRecording();
+							// start doing recording stuff
+							startRecording();
+						} else {
+							// If we literally just clicked to stop
+							Drawable button = getResources().getDrawable(R.drawable.mic_active);
+							button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+							((ImageView) v).setImageDrawable(button);
+
+							// start saving it and moving on
+							stopRecording();
+						}
 					}
+					return true;
 				}
-				return true;
 			}
 			return false;
 		}
@@ -437,52 +447,66 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	private class CameraButtonTouchListner implements OnTouchListener {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				if (mMode != MediaMode.PICTURE) {
-					// If we aren't in cameara mode
-					// Do nothing until release
-				} else {
-					// If we are in camera mode
-					// We just clicked so make it show that
-					Drawable button = getResources().getDrawable(R.drawable.camera_active);
-					button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
-					((ImageView) v).setImageDrawable(button);
+			// Disable if using another mode
+			if (!mIsRecordingAudio && !mIsRecordingVideo) {
+				// If not disabled:
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					if (mMode != MediaMode.PICTURE) {
+						// If we aren't in cameara mode
+						// Do nothing until release
+					} else {
+						// If we are in camera mode
+						// We just clicked so make it show that
+						Drawable button = getResources().getDrawable(R.drawable.camera_active);
+						button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
+						((ImageView) v).setImageDrawable(button);
+						// Set capturing picture flag
+						mIsCapturingPicture = true;
 
-					// take the picture
-					// mCamera.takePicture(null, null, mPictureCallback);
+						// take the picture
+						// mCamera.takePicture(null, null, mPictureCallback);
 
-					// start saving it and moving on
-				}
-				return true;
-			}
-			if (event.getAction() == MotionEvent.ACTION_UP) {
-				if (mMode != MediaMode.PICTURE) {
-					// If we aren't in picture mode
-					// Change highlight circle
-					switch (mMode) {
-					case AUDIO:
-						// Un-highlight mic
-						mButtonRecordAudio.setImageResource(R.drawable.mic_grey);
-						break;
-					case VIDEO:
-						// Un-highlight video recorder
-						mButtonRecordVideo.setImageResource(R.drawable.recorder_grey);
-						break;
-					default:
-						break;
+						// start saving it and moving on
+
 					}
-					// Highlight camera
-					mButtonCapturePicture.setImageResource(R.drawable.camera_active);
-					// then put us in picture mode
-					mMode = MediaMode.PICTURE;
-				} else {
-					// If we are in picture mode:
-					// Draw the button back
-					Drawable button = getResources().getDrawable(R.drawable.camera_active);
-					button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
-					((ImageView) v).setImageDrawable(button);
+					return true;
 				}
-				return true;
+
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+
+					if (mMode != MediaMode.PICTURE) {
+						// If we aren't in picture mode
+						// Change highlight circle
+
+						switch (mMode) {
+						case AUDIO:
+							// Un-highlight mic
+							mButtonRecordAudio.setImageResource(R.drawable.mic_grey);
+							break;
+						case VIDEO:
+							// Un-highlight video recorder
+							mButtonRecordVideo.setImageResource(R.drawable.recorder_grey);
+							break;
+						default:
+							break;
+						}
+						// Highlight camera
+						mButtonCapturePicture.setImageResource(R.drawable.camera_active);
+						// then put us in picture mode
+						mMode = MediaMode.PICTURE;
+
+					} else {
+						// If we are in picture mode:
+						// Draw the button back
+						Drawable button = getResources().getDrawable(R.drawable.camera_active);
+						button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+						((ImageView) v).setImageDrawable(button);
+						// Clear capturing picture flag
+						mIsCapturingPicture = false;
+					}
+					return true;
+
+				}
 			}
 			return false;
 		}
@@ -491,61 +515,70 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	private class VideoButtonTouchListner implements OnTouchListener {
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				if (mMode != MediaMode.VIDEO) {
-					// If we aren't in video record mode
-					// Do nothing until release
-				} else {
-					// If we are in video record mode
-					if (!mIsRecordingVideo) {
-						// If we aren't recording, but we just clicked to do so
+			// Disable if using another mode
+			if (!mIsRecordingAudio && !mIsCapturingPicture) {
+				// If not disabled:
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					if (mMode != MediaMode.VIDEO) {
+						// If we aren't in video record mode
+						// Do nothing until release
 					} else {
-						// If we were just recording, but just clicked to stop
+						// If we are in video record mode
+						if (!mIsRecordingVideo) {
+							// If we aren't recording, but we just clicked to do
+							// so
+						} else {
+							// If we were just recording, but just clicked to
+							// stop
+						}
 					}
+					return true;
 				}
-				return true;
-			}
-			if (event.getAction() == MotionEvent.ACTION_UP) {
-				if (mMode != MediaMode.VIDEO) {
-					// If we aren't in video record mode
-					// Change highlight circle
-					switch (mMode) {
-					case AUDIO:
-						// Un-highlight mic
-						mButtonRecordAudio.setImageResource(R.drawable.mic_grey);
-						break;
-					case PICTURE:
-						// Un-highlight camera
-						mButtonCapturePicture.setImageResource(R.drawable.camera_grey);
-						break;
-					default:
-						break;
-					}
-					// Highlight Video recorder
-					mButtonRecordVideo.setImageResource(R.drawable.recorder_active);
-					// then put us in video record mode
-					mMode = MediaMode.VIDEO;
-				} else {
-					// If we are in video record mode
-					if (!mIsRecordingVideo) {
-						// If we literally just clicked to record
-						Drawable button = getResources().getDrawable(R.drawable.recorder_active);
-						button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
-						((ImageView) v).setImageDrawable(button);
-						mIsRecordingVideo = true;
 
-						// start doing recording stuff
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+
+					if (mMode != MediaMode.VIDEO) {
+						// If we aren't in video record mode
+						// Change highlight circle
+						switch (mMode) {
+						case AUDIO:
+							// Un-highlight mic
+							mButtonRecordAudio.setImageResource(R.drawable.mic_grey);
+							break;
+						case PICTURE:
+							// Un-highlight camera
+							mButtonCapturePicture.setImageResource(R.drawable.camera_grey);
+							break;
+						default:
+							break;
+						}
+						// Highlight Video recorder
+						mButtonRecordVideo.setImageResource(R.drawable.recorder_active);
+						// then put us in video record mode
+						mMode = MediaMode.VIDEO;
+
 					} else {
-						// If we literally just clicked to stop
-						Drawable button = getResources().getDrawable(R.drawable.recorder_active);
-						button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
-						((ImageView) v).setImageDrawable(button);
-						mIsRecordingVideo = false;
+						// If we are in video record mode
+						if (!mIsRecordingVideo) {
+							// If we literally just clicked to record
+							Drawable button = getResources().getDrawable(R.drawable.recorder_active);
+							button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
+							((ImageView) v).setImageDrawable(button);
+							mIsRecordingVideo = true;
 
-						// start saving it and moving on
+							// start doing recording stuff
+						} else {
+							// If we literally just clicked to stop
+							Drawable button = getResources().getDrawable(R.drawable.recorder_active);
+							button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+							((ImageView) v).setImageDrawable(button);
+							mIsRecordingVideo = false;
+
+							// start saving it and moving on
+						}
 					}
+					return true;
 				}
-				return true;
 			}
 			return false;
 		}
