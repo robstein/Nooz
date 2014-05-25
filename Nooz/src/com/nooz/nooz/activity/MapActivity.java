@@ -1,7 +1,9 @@
 package com.nooz.nooz.activity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -12,6 +14,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,19 +25,24 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -164,6 +173,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 		// Main map views
 		mapContainer = (RelativeLayout) findViewById(R.id.map_container);
+		//
+		mRegion = (TextView) findViewById(R.id.region);
+		mRegion.setOnEditorActionListener(mRegionEditorDoneListener);
+		mRegion.setOnFocusChangeListener(mRegionFocusDoneListener);
 		//
 		mButtonRelevant = (TextView) findViewById(R.id.button_relevant);
 		mButtonRelevant.setOnClickListener(this);
@@ -303,7 +316,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 		super.onPause();
 	}
-	
+
 	/*
 	 * Called when the Activity is no longer visible.
 	 */
@@ -361,6 +374,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
+		case R.id.region:
+			mRegion.setText("");
 		case R.id.button_relevant:
 			switchSearchTypes(R.id.button_relevant);
 			break;
@@ -430,20 +445,87 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	public void onCameraChange(CameraPosition position) {
 		Log.d("Zoom", "Zoom: " + position.zoom);
 
+		// Update Bubbles
 		if (mPreviousZoomLevel != position.zoom) {
 			mMapWidthInMeters = GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, position.zoom);
 			updateBubbleSizes();
 		}
-
 		mPreviousZoomLevel = position.zoom;
+
+		// Update City
+		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+		Geocoder gcd = new Geocoder(mContext, Locale.getDefault());
+		List<Address> addressesNorthEast;
+		List<Address> addressesSouthWest;
+		try {
+			addressesNorthEast = gcd.getFromLocation(bounds.northeast.latitude, bounds.northeast.longitude, 1);
+			addressesSouthWest = gcd.getFromLocation(bounds.southwest.latitude, bounds.southwest.longitude, 1);
+			if ((addressesNorthEast.size() > 0) && (addressesSouthWest.size() > 0)) {
+				String localityNorthEast = addressesNorthEast.get(0).getLocality();
+				String localitySouthWest = addressesSouthWest.get(0).getLocality();
+				if ((localityNorthEast != null) && (localitySouthWest != null)) {
+					if (localityNorthEast.equals(localitySouthWest)) {
+						// Change text
+						mRegion.setText(localityNorthEast.toUpperCase(Locale.ENGLISH));
+						// Don't make the search box focused
+						mRegion.setSelected(false);
+					}
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	/* ***** LISTENERS END ***** */
 
+	/* ***** MAP SEARCH BEGIN***** */
+	
+	private OnEditorActionListener mRegionEditorDoneListener = new TextView.OnEditorActionListener() {
+		@Override
+		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+			if (actionId == EditorInfo.IME_ACTION_DONE) {
+				searchMap();
+				// hide virtual keyboard
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(mRegion.getWindowToken(), 0);
+				return true;
+			}
+			return false;
+		}
+	};
+
+	private OnFocusChangeListener mRegionFocusDoneListener = new OnFocusChangeListener() {
+
+		public void onFocusChange(View v, boolean hasFocus) {
+			if (!hasFocus)
+				searchMap();
+		}
+	};
+
+	private void searchMap() {
+		Geocoder gcd = new Geocoder(mContext, Locale.getDefault());
+		try {
+			List<Address> l = gcd.getFromLocationName(mRegion.getText().toString(), 1);
+			if (l.size() > 0) {
+				mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(l.get(0).getLatitude(), l.get(0)
+						.getLongitude()), 10));
+
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/* ***** MAP SEARCH END ***** */
+
 	/* ***** STORIES BEGIN ***** */
 
 	private void populateInitialStories() {
-		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;	
+		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 		mNoozService.getAllStories(bounds, new GetStoriesCallback());
 	}
 
@@ -481,10 +563,11 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		final long start = SystemClock.uptimeMillis();
 		final double startRadius = 0;
 		final Interpolator interpolator = new LinearInterpolator();
-		
+
 		CircleOptions circleOptions;
 		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(startRadius);
-		//circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(targetRadius);
+		// circleOptions = new CircleOptions().center(new LatLng(lat,
+		// lng)).radius(targetRadius);
 		final Circle c = mMap.addCircle(circleOptions);
 		mCircles.add(c);
 
@@ -506,19 +589,19 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mGroundOverlays.add(icon);
 
 		handler.post(new Runnable() {
-		    @Override
-		    public void run() {
-		        long elapsed = SystemClock.uptimeMillis() - start;
-		        float t = interpolator.getInterpolation((float) elapsed / duration);
-		        double r = Math.max(0, t * targetRadius + (1 - t) * startRadius);
-		        c.setRadius(r);
-		        if (t < 1.0) {
-		            // Post again 16ms later == 60 frames per second
-		            handler.postDelayed(this, 16);
-		        } else {
-		            // animation ended
-		        }
-		    }
+			@Override
+			public void run() {
+				long elapsed = SystemClock.uptimeMillis() - start;
+				float t = interpolator.getInterpolation((float) elapsed / duration);
+				double r = Math.max(0, t * targetRadius + (1 - t) * startRadius);
+				c.setRadius(r);
+				if (t < 1.0) {
+					// Post again 16ms later == 60 frames per second
+					handler.postDelayed(this, 16);
+				} else {
+					// animation ended
+				}
+			}
 		});
 
 	}
@@ -527,40 +610,38 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		int i = 0;
 		for (Story s : mStories) {
 			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
-			
+
 			final double targetRadius = newRadius;
 			final long duration = 400;
 			final Handler handler = new Handler();
 			final long start = SystemClock.uptimeMillis();
 			final double startRadius = s.radius;
 			final Interpolator interpolator = new LinearInterpolator();
-			
+
 			final Circle c = mCircles.get(i);
-			
+
 			handler.post(new Runnable() {
-			    @Override
-			    public void run() {
-			        long elapsed = SystemClock.uptimeMillis() - start;
-			        float t = interpolator.getInterpolation((float) elapsed / duration);
-			        double r = Math.max(0, t * targetRadius + (1 - t) * startRadius);
-			        c.setRadius(r);
-			        if (t < 1.0) {
-			            // Post again 16ms later == 60 frames per second
-			            handler.postDelayed(this, 16);
-			        } else {
-			            // animation ended
-			        }
-			    }
+				@Override
+				public void run() {
+					long elapsed = SystemClock.uptimeMillis() - start;
+					float t = interpolator.getInterpolation((float) elapsed / duration);
+					double r = Math.max(0, t * targetRadius + (1 - t) * startRadius);
+					c.setRadius(r);
+					if (t < 1.0) {
+						// Post again 16ms later == 60 frames per second
+						handler.postDelayed(this, 16);
+					} else {
+						// animation ended
+					}
+				}
 			});
-			
+
 			mStories.get(i).setRadius(newRadius);
-			//mCircles.get(i).setRadius(newRadius);
+			// mCircles.get(i).setRadius(newRadius);
 			mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int) (newRadius * 3 / 4));
 			i++;
 		}
 	}
-	
-
 
 	/* ***** STORIES END ***** */
 

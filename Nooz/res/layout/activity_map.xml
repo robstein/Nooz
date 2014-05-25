@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -16,23 +15,17 @@
             android:layout_height="0dp"
             android:layout_weight=".61" >
 
-            <fragment
-                android:id="@+id/map"
-                android:name="com.google.android.gms.maps.MapFragment"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                map:cameraTargetLat="37.09024"
-                map:cameraTargetLng="-95.712891"
-                map:cameraZoom="3"
-                map:mapType="normal"
-                map:uiCompass="false"
-                map:uiRotateGestures="false"
-                map:uiScrollGestures="true"
-                map:uiTiltGestures="false"
-                map:uiZoomControls="false"
-                map:uiZoomGestures="true" />
+            <include layout="@layout/layout_map" />
 
-            <TextView
+            <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+
+            <LinearLayout
+                android:layout_width="0px"
+                android:layout_height="0px"
+                android:focusable="true"
+                android:focusableInTouchMode="true" />
+
+            <EditText
                 android:id="@+id/region"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -43,12 +36,15 @@
                 android:background="@drawable/region_label"
                 android:clickable="true"
                 android:gravity="center_horizontal"
+                android:hint="SEARCH CITY"
+                android:inputType="textCapCharacters"
+                android:nextFocusLeft="@id/region"
+                android:nextFocusUp="@id/region"
                 android:onClick="onClick"
                 android:paddingBottom="9dp"
                 android:paddingLeft="18dp"
                 android:paddingRight="18dp"
                 android:paddingTop="9dp"
-                android:text="CHAMPAIGN"
                 android:textAllCaps="true"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp"

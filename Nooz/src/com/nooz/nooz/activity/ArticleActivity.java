@@ -118,13 +118,13 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		mRelevanceLabel.setTextColor(getColorByCategory(mStory.category));
 		mIrrelevanceLabel.setTextColor(getColorByCategory(mStory.category));
 		mButtonComments.setImageResource(getCommentsByCategory(mStory.category));
-		
+
 		if(mStory.userRelevance == 1) {
 			invertRelevant();
 		} else if(mStory.userRelevance == -1) {
 			invertIrrelevant();
 		}
-		
+
 		mRelevanceScore.setText(mStory.scoreRelevance.toString());
 		mIrrelevanceScore.setText(mStory.scoreIrrelevance.toString());
 	}
@@ -156,7 +156,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		Integer change = mRelevant ? 1 : -1;
 		Integer newScore = Integer.parseInt((String) mRelevanceScore.getText()) + change;
 		mRelevanceScore.setText(newScore.toString());
-		
+
 		saveRelevanceInput();
 	}
 
@@ -170,10 +170,10 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		Integer change = mIrrelevant ? 1 : -1;
 		Integer newScore = Integer.parseInt((String) mIrrelevanceScore.getText()) + change;
 		mIrrelevanceScore.setText(newScore.toString());
-		
+
 		saveRelevanceInput();
 	}
-	
+
 	private void saveRelevanceInput() {
 		Integer input = 0;
 		if (mRelevant) {
