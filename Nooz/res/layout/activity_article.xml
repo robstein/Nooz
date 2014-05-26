@@ -61,14 +61,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:scaleType="fitCenter"
-                android:src="@drawable/example_article_picture" />
+                />
 
             <RelativeLayout
+                android:id="@+id/article_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/article_image"
                 android:background="@drawable/headline_transition"
                 android:padding="20dp"
+                android:clickable="true"
                 android:tag="sticky-hastransparancy" >
 
                 <TextView

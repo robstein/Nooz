@@ -1,8 +1,20 @@
 package com.nooz.nooz.activity;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -10,13 +22,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.nooz.nooz.NoozApplication;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
@@ -31,11 +43,13 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 	private static int COLOR_PUBLIC_SAFETY;
 	private static int COLOR_ARTS_AND_LIFE;
 	private static final int COLOR_WHITE = 0xFFFFFFFF;
+	private static final String CONTAINER_NAME = "media";
 
 	private ImageView mArticleCategoryLogo;
 	private TextView mArticleCategory;
 	private ImageView mArticleInfo;
 	private ImageView mArticleImage;
+	private RelativeLayout mArticleHeader;
 	private TextView mHeadline;
 	private ImageView mAuthorPicture;
 	private TextView mAuthor;
@@ -48,11 +62,16 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 	private TextView mIrrelevanceLabel;
 	private ImageView mButtonComments;
 
+	private MediaPlayer mPlayer = null;
+	private boolean mCurrentlyPlayingAudio = false;
+	private boolean mLoaded = false;
 	private Story mStory;
 	private Boolean mRelevant = false;
 	private Boolean mIrrelevant = false;
 	private Integer mScoreRel = 0;
 	private Integer mScoreIrr = 0;
+
+	/* ***** ACTIVITY SETUP BEGIN ***** */
 
 	@SuppressLint("NewApi")
 	@Override
@@ -61,6 +80,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		setContentView(R.layout.activity_article);
 		Bundle bundle = getIntent().getParcelableExtra("bundle");
 		mStory = bundle.getParcelable("story");
+		mNoozService.getBlobSas(CONTAINER_NAME, mStory.id);
 
 		COLOR_PEOPLE = getResources().getColor(R.color.category_people);
 		COLOR_COMMUNITY = getResources().getColor(R.color.category_community);
@@ -73,6 +93,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		mArticleCategory = (TextView) findViewById(R.id.article_category);
 		mArticleInfo = (ImageView) findViewById(R.id.article_info);
 		mArticleImage = (ImageView) findViewById(R.id.article_image);
+		// mArticleHeader = (RelativeLayout) findViewById(R.id.article_header);
 		mHeadline = (TextView) findViewById(R.id.headline);
 		mAuthorPicture = (ImageView) findViewById(R.id.author_picture);
 		mAuthor = (TextView) findViewById(R.id.author);
@@ -85,6 +106,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		mIrrelevanceLabel = (TextView) findViewById(R.id.irrelevance_label);
 		mButtonComments = (ImageView) findViewById(R.id.btn_comments);
 
+		mArticleImage.setOnClickListener(this);
 		mArticleInfo.setOnClickListener(this);
 		mButtonRelevant.setOnClickListener(this);
 		mButtonIrrelevant.setOnClickListener(this);
@@ -95,6 +117,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		mArticleCategory.setTextColor(getColorByCategory(mStory.category));
 		mArticleInfo.setImageResource(getInfoByCategory(mStory.category));
 		// Set mArticleImage
+		// Happens in the broadcast recevier
 		mHeadline.setText(mStory.headline);
 		// Set mAuthorPicture
 		mAuthor.setText(mStory.firstName + " " + mStory.lastName);
@@ -119,9 +142,9 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		mIrrelevanceLabel.setTextColor(getColorByCategory(mStory.category));
 		mButtonComments.setImageResource(getCommentsByCategory(mStory.category));
 
-		if(mStory.userRelevance == 1) {
+		if (mStory.userRelevance == 1) {
 			invertRelevant();
-		} else if(mStory.userRelevance == -1) {
+		} else if (mStory.userRelevance == -1) {
 			invertIrrelevant();
 		}
 
@@ -129,14 +152,69 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		mIrrelevanceScore.setText(mStory.scoreIrrelevance.toString());
 	}
 
+	/***
+	 * Register for broadcasts
+	 */
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+	protected void onResume() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("blob.loaded");
+		registerReceiver(receiver, filter);
+		super.onResume();
 	}
+
+	/***
+	 * Unregister for broadcasts
+	 */
+	@Override
+	protected void onPause() {
+		unregisterReceiver(receiver);
+		if(mCurrentlyPlayingAudio) {
+			stopPlaying();
+		}
+		super.onPause();
+	}
+	
+	
+
+	/***
+	 * Broadcast receiver handles blobs being loaded or a new blob being created
+	 */
+	private BroadcastReceiver receiver = new BroadcastReceiver() {
+		public void onReceive(Context context, android.content.Intent intent) {
+			String intentAction = intent.getAction();
+			if (intentAction.equals("blob.loaded")) {
+				// Load the image using the SAS URL
+				JsonObject blob = mNoozService.getLoadedBlob();
+				String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();
+				sasUrl = sasUrl.replace("\"", "");
+				if ("AUDIO".equals(mStory.medium)) {
+					(new AudioFetcherTask(sasUrl)).execute();
+					mArticleImage.setImageDrawable(getResources().getDrawable(R.drawable.play));
+					mLoaded = true;
+				}
+				if ("PICTURE".equals(mStory.medium)) {
+					(new ImageFetcherTask(sasUrl)).execute();
+				}
+				if ("VIDEO".equals(mStory.medium)) {
+
+				}
+			}
+		}
+	};
+
+	/* ***** ACTIVITY SETUP END ***** */
+
+	/* ***** ONCLICKLISTENERS BEGIN ***** */
 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
+		case R.id.article_image:
+			if (mLoaded) {
+				onPlay(!mCurrentlyPlayingAudio);
+			}
+			break;
 		case R.id.button_relevant:
 			clickRelevant();
 			break;
@@ -145,6 +223,112 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 			break;
 		}
 	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+			finish();
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	/* ***** ONCLICKLISTENERS END ***** */
+
+	/* ***** AUDIO BEGIN ***** */
+
+	private void onPlay(boolean start) {
+		if (start) {
+			startPlaying();
+		} else {
+			stopPlaying();
+		}
+	}
+
+	private void startPlaying() {
+		try {
+			mPlayer.prepare();
+			mPlayer.start();
+			mCurrentlyPlayingAudio = true;
+		} catch (IOException e) {
+			Log.e(TAG, "prepare() failed");
+		}
+	}
+
+	private void stopPlaying() {
+		mPlayer.release();
+		mPlayer = null;
+		mCurrentlyPlayingAudio = false;
+	}
+
+	/**
+	 * This class specifically handles fetching an audio file from a URL and
+	 * loading the player with its data
+	 */
+	private class AudioFetcherTask extends AsyncTask<Void, Void, Boolean> {
+		private String mUrl;
+		private Bitmap mBitmap;
+
+		public AudioFetcherTask(String url) {
+			mUrl = url;
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			try {
+				mPlayer = new MediaPlayer();
+				Log.d(TAG, "mPlayer is not null");
+				Uri myUri = Uri.parse(mUrl);
+				mPlayer.setDataSource(mContext, myUri);
+			} catch (Exception e) {
+				Log.e(TAG, e.getMessage());
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean loaded) {
+
+		}
+	}
+
+	/* ***** AUDIO END ***** */
+
+	/**
+	 * This class specifically handles fetching an image from a URL and setting
+	 * the image view source on the screen
+	 */
+	private class ImageFetcherTask extends AsyncTask<Void, Void, Boolean> {
+		private String mUrl;
+		private Bitmap mBitmap;
+
+		public ImageFetcherTask(String url) {
+			mUrl = url;
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			try {
+				mBitmap = BitmapFactory.decodeStream((InputStream) new URL(mUrl).getContent());
+			} catch (Exception e) {
+				Log.e(TAG, e.getMessage());
+				return false;
+			}
+			return true;
+		}
+
+		/***
+		 * If the image was loaded successfully, set the image view
+		 */
+		@Override
+		protected void onPostExecute(Boolean loaded) {
+			if (loaded) {
+				mArticleImage.setImageBitmap(mBitmap);
+			}
+		}
+	}
+
+	/* ***** RELEVANCE BEGIN ***** */
 
 	private void clickRelevant() {
 		if (mIrrelevant) {
@@ -197,14 +381,6 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 			}
 		}
 	};
-
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-			finish();
-		}
-		return super.onKeyDown(keyCode, event);
-	}
 
 	@SuppressLint("NewApi")
 	private void invertRelevant() {
@@ -275,6 +451,10 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 			mIrrelevant = true;
 		}
 	}
+
+	/* ***** RELEVANCE BEGIN ***** */
+	
+	/* ***** GET THEME RESOURCES BY CATEGORY BEGIN ***** */
 
 	private int getCommentsByCategory(String category) {
 		if ("People".equals(category)) {
@@ -373,5 +553,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 			return R.drawable.arts_and_life_solid_fullsize;
 		}
 	}
+	
+	/* ***** GET THEME RESOURCES BY CATEGORY END ***** */
 
 }

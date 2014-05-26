@@ -2,6 +2,7 @@ package com.nooz.nooz.activity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -13,18 +14,12 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.Location;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -46,7 +41,6 @@ import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.Tools;
-import com.nooz.nooz.widget.SquareImageView;
 
 public class NewArticleActivity extends BaseActivity implements OnClickListener {
 
@@ -79,6 +73,8 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 	byte[] mImageData;
 	Bitmap mBitmap;
 
+	private String mMedium;
+
 	public static final int TOP_BAR_HEIGHT = 61;
 
 	@Override
@@ -87,6 +83,7 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		setContentView(R.layout.activity_newarticle);
 		Bundle bundle = getIntent().getParcelableExtra("bundle");
 		mLocation = bundle.getParcelable("location");
+		mMedium = (String) bundle.getCharSequence("medium");
 
 		// create spinner
 		mCategorySpinner = (Spinner) findViewById(R.id.spinner_choose_category);
@@ -109,12 +106,14 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		mLayoutStoryDetails.setLayoutParams(controlLayoutParams);
 
 		// display the image
-		mImageData = bundle.getByteArray("image");
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inMutable = true;
-		mBitmap = BitmapFactory.decodeByteArray(mImageData, 0, mImageData.length, options);
-		mNewArticleImage = (ImageView) findViewById(R.id.new_article_image);
-		mNewArticleImage.setImageBitmap(mBitmap);
+		/*
+		 * mImageData = bundle.getByteArray("image"); BitmapFactory.Options
+		 * options = new BitmapFactory.Options(); options.inMutable = true;
+		 * mBitmap = BitmapFactory.decodeByteArray(mImageData, 0,
+		 * mImageData.length, options); mNewArticleImage = (ImageView)
+		 * findViewById(R.id.new_article_image);
+		 * mNewArticleImage.setImageBitmap(mBitmap);
+		 */
 
 		//
 		mTextButtonBreak = (TextView) findViewById(R.id.btn_break_post);
@@ -190,7 +189,7 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		}
 
 		splashLoadingScreen();
-		mNoozService.saveStory(category, headline, caption, keywords.get(0), keywords.get(1), keywords.get(2),
+		mNoozService.saveStory(mMedium, category, headline, caption, keywords.get(0), keywords.get(1), keywords.get(2),
 				location, shareOnFacebook, shareOnTwitter, shareOnTumblr, onPostNooz);
 	}
 
@@ -330,10 +329,75 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 				// If a blob has been created, upload the image
 				JsonObject blob = mNoozService.getLoadedBlob();
 				String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();
-				(new ImageUploaderTask(sasUrl)).execute();
+				if ("AUDIO".equals(mMedium)) {
+					(new AudioUploaderTask(sasUrl)).execute();
+				}
+				if ("PICTURE".equals(mMedium)) {
+					(new ImageUploaderTask(sasUrl)).execute();
+				}
+				if ("VIDEO".equals(mMedium)) {
+
+				}
 			}
 		}
 	};
+
+	/***
+	 * Handles uploading an audio file to a specified url
+	 */
+	class AudioUploaderTask extends AsyncTask<Void, Void, Boolean> {
+		private String mUrl;
+
+		public AudioUploaderTask(String url) {
+			mUrl = url;
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			try {
+				String path = mContext.getFilesDir().getAbsolutePath().toString();
+				String filename = "audio.3gp";
+				File file = new File(path, filename);
+				FileInputStream fis = new FileInputStream(file);
+				int bytesRead = 0;
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				byte[] b = new byte[1024];
+				while ((bytesRead = fis.read(b)) != -1) {
+					bos.write(b, 0, bytesRead);
+				}
+				byte[] bytes = bos.toByteArray();
+				// Post our image data (byte array) to the server
+				URL url = new URL(mUrl.replace("\"", ""));
+				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+				urlConnection.setDoOutput(true);
+				urlConnection.setRequestMethod("PUT");
+				urlConnection.addRequestProperty("Content-Type", "image/jpeg");
+				urlConnection.setRequestProperty("Content-Length", "" + bytes.length);
+				// Write image data to server
+				DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+				wr.write(bytes);
+				wr.flush();
+				wr.close();
+				int response = urlConnection.getResponseCode();
+				// If we successfully uploaded, return true
+				if (response == 201 && urlConnection.getResponseMessage().equals("Created")) {
+					return true;
+				}
+			} catch (Exception ex) {
+				Log.e(TAG, ex.getMessage());
+			}
+			return false;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean uploaded) {
+			if (uploaded) {
+				removeSplashLoadingScreen();
+				Log.d(TAG, "Blob uploaded");
+				finish();
+			}
+		}
+	}
 
 	/***
 	 * Handles uploading an image to a specified url

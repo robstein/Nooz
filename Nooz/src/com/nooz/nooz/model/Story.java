@@ -38,6 +38,9 @@ public class Story implements Parcelable {
 	public Integer scoreRelevance;
 	@SerializedName("irrelevantScore")
 	public Integer scoreIrrelevance;
+	
+	@SerializedName("medium")
+	public String medium;
 
 	public Double radius;
 
@@ -63,6 +66,7 @@ public class Story implements Parcelable {
 		dest.writeInt(userRelevance);
 		dest.writeInt(scoreRelevance);
 		dest.writeInt(scoreIrrelevance);
+		dest.writeString(medium);
 
 		dest.writeDouble(radius);
 	}
@@ -84,6 +88,7 @@ public class Story implements Parcelable {
 		userRelevance = pc.readInt();
 		scoreRelevance = pc.readInt();
 		scoreIrrelevance = pc.readInt();
+		medium = pc.readString();
 
 		radius = pc.readDouble();
 
@@ -227,6 +232,14 @@ public class Story implements Parcelable {
 
 	public void setScoreIrrelevance(Integer scoreIrrelevance) {
 		this.scoreIrrelevance = scoreIrrelevance;
+	}
+
+	public String getMedium() {
+		return medium;
+	}
+
+	public void setMedium(String medium) {
+		this.medium = medium;
 	}
 
 }

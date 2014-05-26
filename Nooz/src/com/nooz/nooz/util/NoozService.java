@@ -71,11 +71,12 @@ public class NoozService {
 		mTableRelevance.insert(story, parameters, callback);
 	}
 
-	public void saveStory(String category, String headline, String caption, String keyword1, String keyword2,
+	public void saveStory(String medium, String category, String headline, String caption, String keyword1, String keyword2,
 			String keyword3, LatLng location, boolean sharefb, boolean sharetw, boolean sharetu,
 			TableJsonOperationCallback callback) {
 		JsonObject story = new JsonObject();
 		story.addProperty("author_id", mClient.getCurrentUser().getUserId());
+		story.addProperty("medium", medium);
 		story.addProperty("category", category);
 		story.addProperty("headline", headline);
 		story.addProperty("caption", caption);
