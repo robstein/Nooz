@@ -1,6 +1,8 @@
 package com.nooz.nooz.activity;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -9,14 +11,19 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -62,11 +69,11 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.gson.JsonObject;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.BubbleSizer;
-import com.nooz.nooz.util.GetStoriesCallbackInterface;
 import com.nooz.nooz.util.GlobeTrigonometry;
 import com.nooz.nooz.util.SearchType;
 import com.nooz.nooz.util.Tools;
@@ -89,6 +96,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private static final int TOP_RIGHT = 1;
 	private static final int BOTTOM_LEFT = 2;
 	private static final int BOTTOM_RIGHT = 3;
+	private static final String CONTAINER_NAME = "media";
 
 	// Animations
 	private Animation mSlideInBottom;
@@ -266,6 +274,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	@Override
 	protected void onResume() {
 		super.onResume();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("stories.loaded");
+		registerReceiver(receiver, filter);
+
 		setUpMapIfNeeded();
 
 		SharedPreferences settings = getSharedPreferences("map_settings", MODE_PRIVATE);
@@ -292,6 +304,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	 */
 	@Override
 	protected void onPause() {
+		unregisterReceiver(receiver);
 
 		CameraPosition camPosition = mMap.getCameraPosition();
 		double longitude = camPosition.target.longitude;
@@ -367,6 +380,21 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mMap.setOnMapClickListener(this);
 	}
 
+	/***
+	 * Broadcast receiver handles blobs for stories when loaded
+	 */
+	private BroadcastReceiver receiver = new BroadcastReceiver() {
+		public void onReceive(Context context, android.content.Intent intent) {
+			String intentAction = intent.getAction();
+			if (intentAction.equals("stories.loaded")) {
+				getStoriesCallBack();
+			}
+			if (intentAction.equals("storyImage.loaded")) {
+				getStoryImageCallBack(intent.getFlags());
+			}
+		}
+	};
+
 	/* ***** APP SETUP END ***** */
 
 	/* ***** LISTENERS BEGIN ***** */
@@ -389,7 +417,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		case R.id.button_refresh:
 			break;
 		case R.id.button_new_story:
-			if(mCurrentLocation == null) {
+			if (mCurrentLocation == null) {
 				Alert.createAndShowDialog("Please turn on Locations Services", "Location not found", mContext);
 			} else {
 				Intent mediaRecorderIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
@@ -487,7 +515,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	/* ***** LISTENERS END ***** */
 
 	/* ***** MAP SEARCH BEGIN***** */
-	
+
 	private OnEditorActionListener mRegionEditorDoneListener = new TextView.OnEditorActionListener() {
 		@Override
 		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -531,20 +559,66 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 	private void populateInitialStories() {
 		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-		mNoozService.getAllStories(bounds, new GetStoriesCallback());
+		mNoozService.getAllStories(bounds);
 	}
 
-	private class GetStoriesCallback implements GetStoriesCallbackInterface {
+	private void getStoriesCallBack() {
+		mStories = mNoozService.getLoadedStories();
+		mNoozService.getBlobSases(CONTAINER_NAME, mStories);
+		// Reset footer
+		PagerAdapter adapter = new StoryAdapter(mContext);
+		mPager.setAdapter(adapter);
+		mPager.setOffscreenPageLimit(adapter.getCount());
+		drawCirlesOnMap();
+		mPager.setCurrentItem(mResumeStory);
+	}
+	
+	private void getStoryImageCallBack(int i) {
+		// Load the image using the SAS URL
+		JsonObject blob = mNoozService.getLoadedStoryImage(i);
+		String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();
+		sasUrl = sasUrl.replace("\"", "");
+		if ("PICTURE".equals(mStories.get(i).medium)) {
+			(new ImageFetcherTask(sasUrl, i)).execute();
+		}
+		if ("VIDEO".equals(mStories.get(i).medium)) {
+
+		}
+	}
+	
+	/**
+	 * This class specifically handles fetching an image from a URL and setting
+	 * the image view source on the screen
+	 */
+	private class ImageFetcherTask extends AsyncTask<Void, Void, Boolean> {
+		private String mUrl;
+		private Bitmap mBitmap;
+		private Integer mIndex;
+
+		public ImageFetcherTask(String url, int index) {
+			mUrl = url;
+			mIndex = index;
+		}
 
 		@Override
-		public void onComplete(List<Story> stories) {
-			mStories = stories;
-			// Reset footer
-			PagerAdapter adapter = new StoryAdapter(mContext);
-			mPager.setAdapter(adapter);
-			mPager.setOffscreenPageLimit(adapter.getCount());
-			drawCirlesOnMap();
-			mPager.setCurrentItem(mResumeStory);
+		protected Boolean doInBackground(Void... params) {
+			try {
+				mBitmap = BitmapFactory.decodeStream((InputStream) new URL(mUrl).getContent());
+			} catch (Exception e) {
+				Log.e(TAG, e.getMessage());
+				return false;
+			}
+			return true;
+		}
+
+		/***
+		 * If the image was loaded successfully, set the image view
+		 */
+		@Override
+		protected void onPostExecute(Boolean loaded) {
+			if (loaded) {
+				mStories.get(mIndex).setBitmap(mBitmap);
+			}
 		}
 	}
 
@@ -667,6 +741,12 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			View layout = inflater.inflate(R.layout.story_item, null);
 			layout.setOnClickListener((OnClickListener) mContext);
 
+			ImageView image = (ImageView) layout.findViewById(R.id.story_item_article_image);
+			if("PICTURE".equals(mStories.get(position).medium)) {
+				image.setImageBitmap(mStories.get(position).bitmap);
+			}
+			
+			
 			TextView title = (TextView) layout.findViewById(R.id.story_item_title);
 			TextView author = (TextView) layout.findViewById(R.id.story_item_author);
 			View categoryRuler = (View) layout.findViewById(R.id.categoryRuler);

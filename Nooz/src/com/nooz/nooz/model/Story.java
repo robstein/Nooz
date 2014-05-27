@@ -1,5 +1,6 @@
 package com.nooz.nooz.model;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -42,6 +43,7 @@ public class Story implements Parcelable {
 	@SerializedName("medium")
 	public String medium;
 
+	public Bitmap bitmap;
 	public Double radius;
 
 	@Override
@@ -240,6 +242,10 @@ public class Story implements Parcelable {
 
 	public void setMedium(String medium) {
 		this.medium = medium;
+	}
+	
+	public void setBitmap(Bitmap bitmap) {
+		this.bitmap = bitmap;
 	}
 
 }

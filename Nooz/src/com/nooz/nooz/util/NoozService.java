@@ -3,6 +3,7 @@ package com.nooz.nooz.util;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
@@ -71,8 +72,8 @@ public class NoozService {
 		mTableRelevance.insert(story, parameters, callback);
 	}
 
-	public void saveStory(String medium, String category, String headline, String caption, String keyword1, String keyword2,
-			String keyword3, LatLng location, boolean sharefb, boolean sharetw, boolean sharetu,
+	public void saveStory(String medium, String category, String headline, String caption, String keyword1,
+			String keyword2, String keyword3, LatLng location, boolean sharefb, boolean sharetw, boolean sharetu,
 			TableJsonOperationCallback callback) {
 		JsonObject story = new JsonObject();
 		story.addProperty("author_id", mClient.getCurrentUser().getUserId());
@@ -212,7 +213,13 @@ public class NoozService {
 		((Activity) mContext).finish();
 	}
 
-	public void getAllStories(LatLngBounds bounds, final GetStoriesCallbackInterface getStoriesCallback) {
+	private List<Story> mLoadedStories;
+
+	public List<Story> getLoadedStories() {
+		return mLoadedStories;
+	}
+
+	public void getAllStories(LatLngBounds bounds) {
 
 		JsonObject body = new JsonObject();
 		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
@@ -226,12 +233,17 @@ public class NoozService {
 					List<Story> stories = new Gson().fromJson(jsonObject, listType);
 
 					// In case we don't have user_relevance
-					for(Story s : stories) {
-						if(s.userRelevance == null)
-						s.setUserRelevance(0);
+					for (Story s : stories) {
+						if (s.userRelevance == null)
+							s.setUserRelevance(0);
 					}
-					
-					getStoriesCallback.onComplete(stories);
+
+					mLoadedStories = stories;
+
+					Intent broadcast = new Intent();
+					broadcast.setAction("stories.loaded");
+					mContext.sendBroadcast(broadcast);
+
 				} else {
 					Log.e(TAG, "There was an error retrieving stories: " + exception.getMessage());
 				}
@@ -240,71 +252,110 @@ public class NoozService {
 		});
 
 	}
-	
+
 	/* ***** BLOB STORAGE ***** */
-	
+
 	private JsonObject mLoadedBlob;
-	
+
 	public JsonObject getLoadedBlob() {
 		return this.mLoadedBlob;
 	}
-	
+
 	/** Inserting blobs **/
 	public void getSasForNewBlob(String containerName, String blobName) {
-		//Create the json Object we'll send over and fill it with the required
-		//id property - otherwise we'll get kicked back
-		JsonObject blob = new JsonObject();		
+		// Create the json Object we'll send over and fill it with the required
+		// id property - otherwise we'll get kicked back
+		JsonObject blob = new JsonObject();
 		blob.addProperty("id", 0);
-		//Create parameters to pass in the blob details.  We do this with params
-		//because it would be stripped out if we put it on the blob object
-		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		// Create parameters to pass in the blob details. We do this with params
+		// because it would be stripped out if we put it on the blob object
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("containerName", containerName));
-		parameters.add(new Pair<String, String>("blobName", blobName));		
-		mTableBlobs.insert(blob, parameters, new TableJsonOperationCallback() {			
+		parameters.add(new Pair<String, String>("blobName", blobName));
+		mTableBlobs.insert(blob, parameters, new TableJsonOperationCallback() {
 			@Override
-			public void onCompleted(JsonObject jsonObject, Exception exception,
-					ServiceFilterResponse response) {
+			public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
 				if (exception != null) {
 					Log.e(TAG, exception.getCause().getMessage());
 					return;
 				}
-				//Set the loaded blob
+				// Set the loaded blob
 				mLoadedBlob = jsonObject;
-				//Broadcast that we are ready to upload the blob data
+				// Broadcast that we are ready to upload the blob data
 				Intent broadcast = new Intent();
 				broadcast.setAction("blob.created");
 				mContext.sendBroadcast(broadcast);
 			}
 		});
 	}
-	
+
 	/** Loading individual blob data **/
 	public void getBlobSas(String containerName, String blobName) {
-		//Create the json Object we'll send over and fill it with the required
-		//id property - otherwise we'll get kicked back
-		JsonObject blob = new JsonObject();		
+		// Create the json Object we'll send over and fill it with the required
+		// id property - otherwise we'll get kicked back
+		JsonObject blob = new JsonObject();
 		blob.addProperty("id", 0);
-		//Create parameters to pass in the blob details.  We do this with params
-		//because it would be stripped out if we put it on the blob object
-		List<Pair<String,String>> parameters = new ArrayList<Pair<String, String>>();
+		// Create parameters to pass in the blob details. We do this with params
+		// because it would be stripped out if we put it on the blob object
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("containerName", containerName));
-		parameters.add(new Pair<String, String>("blobName", blobName));		
-		mTableBlobs.insert(blob, parameters, new TableJsonOperationCallback() {			
+		parameters.add(new Pair<String, String>("blobName", blobName));
+		mTableBlobs.insert(blob, parameters, new TableJsonOperationCallback() {
 			@Override
-			public void onCompleted(JsonObject jsonObject, Exception exception,
-					ServiceFilterResponse response) {
+			public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
 				if (exception != null) {
 					Log.e(TAG, exception.getCause().getMessage());
 					return;
 				}
-				//Set the loaded blob
+				// Set the loaded blob
 				mLoadedBlob = jsonObject;
-				//Broadcast that the blob is loaded
+				// Broadcast that the blob is loaded
 				Intent broadcast = new Intent();
 				broadcast.setAction("blob.loaded");
 				mContext.sendBroadcast(broadcast);
 			}
 		});
 	}
+
+	HashMap<Integer, JsonObject> mStoryImages;
 	
+	/** Loading blob data for list of stories **/
+	public void getBlobSases(String containerName, List<Story> stories) {
+		int i = 0;
+		mStoryImages = new HashMap<Integer, JsonObject>();
+		for (Story s : stories) {
+			final int index = i;
+			if ("PICTURE".equals(s.medium) || "VIDEO".equals(s.medium)) {
+				// Create the json Object
+				JsonObject blob = new JsonObject();
+				blob.addProperty("id", 0);
+				// Create parameters
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+				parameters.add(new Pair<String, String>("containerName", containerName));
+				parameters.add(new Pair<String, String>("blobName", s.id));
+				mTableBlobs.insert(blob, parameters, new TableJsonOperationCallback() {
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							Log.e(TAG, exception.getCause().getMessage());
+							return;
+						}
+						// Set the loaded blob
+						mStoryImages.put(index, jsonObject);
+						// Broadcast that the blob is loaded
+						Intent broadcast = new Intent();
+						broadcast.setAction("storyImage.loaded");
+						broadcast.addFlags(index);
+						mContext.sendBroadcast(broadcast);
+					}
+				});
+			}
+			i++;
+		}
+	}
+
+	public JsonObject getLoadedStoryImage(int i) {
+		return mStoryImages.get(i);
+	}
+
 }
