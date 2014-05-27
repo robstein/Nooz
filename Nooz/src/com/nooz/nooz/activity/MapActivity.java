@@ -276,6 +276,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		super.onResume();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("stories.loaded");
+		filter.addAction("storyImage.loaded");
 		registerReceiver(receiver, filter);
 
 		setUpMapIfNeeded();
@@ -390,7 +391,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 				getStoriesCallBack();
 			}
 			if (intentAction.equals("storyImage.loaded")) {
-				getStoryImageCallBack(intent.getFlags());
+				getStoryImageCallBack(intent.getIntExtra("index", -1));
 			}
 		}
 	};
@@ -584,6 +585,11 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		if ("VIDEO".equals(mStories.get(i).medium)) {
 
 		}
+		PagerAdapter adapter = new StoryAdapter(mContext);
+		mPager.setAdapter(adapter);
+		mPager.setOffscreenPageLimit(adapter.getCount());
+		drawCirlesOnMap();
+		mPager.setCurrentItem(mResumeStory);
 	}
 	
 	/**

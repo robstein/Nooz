@@ -345,7 +345,7 @@ public class NoozService {
 						// Broadcast that the blob is loaded
 						Intent broadcast = new Intent();
 						broadcast.setAction("storyImage.loaded");
-						broadcast.addFlags(index);
+						broadcast.putExtra("index", index);
 						mContext.sendBroadcast(broadcast);
 					}
 				});
