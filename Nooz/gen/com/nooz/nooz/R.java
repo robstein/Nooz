@@ -403,7 +403,7 @@ containing a value of this type.
         public static final int button_top_nooz=0x7f060063;
         public static final int camera_preview=0x7f060032;
         public static final int caption=0x7f06000d;
-        public static final int categoryRuler=0x7f060069;
+        public static final int categoryRuler=0x7f06006a;
         public static final int customSpinnerItemTextView=0x7f060064;
         public static final int filters_layout=0x7f06004d;
         public static final int filters_search=0x7f060050;
@@ -431,6 +431,7 @@ containing a value of this type.
         public static final int linearlayout_login_buttons=0x7f06001d;
         public static final int linearlayout_name_signup_first_and_last=0x7f060021;
         public static final int linearlayout_signup=0x7f060020;
+        public static final int loading=0x7f060066;
         public static final int map=0x7f06005c;
         public static final int map_container=0x7f060029;
         public static final int media_control_layer=0x7f060034;
@@ -451,11 +452,11 @@ containing a value of this type.
         public static final int seekbar=0x7f060052;
         public static final int spinner_choose_category=0x7f06003b;
         public static final int story_footer=0x7f06002d;
-        public static final int story_item_article_image=0x7f060066;
-        public static final int story_item_author=0x7f060068;
+        public static final int story_item_article_image=0x7f060067;
+        public static final int story_item_author=0x7f060069;
         public static final int story_item_layout=0x7f060065;
-        public static final int story_item_shader=0x7f060067;
-        public static final int story_item_title=0x7f06006a;
+        public static final int story_item_shader=0x7f060068;
+        public static final int story_item_title=0x7f06006b;
         public static final int strut=0x7f060047;
         public static final int terrain=0x7f060003;
         public static final int text_input_signup_password_confirm=0x7f060026;
@@ -594,11 +595,13 @@ containing a value of this type.
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
 
 
+
     
 
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
             backward-compatibility can go here.
+
 
 
         
@@ -619,6 +622,7 @@ containing a value of this type.
          */
         public static final int AppTheme=0x7f0a0001;
         public static final int ButtonText=0x7f0a0003;
+        public static final int GenericProgressIndicator=0x7f0a0004;
         public static final int noAnimTheme=0x7f0a0002;
     }
     public static final class styleable {

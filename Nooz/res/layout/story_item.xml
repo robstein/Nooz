@@ -5,12 +5,16 @@
     android:layout_height="match_parent"
     android:clickable="true" >
 
+    <ProgressBar
+        android:id="@+id/loading"
+        style="@style/GenericProgressIndicator"
+        android:layout_centerInParent="true" />
+
     <com.nooz.nooz.widget.SquareImageView
         android:id="@+id/story_item_article_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/example_article_picture" />
+        android:scaleType="centerCrop" />
 
     <View
         android:id="@+id/story_item_shader"

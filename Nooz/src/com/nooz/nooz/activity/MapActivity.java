@@ -47,6 +47,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -320,14 +321,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		editor.commit();
 
 		mStories.clear();
-		for (Circle c : mCircles) {
-			c.remove();
-		}
-		mCircles.clear();
-		for (GroundOverlay g : mGroundOverlays) {
-			g.remove();
-		}
-		mGroundOverlays.clear();
+		mMap.clear();
 
 		super.onPause();
 	}
@@ -487,6 +481,15 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mPreviousZoomLevel = position.zoom;
 
 		// Update City
+		updateCity();
+
+	}
+
+	/* ***** LISTENERS END ***** */
+
+	/* ***** MAP SEARCH BEGIN***** */
+	
+	private void updateCity() {
 		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 		Geocoder gcd = new Geocoder(mContext, Locale.getDefault());
 		List<Address> addressesNorthEast;
@@ -509,13 +512,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-
+		}		
 	}
-
-	/* ***** LISTENERS END ***** */
-
-	/* ***** MAP SEARCH BEGIN***** */
 
 	private OnEditorActionListener mRegionEditorDoneListener = new TextView.OnEditorActionListener() {
 		@Override
@@ -588,7 +586,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		PagerAdapter adapter = new StoryAdapter(mContext);
 		mPager.setAdapter(adapter);
 		mPager.setOffscreenPageLimit(adapter.getCount());
-		drawCirlesOnMap();
 		mPager.setCurrentItem(mResumeStory);
 	}
 	
@@ -752,6 +749,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 				image.setImageBitmap(mStories.get(position).bitmap);
 			}
 			
+			ProgressBar loading = (ProgressBar) layout.findViewById(R.id.loading);
+			loading.setVisibility(View.GONE);
 			
 			TextView title = (TextView) layout.findViewById(R.id.story_item_title);
 			TextView author = (TextView) layout.findViewById(R.id.story_item_author);
