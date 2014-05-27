@@ -64,6 +64,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
+import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.BubbleSizer;
 import com.nooz.nooz.util.GetStoriesCallbackInterface;
 import com.nooz.nooz.util.GlobeTrigonometry;
@@ -388,8 +389,12 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		case R.id.button_refresh:
 			break;
 		case R.id.button_new_story:
-			Intent mediaRecorderIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
-			startActivity(mediaRecorderIntent);
+			if(mCurrentLocation == null) {
+				Alert.createAndShowDialog("Please turn on Locations Services", "Location not found", mContext);
+			} else {
+				Intent mediaRecorderIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
+				startActivity(mediaRecorderIntent);
+			}
 			break;
 		case R.id.story_item_layout:
 			Bundle args = new Bundle();

@@ -44,6 +44,7 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.nooz.nooz.R;
+import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.MediaMode;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.CameraPreview;
@@ -101,16 +102,10 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 		if (mCamera == null) {
 			finish();
 		}
-		mCamera.setDisplayOrientation(90);
 		Camera.Parameters camParams = mCamera.getParameters();
 		camParams.setRotation(90);
-		// List<String> focusModes = camParams.getSupportedFocusModes();
-		// if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-		// camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-		// }
-		List<Camera.Size> pictureSizes = camParams.getSupportedPictureSizes();
-		camParams.setPictureSize(pictureSizes.get(0).width, pictureSizes.get(0).height);
 		mCamera.setParameters(camParams);
+		mCamera.setDisplayOrientation(90);
 
 		// Create our Preview view and set it as the content of our activity.
 		mCameraPreview = new CameraPreview(this, mCamera);
@@ -217,52 +212,59 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	}
 
 	/* ***** ACTIVITY SETUP END ***** */
-	
+
 	/* ***** AUDIO RECORDING BEGIN ***** */
-	
-    private MediaRecorder mRecorder = null;
+
+	private MediaRecorder mRecorder = null;
 
 	private void startRecording() {
 		mRecorder = new MediaRecorder();
-        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mRecorder.setOutputFile(getFilesDir().getAbsolutePath() + "/audio.3gp");
-        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        try {
-            mRecorder.prepare();
-        } catch (IOException e) {
-            Log.e(TAG, "prepare() failed");
-        }
-        mRecorder.start();
+		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+		mRecorder.setOutputFile(getFilesDir().getAbsolutePath() + "/audio.3gp");
+		mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+		try {
+			mRecorder.prepare();
+		} catch (IOException e) {
+			Log.e(TAG, "prepare() failed");
+		}
+		mRecorder.start();
 	}
-	
+
 	private void stopRecording() {
-        mRecorder.stop();
-        mRecorder.release();
-        mRecorder = null;
-    }
+		mRecorder.stop();
+		mRecorder.release();
+		mRecorder = null;
+	}
 
 	/* ***** AUDIO RECORDING END ***** */
+
+	/* ***** PICTURE CAPTURING BEGIN ***** */
 
 	private PictureCallback mPictureCallback = new PictureCallback() {
 
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
-
 			// Save to file:
-			Bitmap bmp = scaleDownBitmap(BitmapFactory.decodeByteArray(data, 0, data.length), mScreenWidthInPixels / 3,
-					mContext);
+			Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
-			// compress because when we don't we get a failed binder transaction
-			bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+			bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
 			byte[] bytes = stream.toByteArray();
+			// convert array of bytes into file
+			try {
+				FileOutputStream fileOuputStream = new FileOutputStream(getFilesDir().getAbsolutePath()
+						+ "/picture.jpg");
+				fileOuputStream.write(bytes);
+				fileOuputStream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
-			// Pass byte array to NewArticleActivity
+			// Go to NewArticleActivity
 			Bundle args = new Bundle();
-			args.putByteArray("image", bytes);
 			args.putParcelable("location", mCurrentLocation);
 			args.putCharSequence("medium", mMode.toString());
-
 			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
 			newStoryIntent.putExtra("bundle", args);
 			startActivity(newStoryIntent);
@@ -307,6 +309,8 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 		}
 		return mediaFile;
 	}
+
+	/* ***** PICTURE CAPTURING END ***** */
 
 	/* ***** CONTROL BUTTON ONTOUCHLISTENERS BEGIN ***** */
 
@@ -357,37 +361,46 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 
 					} else {
 						// If we are in audio record mode
-						if (!mIsRecordingAudio) {
-							// If we literally just clicked to record
-							Drawable button = getResources().getDrawable(R.drawable.mic_active);
-							button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
-							((ImageView) v).setImageDrawable(button);
 
-							// start doing recording stuff
-							startRecording();
-							
-							// Set recording flag
-							mIsRecordingAudio = true;
+						// Check to make sure location is not null
+						if (mCurrentLocation == null) {
+							Alert.createAndShowDialog("Please turn on Locations Services", "Location not found",
+									mContext);
+							return false;
 						} else {
-							// If we literally just clicked to stop
-							Drawable button = getResources().getDrawable(R.drawable.mic_active);
-							button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
-							((ImageView) v).setImageDrawable(button);
 
-							// start saving it and moving on
-							stopRecording();
-							
-							// Clear recording flag
-							mIsRecordingAudio = false;
-							
-							// Go to NewArticleActivity
-							Bundle args = new Bundle();
-							args.putParcelable("location", mCurrentLocation);
-							args.putCharSequence("medium", mMode.toString());
-							Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
-							newStoryIntent.putExtra("bundle", args);
-							startActivity(newStoryIntent);
-							finish();
+							if (!mIsRecordingAudio) {
+								// If we literally just clicked to record
+								Drawable button = getResources().getDrawable(R.drawable.mic_active);
+								button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
+								((ImageView) v).setImageDrawable(button);
+
+								// start doing recording stuff
+								startRecording();
+
+								// Set recording flag
+								mIsRecordingAudio = true;
+							} else {
+								// If we literally just clicked to stop
+								Drawable button = getResources().getDrawable(R.drawable.mic_active);
+								button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+								((ImageView) v).setImageDrawable(button);
+
+								// start saving it and moving on
+								stopRecording();
+
+								// Clear recording flag
+								mIsRecordingAudio = false;
+
+								// Go to NewArticleActivity
+								Bundle args = new Bundle();
+								args.putParcelable("location", mCurrentLocation);
+								args.putCharSequence("medium", mMode.toString());
+								Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
+								newStoryIntent.putExtra("bundle", args);
+								startActivity(newStoryIntent);
+								finish();
+							}
 						}
 					}
 					return true;
@@ -409,18 +422,26 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 						// Do nothing until release
 					} else {
 						// If we are in camera mode
-						// We just clicked so make it show that
-						Drawable button = getResources().getDrawable(R.drawable.camera_active);
-						button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
-						((ImageView) v).setImageDrawable(button);
-						// Set capturing picture flag
-						mIsCapturingPicture = true;
 
-						// take the picture
-						// mCamera.takePicture(null, null, mPictureCallback);
+						// Check to make sure location is not null
+						if (mCurrentLocation == null) {
+							Alert.createAndShowDialog("Please turn on Locations Services", "Location not found",
+									mContext);
+							return false;
+						} else {
 
-						// start saving it and moving on
+							// We just clicked so make it show that
+							Drawable button = getResources().getDrawable(R.drawable.camera_active);
+							button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
+							((ImageView) v).setImageDrawable(button);
+							// Set capturing picture flag
+							mIsCapturingPicture = true;
 
+							// take the picture
+							// picturecallback will save the picture
+							// picturecallback also launches new intent
+							mCamera.takePicture(null, null, mPictureCallback);
+						}
 					}
 					return true;
 				}
@@ -450,12 +471,19 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 
 					} else {
 						// If we are in picture mode:
-						// Draw the button back
-						Drawable button = getResources().getDrawable(R.drawable.camera_active);
-						button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
-						((ImageView) v).setImageDrawable(button);
-						// Clear capturing picture flag
-						mIsCapturingPicture = false;
+
+						// Check to make sure location is not null
+						if (mCurrentLocation == null) {
+							return false;
+						} else {
+
+							// Draw the button back
+							Drawable button = getResources().getDrawable(R.drawable.camera_active);
+							button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+							((ImageView) v).setImageDrawable(button);
+							// Clear capturing picture flag
+							mIsCapturingPicture = false;
+						}
 					}
 					return true;
 
@@ -511,23 +539,30 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 						mMode = MediaMode.VIDEO;
 
 					} else {
-						// If we are in video record mode
-						if (!mIsRecordingVideo) {
-							// If we literally just clicked to record
-							Drawable button = getResources().getDrawable(R.drawable.recorder_active);
-							button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
-							((ImageView) v).setImageDrawable(button);
-							mIsRecordingVideo = true;
-
-							// start doing recording stuff
+						// Check to make sure location is not null
+						if (mCurrentLocation == null) {
+							Alert.createAndShowDialog("Please turn on Locations Services", "Location not found",
+									mContext);
+							return false;
 						} else {
-							// If we literally just clicked to stop
-							Drawable button = getResources().getDrawable(R.drawable.recorder_active);
-							button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
-							((ImageView) v).setImageDrawable(button);
-							mIsRecordingVideo = false;
+							// If we are in video record mode
+							if (!mIsRecordingVideo) {
+								// If we literally just clicked to record
+								Drawable button = getResources().getDrawable(R.drawable.recorder_active);
+								button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
+								((ImageView) v).setImageDrawable(button);
+								mIsRecordingVideo = true;
 
-							// start saving it and moving on
+								// start doing recording stuff
+							} else {
+								// If we literally just clicked to stop
+								Drawable button = getResources().getDrawable(R.drawable.recorder_active);
+								button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+								((ImageView) v).setImageDrawable(button);
+								mIsRecordingVideo = false;
+
+								// start saving it and moving on
+							}
 						}
 					}
 					return true;

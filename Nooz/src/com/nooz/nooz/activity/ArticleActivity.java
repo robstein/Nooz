@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -17,6 +18,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,6 +34,7 @@ import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
+import com.nooz.nooz.util.Tools;
 
 public class ArticleActivity extends BaseActivity implements OnClickListener {
 	private static final String TAG = "ArticleActivity";
@@ -71,6 +74,8 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 	private Integer mScoreRel = 0;
 	private Integer mScoreIrr = 0;
 
+	private int mScreenWidthInPixels;
+
 	/* ***** ACTIVITY SETUP BEGIN ***** */
 
 	@SuppressLint("NewApi")
@@ -105,6 +110,19 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		mIrrelevanceScore = (TextView) findViewById(R.id.irrelevance_score);
 		mIrrelevanceLabel = (TextView) findViewById(R.id.irrelevance_label);
 		mButtonComments = (ImageView) findViewById(R.id.btn_comments);
+		
+		// Make picture the right size
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		mScreenWidthInPixels = size.x;
+		RelativeLayout.LayoutParams imageLayoutParams = (RelativeLayout.LayoutParams) mArticleImage
+				.getLayoutParams();
+		imageLayoutParams.height = mScreenWidthInPixels;
+		imageLayoutParams.width = mScreenWidthInPixels;
+		mArticleImage.setLayoutParams(imageLayoutParams);
+		
+		
 
 		mArticleImage.setOnClickListener(this);
 		mArticleInfo.setOnClickListener(this);
@@ -169,16 +187,14 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 	@Override
 	protected void onPause() {
 		unregisterReceiver(receiver);
-		if(mCurrentlyPlayingAudio) {
+		if (mCurrentlyPlayingAudio) {
 			stopPlaying();
 		}
 		super.onPause();
 	}
-	
-	
 
 	/***
-	 * Broadcast receiver handles blobs being loaded or a new blob being created
+	 * Broadcast receiver handles a blob being loaded
 	 */
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context context, android.content.Intent intent) {
@@ -195,6 +211,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 				}
 				if ("PICTURE".equals(mStory.medium)) {
 					(new ImageFetcherTask(sasUrl)).execute();
+					mLoaded = true;
 				}
 				if ("VIDEO".equals(mStory.medium)) {
 
@@ -211,8 +228,10 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.article_image:
-			if (mLoaded) {
-				onPlay(!mCurrentlyPlayingAudio);
+			if ("AUDIO".equals(mStory.medium)) {
+				if (mLoaded) {
+					onPlay(!mCurrentlyPlayingAudio);
+				}
 			}
 			break;
 		case R.id.button_relevant:
@@ -453,7 +472,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 	}
 
 	/* ***** RELEVANCE BEGIN ***** */
-	
+
 	/* ***** GET THEME RESOURCES BY CATEGORY BEGIN ***** */
 
 	private int getCommentsByCategory(String category) {
@@ -553,7 +572,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 			return R.drawable.arts_and_life_solid_fullsize;
 		}
 	}
-	
+
 	/* ***** GET THEME RESOURCES BY CATEGORY END ***** */
 
 }

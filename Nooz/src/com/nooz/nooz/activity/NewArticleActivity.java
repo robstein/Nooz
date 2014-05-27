@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -106,14 +107,21 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		mLayoutStoryDetails.setLayoutParams(controlLayoutParams);
 
 		// display the image
-		/*
-		 * mImageData = bundle.getByteArray("image"); BitmapFactory.Options
-		 * options = new BitmapFactory.Options(); options.inMutable = true;
-		 * mBitmap = BitmapFactory.decodeByteArray(mImageData, 0,
-		 * mImageData.length, options); mNewArticleImage = (ImageView)
-		 * findViewById(R.id.new_article_image);
-		 * mNewArticleImage.setImageBitmap(mBitmap);
-		 */
+		mNewArticleImage = (ImageView) findViewById(R.id.new_article_image);
+		if ("AUDIO".equals(mMedium)) {
+			mNewArticleImage.setImageDrawable(getResources().getDrawable(R.drawable.micbig));
+		}
+		if ("PICTURE".equals(mMedium)) {
+			mNewArticleImage.setImageDrawable(Drawable.createFromPath(getFilesDir().getAbsolutePath() + "/picture.jpg"));
+		}
+		if ("VIDEO".equals(mMedium)) {
+
+		}
+		RelativeLayout.LayoutParams imageLayoutParams = (RelativeLayout.LayoutParams) mNewArticleImage
+				.getLayoutParams();
+		imageLayoutParams.height = mScreenWidthInPixels;
+		imageLayoutParams.width = mScreenWidthInPixels;
+		mNewArticleImage.setLayoutParams(imageLayoutParams);
 
 		//
 		mTextButtonBreak = (TextView) findViewById(R.id.btn_break_post);
@@ -371,7 +379,7 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 				urlConnection.setDoOutput(true);
 				urlConnection.setRequestMethod("PUT");
-				urlConnection.addRequestProperty("Content-Type", "image/jpeg");
+				urlConnection.addRequestProperty("Content-Type", "audio/3gpp");
 				urlConnection.setRequestProperty("Content-Length", "" + bytes.length);
 				// Write image data to server
 				DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
@@ -412,16 +420,27 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			try {
+				String path = mContext.getFilesDir().getAbsolutePath().toString();
+				String filename = "picture.jpg";
+				File file = new File(path, filename);
+				FileInputStream fis = new FileInputStream(file);
+				int bytesRead = 0;
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				byte[] b = new byte[1024];
+				while ((bytesRead = fis.read(b)) != -1) {
+					bos.write(b, 0, bytesRead);
+				}
+				byte[] bytes = bos.toByteArray();
 				// Post our image data (byte array) to the server
 				URL url = new URL(mUrl.replace("\"", ""));
 				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 				urlConnection.setDoOutput(true);
 				urlConnection.setRequestMethod("PUT");
 				urlConnection.addRequestProperty("Content-Type", "image/jpeg");
-				urlConnection.setRequestProperty("Content-Length", "" + mImageData.length);
+				urlConnection.setRequestProperty("Content-Length", "" + bytes.length);
 				// Write image data to server
 				DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-				wr.write(mImageData);
+				wr.write(bytes);
 				wr.flush();
 				wr.close();
 				int response = urlConnection.getResponseCode();
