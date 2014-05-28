@@ -33,6 +33,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.activity.LoginActivity;
+import com.nooz.nooz.model.FilterSettings;
 import com.nooz.nooz.model.Story;
 
 public class NoozService {
@@ -219,7 +220,7 @@ public class NoozService {
 		return mLoadedStories;
 	}
 
-	public void getAllStories(LatLngBounds bounds) {
+	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings) {
 
 		JsonObject body = new JsonObject();
 		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
@@ -227,6 +228,17 @@ public class NoozService {
 		body.addProperty("northeastLng", bounds.northeast.longitude);
 		body.addProperty("southwestLat", bounds.southwest.latitude);
 		body.addProperty("southwestLng", bounds.southwest.longitude);
+		body.addProperty("defaultMedium", filterSettings.DefaultMedium);
+		body.addProperty("audio", filterSettings.Audio);
+		body.addProperty("picture", filterSettings.Picture);
+		body.addProperty("video", filterSettings.Video);
+		body.addProperty("defaultCategory", filterSettings.DefaultCategory);
+		body.addProperty("people", filterSettings.People);
+		body.addProperty("community", filterSettings.Community);
+		body.addProperty("sports", filterSettings.Sports);
+		body.addProperty("food", filterSettings.Food);
+		body.addProperty("publicSaftey", filterSettings.PublicSafety);
+		body.addProperty("artsAndLife", filterSettings.ArtsAndLife);
 		mClient.invokeApi("getnooz", body, new ApiJsonOperationCallback() {
 
 			@Override

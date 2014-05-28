@@ -20,6 +20,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -73,6 +74,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.gson.JsonObject;
 import com.nooz.nooz.R;
+import com.nooz.nooz.model.FilterSettings;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.BubbleSizer;
@@ -125,9 +127,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private static final int COLOR_ARTS_AND_LIFE_STROKE = 0xFFAE7DCE;
 
 	// Main map views
-	private RelativeLayout mapContainer;
+	private RelativeLayout mMapContainer;
 	private GoogleMap mMap;
 	private TextView mRegion;
+	private LinearLayout mMiddlebar;
 	private TextView mButtonRelevant;
 	private ImageView mButtonSettingsAndFilters;
 	private TextView mButtonBreaking;
@@ -147,6 +150,15 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	// Filter menu views
 	private LinearLayout mLayoutFilters;
 	private ImageView mButtonMapFiltersBack;
+	private ImageView mTogglerFilterAudio;
+	private ImageView mTogglerFilterPicture;
+	private ImageView mTogglerFilterVideo;
+	private ImageView mTogglerFilterPeople;
+	private ImageView mTogglerFilterCommunity;
+	private ImageView mTogglerFilterSports;
+	private ImageView mTogglerFilterFood;
+	private ImageView mTogglerFilterPublicSafety;
+	private ImageView mTogglerFilterArtsAndLife;
 
 	// Story Lists
 	private List<Story> mStories;
@@ -166,6 +178,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private int mScreenWidthInPixels;
 	private double mMapWidthInMeters;
 	private int mResumeStory = 0;
+	private FilterSettings mFilterSettings;
 
 	/* ***** APP SETUP BEGIN ***** */
 
@@ -183,11 +196,13 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mLocationClient = new LocationClient(this, this, this);
 
 		// Main map views
-		mapContainer = (RelativeLayout) findViewById(R.id.map_container);
+		mMapContainer = (RelativeLayout) findViewById(R.id.map_container);
 		//
 		mRegion = (TextView) findViewById(R.id.region);
 		mRegion.setOnEditorActionListener(mRegionEditorDoneListener);
 		mRegion.setOnFocusChangeListener(mRegionFocusDoneListener);
+		//
+		mMiddlebar = (LinearLayout) findViewById(R.id.middlebar);
 		//
 		mButtonRelevant = (TextView) findViewById(R.id.button_relevant);
 		mButtonRelevant.setOnClickListener(this);
@@ -244,6 +259,27 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		//
 		mButtonMapFiltersBack = (ImageView) findViewById(R.id.button_back_from_filter);
 		mButtonMapFiltersBack.setOnClickListener(this);
+		//
+		mTogglerFilterAudio = (ImageView) findViewById(R.id.button_filter_mic);
+		mTogglerFilterAudio.setOnClickListener(filterSettingsToggler);
+		mTogglerFilterPicture = (ImageView) findViewById(R.id.button_filter_camera);
+		mTogglerFilterPicture.setOnClickListener(filterSettingsToggler);
+		mTogglerFilterVideo = (ImageView) findViewById(R.id.button_filter_video);
+		mTogglerFilterVideo.setOnClickListener(filterSettingsToggler);
+		mTogglerFilterPeople = (ImageView) findViewById(R.id.button_filter_people);
+		mTogglerFilterPeople.setOnClickListener(filterSettingsToggler);
+		mTogglerFilterCommunity = (ImageView) findViewById(R.id.button_filter_community);
+		mTogglerFilterCommunity.setOnClickListener(filterSettingsToggler);
+		mTogglerFilterSports = (ImageView) findViewById(R.id.button_filter_sports);
+		mTogglerFilterSports.setOnClickListener(filterSettingsToggler);
+		mTogglerFilterFood = (ImageView) findViewById(R.id.button_filter_food);
+		mTogglerFilterFood.setOnClickListener(filterSettingsToggler);
+		mTogglerFilterPublicSafety = (ImageView) findViewById(R.id.button_filter_public_safety);
+		mTogglerFilterPublicSafety.setOnClickListener(filterSettingsToggler);
+		mTogglerFilterArtsAndLife = (ImageView) findViewById(R.id.button_filter_arts_and_life);
+		mTogglerFilterArtsAndLife.setOnClickListener(filterSettingsToggler);
+		// Create filter settings
+		mFilterSettings = new FilterSettings();
 
 		// Colors
 		COLOR_PEOPLE = getResources().getColor(R.color.category_people);
@@ -520,7 +556,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -557,7 +592,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -570,7 +604,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mStories.clear();
 		mMap.clear();
 		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-		mNoozService.getAllStories(bounds);
+		mNoozService.getAllStories(bounds, mFilterSettings);
 	}
 
 	private void getStoriesCallBack() {
@@ -845,18 +879,136 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 	/* ***** FOOTER ADAPTER AND ONPAGECHANGELISTENER END ***** */
 
+	/* ***** SETTINGS BEGIN ***** */
+
+	OnClickListener filterSettingsToggler = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			switch (v.getId()) {
+			case R.id.button_filter_mic:
+				toggle(R.id.button_filter_mic, mFilterSettings.Audio);
+				break;
+			case R.id.button_filter_camera:
+				toggle(R.id.button_filter_camera, mFilterSettings.Picture);
+				break;
+			case R.id.button_filter_video:
+				toggle(R.id.button_filter_video, mFilterSettings.Video);
+				break;
+			case R.id.button_filter_people:
+				toggle(R.id.button_filter_people, mFilterSettings.People);
+				break;
+			case R.id.button_filter_community:
+				toggle(R.id.button_filter_community, mFilterSettings.Community);
+				break;
+			case R.id.button_filter_sports:
+				toggle(R.id.button_filter_sports, mFilterSettings.Sports);
+				break;
+			case R.id.button_filter_food:
+				toggle(R.id.button_filter_food, mFilterSettings.Food);
+				break;
+			case R.id.button_filter_public_safety:
+				toggle(R.id.button_filter_public_safety, mFilterSettings.PublicSafety);
+				break;
+			case R.id.button_filter_arts_and_life:
+				toggle(R.id.button_filter_arts_and_life, mFilterSettings.ArtsAndLife);
+				break;
+			}
+		}
+
+		private void toggle(int imageViewId, Boolean currentlyOn) {
+			if (currentlyOn) {
+				ImageView v = (ImageView) findViewById(imageViewId);
+				v.setImageResource(getFilterOffImageByViewId(imageViewId));
+				mFilterSettings.toggle(imageViewId);
+			} else {
+				ImageView v = (ImageView) findViewById(imageViewId);
+				v.setImageResource(getFilterOnImageByViewId(imageViewId));
+				mFilterSettings.toggle(imageViewId);
+			}
+		}
+
+		private int getFilterOffImageByViewId(int imageViewId) {
+			switch (imageViewId) {
+			case R.id.button_filter_mic:
+				return R.drawable.filter_mic;
+			case R.id.button_filter_camera:
+				return R.drawable.filter_camera;
+			case R.id.button_filter_video:
+				return R.drawable.filter_video;
+			case R.id.button_filter_people:
+				return R.drawable.filter_people;
+			case R.id.button_filter_community:
+				return R.drawable.filter_community;
+			case R.id.button_filter_sports:
+				return R.drawable.filter_sports;
+			case R.id.button_filter_food:
+				return R.drawable.filter_food;
+			case R.id.button_filter_public_safety:
+				return R.drawable.filter_public_safety;
+			case R.id.button_filter_arts_and_life:
+				return R.drawable.filter_arts_and_life;
+			}
+			return -1;
+		}
+
+		private int getFilterOnImageByViewId(int imageViewId) {
+			switch (imageViewId) {
+			case R.id.button_filter_mic:
+				return R.drawable.filter_mic_active;
+			case R.id.button_filter_camera:
+				return R.drawable.filter_camera_active;
+			case R.id.button_filter_video:
+				return R.drawable.filter_video_active;
+			case R.id.button_filter_people:
+				return R.drawable.filter_people_active;
+			case R.id.button_filter_community:
+				return R.drawable.filter_community_active;
+			case R.id.button_filter_sports:
+				return R.drawable.filter_sports_active;
+			case R.id.button_filter_food:
+				return R.drawable.filter_food_active;
+			case R.id.button_filter_public_safety:
+				return R.drawable.filter_public_safety_active;
+			case R.id.button_filter_arts_and_life:
+				return R.drawable.filter_arts_and_life_active;
+			}
+			return -1;
+		}
+	};
+
+	/* ***** SETTINGS END ***** */
+
 	/* ***** EXTRA MENUS HIDE/SHOW BEGIN ***** */
 
 	private void hideFiltersLayout() {
 		filtersMenuIsOpen = false;
 		mLayoutFilters.setVisibility(View.GONE);
 		mLayoutFilters.startAnimation(mSlideOutLeft);
+
+		// Fade in the views underneath
+		mMapContainer.setVisibility(View.VISIBLE);
+		mMapContainer.startAnimation(mFadeIn);
+		mMiddlebar.setVisibility(View.VISIBLE);
+		mMiddlebar.startAnimation(mFadeIn);
+		mMenuSettings.setVisibility(View.VISIBLE);
+		mMenuSettings.startAnimation(mFadeIn);
+
 	}
 
 	private void showFiltersLayout() {
 		filtersMenuIsOpen = true;
 		mLayoutFilters.setVisibility(View.VISIBLE);
 		mLayoutFilters.startAnimation(mSlideInLeft);
+
+		// Fade out the views underneath
+		// Prevent interaction with views underneath
+		mMapContainer.setVisibility(View.INVISIBLE);
+		mMapContainer.startAnimation(mFadeOut);
+		mMiddlebar.setVisibility(View.INVISIBLE);
+		mMiddlebar.startAnimation(mFadeOut);
+		mMenuSettings.setVisibility(View.INVISIBLE);
+		mMenuSettings.startAnimation(mFadeOut);
+
 	}
 
 	private void hideOrShowSettingsMenu() {
