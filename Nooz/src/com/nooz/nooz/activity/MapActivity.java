@@ -56,6 +56,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.internal.ex;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -382,10 +383,18 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		public void onReceive(Context context, android.content.Intent intent) {
 			String intentAction = intent.getAction();
 			if (intentAction.equals("stories.loaded")) {
-				getStoriesCallBack();
+				try {
+					getStoriesCallBack();
+				} catch (Exception e) {
+					Log.e(TAG, e.getMessage());
+				}
 			}
 			if (intentAction.equals("storyImage.loaded")) {
-				getStoryImageCallBack(intent.getIntExtra("index", -1));
+				try {
+					getStoryImageCallBack(intent.getIntExtra("index", -1));
+				} catch (Exception e) {
+					Log.e(TAG, e.getMessage());
+				}
 			}
 		}
 	};
@@ -410,6 +419,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			hideOrShowSettingsMenu();
 			break;
 		case R.id.button_refresh:
+			populateInitialStories();
 			break;
 		case R.id.button_new_story:
 			if (mCurrentLocation == null) {
@@ -488,7 +498,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	/* ***** LISTENERS END ***** */
 
 	/* ***** MAP SEARCH BEGIN***** */
-	
+
 	private void updateCity() {
 		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 		Geocoder gcd = new Geocoder(mContext, Locale.getDefault());
@@ -512,7 +522,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}		
+		}
 	}
 
 	private OnEditorActionListener mRegionEditorDoneListener = new TextView.OnEditorActionListener() {
@@ -557,6 +567,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	/* ***** STORIES BEGIN ***** */
 
 	private void populateInitialStories() {
+		mStories.clear();
+		mMap.clear();
 		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 		mNoozService.getAllStories(bounds);
 	}
@@ -571,7 +583,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		drawCirlesOnMap();
 		mPager.setCurrentItem(mResumeStory);
 	}
-	
+
 	private void getStoryImageCallBack(int i) {
 		// Load the image using the SAS URL
 		JsonObject blob = mNoozService.getLoadedStoryImage(i);
@@ -588,7 +600,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mPager.setOffscreenPageLimit(adapter.getCount());
 		mPager.setCurrentItem(mResumeStory);
 	}
-	
+
 	/**
 	 * This class specifically handles fetching an image from a URL and setting
 	 * the image view source on the screen
@@ -745,13 +757,13 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			layout.setOnClickListener((OnClickListener) mContext);
 
 			ImageView image = (ImageView) layout.findViewById(R.id.story_item_article_image);
-			if("PICTURE".equals(mStories.get(position).medium)) {
+			if ("PICTURE".equals(mStories.get(position).medium)) {
 				image.setImageBitmap(mStories.get(position).bitmap);
 			}
-			
+
 			ProgressBar loading = (ProgressBar) layout.findViewById(R.id.loading);
 			loading.setVisibility(View.GONE);
-			
+
 			TextView title = (TextView) layout.findViewById(R.id.story_item_title);
 			TextView author = (TextView) layout.findViewById(R.id.story_item_author);
 			View categoryRuler = (View) layout.findViewById(R.id.categoryRuler);

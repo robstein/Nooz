@@ -82,7 +82,8 @@
                 android:clickable="true"
                 android:contentDescription="Record Video"
                 android:padding="6dp"
-                android:src="@drawable/recorder_grey" />
+                android:src="@drawable/recorder_grey"
+                android:visibility="invisible" />
         </LinearLayout>
 
     </LinearLayout>

@@ -223,6 +223,10 @@ public class NoozService {
 
 		JsonObject body = new JsonObject();
 		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
+		body.addProperty("northeastLat", bounds.northeast.latitude);
+		body.addProperty("northeastLng", bounds.northeast.longitude);
+		body.addProperty("southwestLat", bounds.southwest.latitude);
+		body.addProperty("southwestLng", bounds.southwest.longitude);
 		mClient.invokeApi("getnooz", body, new ApiJsonOperationCallback() {
 
 			@Override
