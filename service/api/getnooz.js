@@ -1,7 +1,4 @@
 exports.post = function(request, response) {
-    // Use "request.service" to access features of your mobile service, e.g.:
-    //   var tables = request.service.tables;
-    //   var push = request.service.push;
     var mssql = request.service.mssql;                       
     var sql = "SELECT A.firstName as firstName, " +
               "A.lastName as lastName, " +
@@ -90,11 +87,19 @@ exports.post = function(request, response) {
         console.log(request.body);
         console.log(sql);
         mssql.query(sql, [request.body.user_id, request.body.southwestLat, request.body.northeastLat, request.body.southwestLng, request.body.northeastLng], {
-            success: function(results) {         
-                response.send(200, results);
+            success: function(results) {                       
+                response.send(200, results.sort(rankingFunction).slice(0, Math.min(results.length, 10)));
             }
         })
 };
+
+function rankingFunction(a,b) {
+  if (a.relevantScore - a.irrelevantScore < b.relevantScore - b.irrelevantScore)
+     return -1;
+  if (a.relevantScore - a.irrelevantScore > b.relevantScore - b.irrelevantScore)
+    return 1;
+  return 0;
+}
 
 exports.get = function(request, response) {
     response.send(statusCodes.OK, { message : 'Hello World!' });

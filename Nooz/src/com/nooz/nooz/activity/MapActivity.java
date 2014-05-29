@@ -878,7 +878,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			mCircles.get(mCurrentStory).setFillColor(getColorByCategory(mStories.get(mCurrentStory).category, SHADE));
 			mCircles.get(mCurrentStory).setStrokeColor(
 					getStrokeColorByCategory(mStories.get(mCurrentStory).category, SHADE));
-			// TODO fix bug
 			mGroundOverlays
 					.get(mCurrentStory)
 					.setImage(
