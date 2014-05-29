@@ -20,7 +20,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -57,7 +56,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.internal.ex;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -136,6 +134,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private TextView mButtonBreaking;
 	private RelativeLayout mStoryFooter;
 	private PagerContainer mContainer;
+	private PagerAdapter mFooterAdapter;
 	private ViewPager mPager;
 	private ImageView mButtonRefresh;
 	private ImageView mButtonNewStory;
@@ -165,19 +164,18 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private List<Circle> mCircles;
 	private List<GroundOverlay> mGroundOverlays;
 	private Integer mCurrentStory = 0;
+	private int mResumeStory = 0;
 
 	//
 	private LocationClient mLocationClient;
 	private Location mCurrentLocation;
 	private float mPreviousZoomLevel = -1.0f; // Init to a non-valid zoom value
 	private boolean mIsZooming = false;
-	protected boolean circlesAreOnMap;
 	private SearchType mCurrentSearchType = SearchType.RELEVANT;
 	private Boolean settingsMenuIsOpen = false;
 	private Boolean filtersMenuIsOpen = false;
 	private int mScreenWidthInPixels;
 	private double mMapWidthInMeters;
-	private int mResumeStory = 0;
 	private FilterSettings mFilterSettings;
 
 	/* ***** APP SETUP BEGIN ***** */
@@ -217,12 +215,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		// Set up footer logic
 		mContainer = (PagerContainer) findViewById(R.id.pager_container);
 		mPager = mContainer.getViewPager();
-		PagerAdapter adapter = new StoryAdapter(this);
-		mPager.setAdapter(adapter);
-		mPager.setOffscreenPageLimit(adapter.getCount());
-		mPager.setPageMargin((int) Tools.dipToPixels(this, 4));
-		mPager.setClipChildren(false);
-		mPager.setOnPageChangeListener(onStorySwipe);
 		// Set up footer page margins for multi device prettiness
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
@@ -295,6 +287,13 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mSlideOutLeft = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
 		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 		mFadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+		
+		mFooterAdapter = new StoryAdapter(this);
+		mPager.setAdapter(mFooterAdapter);
+		mPager.setOffscreenPageLimit(mFooterAdapter.getCount());
+		mPager.setPageMargin((int) Tools.dipToPixels(this, 4));
+		mPager.setClipChildren(false);
+		mPager.setOnPageChangeListener(onStorySwipe);
 	}
 
 	/*
@@ -358,9 +357,21 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		editor.commit();
 
 		mStories.clear();
-		mMap.clear();
+		clearMap();
+		mFooterAdapter.notifyDataSetChanged();
 
 		super.onPause();
+	}
+
+	private void clearMap() {
+		for (Circle c : mCircles) {
+			c.remove();
+		}
+		for (GroundOverlay g : mGroundOverlays) {
+			g.remove();
+		}
+		mCircles.clear();
+		mGroundOverlays.clear();
 	}
 
 	/*
@@ -422,14 +433,14 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 				try {
 					getStoriesCallBack();
 				} catch (Exception e) {
-					Log.e(TAG, e.getMessage());
+					Log.e(TAG, "There was a problem in getStoriesCallBack: " + e.getMessage());
 				}
 			}
 			if (intentAction.equals("storyImage.loaded")) {
 				try {
 					getStoryImageCallBack(intent.getIntExtra("index", -1));
 				} catch (Exception e) {
-					Log.e(TAG, e.getMessage());
+					Log.e(TAG, "There was a problem in getStoryImageCallBack: " + e.getMessage());
 				}
 			}
 		}
@@ -602,20 +613,20 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 	private void populateInitialStories() {
 		mStories.clear();
-		mMap.clear();
+		clearMap();
+		mFooterAdapter.notifyDataSetChanged();
 		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 		mNoozService.getAllStories(bounds, mFilterSettings);
 	}
 
 	private void getStoriesCallBack() {
 		mStories = mNoozService.getLoadedStories();
-		mNoozService.getBlobSases(CONTAINER_NAME, mStories);
 		// Reset footer
-		PagerAdapter adapter = new StoryAdapter(mContext);
-		mPager.setAdapter(adapter);
-		mPager.setOffscreenPageLimit(adapter.getCount());
+		mFooterAdapter.notifyDataSetChanged();
 		drawCirlesOnMap();
 		mPager.setCurrentItem(mResumeStory);
+		// Get pictures
+		mNoozService.getBlobSases(CONTAINER_NAME, mStories);
 	}
 
 	private void getStoryImageCallBack(int i) {
@@ -629,10 +640,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		if ("VIDEO".equals(mStories.get(i).medium)) {
 
 		}
-		PagerAdapter adapter = new StoryAdapter(mContext);
-		mPager.setAdapter(adapter);
-		mPager.setOffscreenPageLimit(adapter.getCount());
-		mPager.setCurrentItem(mResumeStory);
+		mFooterAdapter.notifyDataSetChanged();
 	}
 
 	/**
@@ -654,7 +662,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			try {
 				mBitmap = BitmapFactory.decodeStream((InputStream) new URL(mUrl).getContent());
 			} catch (Exception e) {
-				Log.e(TAG, e.getMessage());
+				Log.e(TAG, "There was a problem decoding the stream to a bitmap: " + e.getMessage());
 				return false;
 			}
 			return true;
@@ -666,7 +674,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		@Override
 		protected void onPostExecute(Boolean loaded) {
 			if (loaded) {
-				mStories.get(mIndex).setBitmap(mBitmap);
+				// if (mIndex < mPager.getAdapter().getCount()) {
+				if (mIndex < mStories.size()) {
+					mStories.get(mIndex).setBitmap(mBitmap);
+				}
 			}
 		}
 	}
@@ -680,7 +691,6 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			drawBubble(s.lat, s.lng, s.radius, s.category);
 			i++;
 		}
-		// circlesAreOnMap = true;
 	}
 
 	private void drawBubble(double lat, double lng, double radius, String category) {
@@ -790,13 +800,18 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			View layout = inflater.inflate(R.layout.story_item, null);
 			layout.setOnClickListener((OnClickListener) mContext);
 
-			ImageView image = (ImageView) layout.findViewById(R.id.story_item_article_image);
-			if ("PICTURE".equals(mStories.get(position).medium)) {
-				image.setImageBitmap(mStories.get(position).bitmap);
-			}
+			if (mStories.get(position).bitmap != null) {
 
-			ProgressBar loading = (ProgressBar) layout.findViewById(R.id.loading);
-			loading.setVisibility(View.GONE);
+				ImageView image = (ImageView) layout.findViewById(R.id.story_item_article_image);
+				if ("PICTURE".equals(mStories.get(position).medium)) {
+					image.setImageBitmap(mStories.get(position).bitmap);
+
+				}
+
+				ProgressBar loading = (ProgressBar) layout.findViewById(R.id.loading);
+				loading.setVisibility(View.GONE);
+				image.setVisibility(View.VISIBLE);
+			}
 
 			TextView title = (TextView) layout.findViewById(R.id.story_item_title);
 			TextView author = (TextView) layout.findViewById(R.id.story_item_author);
@@ -817,9 +832,19 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			return layout;
 		}
 
+		/**
+		 * This way, when you call notifyDataSetChanged(), the view pager will
+		 * remove all views and reload them all. As so the reload effect is
+		 * obtained.
+		 **/
 		@Override
 		public void destroyItem(ViewGroup container, int position, Object object) {
 			container.removeView((View) object);
+		}
+
+		@Override
+		public int getItemPosition(Object object) {
+			return POSITION_NONE;
 		}
 
 		@Override
@@ -845,6 +870,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 		@Override
 		public void onPageSelected(int position) {
+
 			// Shade old view
 			View layout = mPager.findViewWithTag(mCurrentStory);
 			View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
@@ -852,6 +878,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			mCircles.get(mCurrentStory).setFillColor(getColorByCategory(mStories.get(mCurrentStory).category, SHADE));
 			mCircles.get(mCurrentStory).setStrokeColor(
 					getStrokeColorByCategory(mStories.get(mCurrentStory).category, SHADE));
+			// TODO fix bug
 			mGroundOverlays
 					.get(mCurrentStory)
 					.setImage(

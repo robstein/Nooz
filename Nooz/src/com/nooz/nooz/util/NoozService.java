@@ -292,7 +292,7 @@ public class NoozService {
 			@Override
 			public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
 				if (exception != null) {
-					Log.e(TAG, exception.getCause().getMessage());
+					Log.e(TAG, "There was an error inserting a blob: " + exception.getCause().getMessage());
 					return;
 				}
 				// Set the loaded blob
@@ -320,7 +320,7 @@ public class NoozService {
 			@Override
 			public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
 				if (exception != null) {
-					Log.e(TAG, exception.getCause().getMessage());
+					Log.e(TAG, "There was an error loading an individual blob: " + exception.getCause().getMessage());
 					return;
 				}
 				// Set the loaded blob
@@ -353,7 +353,7 @@ public class NoozService {
 					@Override
 					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
-							Log.e(TAG, exception.getCause().getMessage());
+							Log.e(TAG, "There was an error loading blob data for a list of stories: " +  exception.getCause().getMessage());
 							return;
 						}
 						// Set the loaded blob
