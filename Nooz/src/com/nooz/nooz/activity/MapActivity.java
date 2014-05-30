@@ -338,6 +338,8 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		}
 		mResumeStory = settings.getInt("current_story", 0);
 		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
+		
+		clearAndPopulateStories();
 	}
 
 	/*
@@ -415,16 +417,11 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			// Check if we were successful in obtaining the map.
 			if (mMap != null) {
 				// The Map is verified. It is now safe to manipulate the map.
-				setUpMapAndPopulateInitialStories();
+				setUpMap();
 			}
 		} else {
-			setUpMapAndPopulateInitialStories();
+			setUpMap();
 		}
-	}
-
-	private void setUpMapAndPopulateInitialStories() {
-		setUpMap();
-		clearAndPopulateStories();
 	}
 
 	private void setUpMap() {
