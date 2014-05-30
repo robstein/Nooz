@@ -87,17 +87,29 @@ exports.post = function(request, response) {
         console.log(request.body);
         console.log(sql);
         mssql.query(sql, [request.body.user_id, request.body.southwestLat, request.body.northeastLat, request.body.southwestLng, request.body.northeastLng], {
-            success: function(results) {                       
-                response.send(200, results.sort(rankingFunction).slice(0, Math.min(results.length, 10)));
+            success: function(results) {
+                if ("RELEVANT" == request.body.searchType) {
+                    // RELEVANT ALGO
+                    // Reverse to get newest to oldest
+                    // Rank by rankingFunction compare logic
+                    // Slice the array, take the first 10 elements (if there are that many)
+                    response.send(200, results.reverse().sort(rankingFunction).slice(0, Math.min(results.length, 10)));
+                }
+                if ("BREAKING" == request.body.searchType) {
+                    // BREAKING ALGO
+                    // Reverse to get newest to oldest
+                    // Slice the array, take the first 10 elements (if there are that many)              
+                    response.send(200, results.reverse().slice(0, Math.min(results.length, 10)));
+                }
             }
         })
 };
 
 function rankingFunction(a,b) {
   if (a.relevantScore - a.irrelevantScore < b.relevantScore - b.irrelevantScore)
-     return -1;
+     return 1;
   if (a.relevantScore - a.irrelevantScore > b.relevantScore - b.irrelevantScore)
-    return 1;
+    return -1;
   return 0;
 }
 

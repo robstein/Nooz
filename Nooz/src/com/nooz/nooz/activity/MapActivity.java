@@ -119,7 +119,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	private static int COLOR_ARTS_AND_LIFE;
 	private static final int COLOR_PEOPLE_STROKE = 0xFF8DCFFF;
 	private static final int COLOR_COMMUNITY_STROKE = 0xFF6B9EF1;
-	private static final int COLOR_SPORTS_STROKE = 0xFFBE9ABD;
+	private static final int COLOR_SPORTS_STROKE = 0xFFEF766B;
 	private static final int COLOR_FOOD_STROKE = 0xFF83D193;
 	private static final int COLOR_PUBLIC_SAFETY_STROKE = 0xFFEEAF7A;
 	private static final int COLOR_ARTS_AND_LIFE_STROKE = 0xFFAE7DCE;
@@ -287,7 +287,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		mSlideOutLeft = AnimationUtils.loadAnimation(this, R.anim.slide_out_left);
 		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 		mFadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
-		
+
 		mFooterAdapter = new StoryAdapter(this);
 		mPager.setAdapter(mFooterAdapter);
 		mPager.setOffscreenPageLimit(mFooterAdapter.getCount());
@@ -317,6 +317,9 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		registerReceiver(receiver, filter);
 
 		setUpMapIfNeeded();
+		
+		SharedPreferences userData = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
+		mButtonProfile.setText(userData.getString("user_name", ""));
 
 		SharedPreferences settings = getSharedPreferences("map_settings", MODE_PRIVATE);
 		double latitude;
@@ -363,6 +366,13 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		super.onPause();
 	}
 
+	/**
+	 * Clears all elements in the Circles and GroundOverlay Lists as well as
+	 * removes the objects from the GMap. Removing the objects in this way
+	 * solved the huge ass
+	 * "java.lang.IllegalArgumentException: Released unknown bitmap reference"
+	 * bug
+	 **/
 	private void clearMap() {
 		for (Circle c : mCircles) {
 			c.remove();
@@ -414,7 +424,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 	private void setUpMapAndPopulateInitialStories() {
 		setUpMap();
-		populateInitialStories();
+		clearAndPopulateStories();
 	}
 
 	private void setUpMap() {
@@ -466,7 +476,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			hideOrShowSettingsMenu();
 			break;
 		case R.id.button_refresh:
-			populateInitialStories();
+			clearAndPopulateStories();
 			break;
 		case R.id.button_new_story:
 			if (mCurrentLocation == null) {
@@ -611,12 +621,15 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 
 	/* ***** STORIES BEGIN ***** */
 
-	private void populateInitialStories() {
+	private void clearAndPopulateStories() {
+		// Clear Stories list
 		mStories.clear();
+		// Clear map
 		clearMap();
+		// Notify adapter that data has changed.
 		mFooterAdapter.notifyDataSetChanged();
 		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-		mNoozService.getAllStories(bounds, mFilterSettings);
+		mNoozService.getAllStories(bounds, mFilterSettings, mCurrentSearchType);
 	}
 
 	private void getStoriesCallBack() {
@@ -640,7 +653,14 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		if ("VIDEO".equals(mStories.get(i).medium)) {
 
 		}
-		mFooterAdapter.notifyDataSetChanged();
+		if ("AUDIO".equals(mStories.get(i).medium)) {
+			View v = mPager.findViewWithTag(i);
+			ProgressBar loading = (ProgressBar) v.findViewById(R.id.loading);
+			loading.setVisibility(View.GONE);
+
+			ImageView mic = (ImageView) v.findViewById(R.id.story_medium_icon);
+			mic.setImageDrawable(getResources().getDrawable(R.drawable.mic_small));
+		}
 	}
 
 	/**
@@ -674,9 +694,23 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		@Override
 		protected void onPostExecute(Boolean loaded) {
 			if (loaded) {
-				// if (mIndex < mPager.getAdapter().getCount()) {
 				if (mIndex < mStories.size()) {
 					mStories.get(mIndex).setBitmap(mBitmap);
+
+					// update image
+					View v = mPager.findViewWithTag(mIndex);
+					if (v != null) {
+						ImageView image = (ImageView) v.findViewById(R.id.story_item_article_image);
+						if ("PICTURE".equals(mStories.get(mIndex).medium)) {
+							if (mStories.get(mIndex).bitmap != null) {
+								image.setImageBitmap(mStories.get(mIndex).bitmap);
+
+								ProgressBar loading = (ProgressBar) v.findViewById(R.id.loading);
+								loading.setVisibility(View.GONE);
+								image.setVisibility(View.VISIBLE);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -800,17 +834,22 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 			View layout = inflater.inflate(R.layout.story_item, null);
 			layout.setOnClickListener((OnClickListener) mContext);
 
-			if (mStories.get(position).bitmap != null) {
-
-				ImageView image = (ImageView) layout.findViewById(R.id.story_item_article_image);
-				if ("PICTURE".equals(mStories.get(position).medium)) {
+			ImageView image = (ImageView) layout.findViewById(R.id.story_item_article_image);
+			if ("PICTURE".equals(mStories.get(position).medium)) {
+				if (mStories.get(position).bitmap != null) {
 					image.setImageBitmap(mStories.get(position).bitmap);
 
+					ProgressBar loading = (ProgressBar) layout.findViewById(R.id.loading);
+					loading.setVisibility(View.GONE);
+					image.setVisibility(View.VISIBLE);
 				}
-
+			}
+			if ("AUDIO".equals(mStories.get(position).medium)) {
 				ProgressBar loading = (ProgressBar) layout.findViewById(R.id.loading);
 				loading.setVisibility(View.GONE);
-				image.setVisibility(View.VISIBLE);
+
+				ImageView mic = (ImageView) layout.findViewById(R.id.story_medium_icon);
+				mic.setImageDrawable(getResources().getDrawable(R.drawable.mic_small));
 			}
 
 			TextView title = (TextView) layout.findViewById(R.id.story_item_title);
@@ -1081,8 +1120,10 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		// Change mCurrentSearchType
 		if ((mCurrentSearchType == SearchType.RELEVANT) && (pressedButton == R.id.button_breaking)) {
 			mCurrentSearchType = SearchType.BREAKING;
+			clearAndPopulateStories();
 		} else if ((mCurrentSearchType == SearchType.BREAKING) && (pressedButton == R.id.button_relevant)) {
 			mCurrentSearchType = SearchType.RELEVANT;
+			clearAndPopulateStories();
 		}
 		// Make sure UI is up to date
 		if (mCurrentSearchType == SearchType.RELEVANT) {

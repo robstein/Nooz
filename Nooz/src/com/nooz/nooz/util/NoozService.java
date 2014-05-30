@@ -95,29 +95,6 @@ public class NoozService {
 		mTableStories.insert(story, parameters, callback);
 	}
 
-	public void getUserFullName(final DisplayUserFullNameCallbackInterface displayUserFullNameCallback) {
-		MobileServiceUser currentUser = mClient.getCurrentUser();
-		if (currentUser != null) {
-
-			mTableAccounts.lookUp(mClient.getCurrentUser().getUserId(), new TableJsonOperationCallback() {
-
-				@Override
-				public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
-					String fullname = "Default Name";
-					if (exception == null) {
-						String firstName = jsonObject.getAsJsonPrimitive("firstName").getAsString();
-						String lastName = jsonObject.getAsJsonPrimitive("lastName").getAsString();
-						fullname = firstName + " " + lastName;
-					} else {
-						Log.e(TAG, "There was an error getting the user's name: " + exception.getMessage());
-					}
-
-					displayUserFullNameCallback.displayUserFullName(fullname);
-				}
-			});
-		}
-	}
-
 	public void setContext(Context context) {
 		mContext = context;
 		mClient.setContext(context);
@@ -159,8 +136,10 @@ public class NoozService {
 		JsonObject user = jsonObject.getAsJsonObject("user");
 		String userId = user.getAsJsonPrimitive("userId").getAsString();
 		String token = jsonObject.getAsJsonPrimitive("token").getAsString();
+		String firstName = jsonObject.getAsJsonPrimitive("firstName").getAsString();
+		String lastName = jsonObject.getAsJsonPrimitive("lastName").getAsString();
 		setUser(userId, token);
-		saveUserData();
+		saveUserData(firstName, lastName);
 	}
 
 	private void setUser(String userId, String token) {
@@ -169,11 +148,12 @@ public class NoozService {
 		mClient.setCurrentUser(user);
 	}
 
-	private void saveUserData() {
+	private void saveUserData(String firstName, String lastName) {
 		SharedPreferences settings = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
 		SharedPreferences.Editor preferencesEditor = settings.edit();
 		preferencesEditor.putString("userid", mClient.getCurrentUser().getUserId());
 		preferencesEditor.putString("token", mClient.getCurrentUser().getAuthenticationToken());
+		preferencesEditor.putString("user_name", firstName + " " + lastName);
 		preferencesEditor.commit();
 	}
 
@@ -220,7 +200,7 @@ public class NoozService {
 		return mLoadedStories;
 	}
 
-	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings) {
+	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings, SearchType currentSearchType) {
 
 		JsonObject body = new JsonObject();
 		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
@@ -239,6 +219,7 @@ public class NoozService {
 		body.addProperty("food", filterSettings.Food);
 		body.addProperty("publicSaftey", filterSettings.PublicSafety);
 		body.addProperty("artsAndLife", filterSettings.ArtsAndLife);
+		body.addProperty("searchType", currentSearchType.toString());
 		mClient.invokeApi("getnooz", body, new ApiJsonOperationCallback() {
 
 			@Override

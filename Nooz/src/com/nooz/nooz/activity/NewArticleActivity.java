@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -95,17 +96,6 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		mCategorySpinner.setOnItemSelectedListener(selectCategoryListener);
 		mSpinnerCustom = (TextView) findViewById(R.id.customSpinnerItemTextView);
 
-		// move create story details views below the image
-		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		mScreenWidthInPixels = size.x;
-		mLayoutStoryDetails = (LinearLayout) findViewById(R.id.layout_story_details);
-		RelativeLayout.LayoutParams controlLayoutParams = (RelativeLayout.LayoutParams) mLayoutStoryDetails
-				.getLayoutParams();
-		controlLayoutParams.setMargins(0, (int) Tools.dipToPixels(this, TOP_BAR_HEIGHT) + mScreenWidthInPixels, 0, 0);
-		mLayoutStoryDetails.setLayoutParams(controlLayoutParams);
-
 		// display the image
 		mNewArticleImage = (ImageView) findViewById(R.id.new_article_image);
 		if ("AUDIO".equals(mMedium)) {
@@ -117,6 +107,12 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		if ("VIDEO".equals(mMedium)) {
 
 		}
+		
+		// Make the square image fill the width of the screen
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		mScreenWidthInPixels = size.x;
 		RelativeLayout.LayoutParams imageLayoutParams = (RelativeLayout.LayoutParams) mNewArticleImage
 				.getLayoutParams();
 		imageLayoutParams.height = mScreenWidthInPixels;
@@ -137,6 +133,14 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		mTogglerShareTumblr.setOnClickListener(this);
 
 		mInputTextHeadline = (EditText) findViewById(R.id.input_headline);
+		mInputTextHeadline.setOnFocusChangeListener(new OnFocusChangeListener() {		
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if(mInputTextHeadline.getText().toString().length() > 0) {
+					mInputTextHeadline.setSelection(0);
+				}
+			}
+		});
 		mInputTextCaption = (EditText) findViewById(R.id.input_caption);
 		mInputTextKeywords = (EditText) findViewById(R.id.input_keywords);
 	}
