@@ -17,8 +17,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 	private SurfaceHolder mHolder;
 	private Camera mCamera;
 
-	//private int mWidth;
-	//private int mHeight;
+	// private int mWidth;
+	// private int mHeight;
 
 	private boolean mIsPreviewRunning = false;
 
@@ -34,9 +34,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		mContext = context;
-		
-		//mWidth = width;
-		//mHeight = height;
+
+		// mWidth = width;
+		// mHeight = height;
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
@@ -49,16 +49,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 			Log.d(TAG, "Error setting camera preview: " + e.getMessage());
 		}
 	}
+
 	/*
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		//mWidth = MeasureSpec.getSize(widthMeasureSpec);
-		//mHeight = mWidth;
-		//setMeasuredDimension(mWidth, mWidth);
-		setMeasuredDimension(mHeight,mWidth);
-	}
-	*/
+	 * @Override protected void onMeasure(int widthMeasureSpec, int
+	 * heightMeasureSpec) { super.onMeasure(widthMeasureSpec,
+	 * heightMeasureSpec); //mWidth = MeasureSpec.getSize(widthMeasureSpec);
+	 * //mHeight = mWidth; //setMeasuredDimension(mWidth, mWidth);
+	 * setMeasuredDimension(mHeight,mWidth); }
+	 */
 
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		// empty. Take care of releasing the Camera preview in your activity.
@@ -85,20 +83,26 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 		// set preview size and make any resize, rotate or
 		// reformatting changes here
 		/*
-		List<Camera.Size> sizes = mCamera.getParameters().getSupportedPreviewSizes();
-		Double ratio = (double) (width / height);
-		Double smallestDifference = Double.MAX_VALUE;
-		Camera.Size previewSize = sizes.get(0);
-		for(Camera.Size cs : sizes) {
-			Double diff = Math.abs((cs.width/cs.height) - ratio);
-			if (diff < smallestDifference) {
-				previewSize = cs;
-				smallestDifference = diff;
-			}
-		}
-        Camera.Parameters parameters = mCamera.getParameters();
-		parameters.setPreviewSize(previewSize.width, previewSize.height);
-		mCamera.setParameters(parameters);
+		 * List<Camera.Size> sizes =
+		 * mCamera.getParameters().getSupportedPreviewSizes(); Double ratio =
+		 * (double) (width / height); Double smallestDifference =
+		 * Double.MAX_VALUE; Camera.Size previewSize = sizes.get(0);
+		 * for(Camera.Size cs : sizes) { Double diff =
+		 * Math.abs((cs.width/cs.height) - ratio); if (diff <
+		 * smallestDifference) { previewSize = cs; smallestDifference = diff; }
+		 * } Camera.Parameters parameters = mCamera.getParameters();
+		 * parameters.setPreviewSize(previewSize.width, previewSize.height);
+		 * mCamera.setParameters(parameters);
+		 * 
+		 * mCamera.autoFocus(new Camera.AutoFocusCallback() {
+		 * 
+		 * @Override public void onAutoFocus(boolean success, Camera camera) {
+		 * // TODO Auto-generated method stub
+		 * 
+		 * }
+		 * 
+		 * });
+		 */
 
 		mCamera.autoFocus(new Camera.AutoFocusCallback() {
 
@@ -109,7 +113,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 			}
 
 		});
-		 */
+
 		// start preview with new settings
 		try {
 			mCamera.setPreviewDisplay(mHolder);

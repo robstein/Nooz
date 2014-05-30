@@ -21,7 +21,9 @@ function insert(item, user, request) {
 							var userId = account.id;
 							request.respond(200, {
 								user: { userId : userId },
-								token: zumoJwt(expiry, userId, masterKey) 
+								token: zumoJwt(expiry, userId, masterKey),
+                                firstName: account.firstName,
+                                lastName: account.lastName
 							});
 						}
 						else {

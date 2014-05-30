@@ -107,6 +107,11 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 		mCamera.setParameters(camParams);
 		mCamera.setDisplayOrientation(90);
 
+		List<String> focusModes = camParams.getSupportedFocusModes();
+		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+		}
+		
 		// Create our Preview view and set it as the content of our activity.
 		mCameraPreview = new CameraPreview(this, mCamera);
 		mFrameLayoutPreview = (FrameLayout) findViewById(R.id.camera_preview);
