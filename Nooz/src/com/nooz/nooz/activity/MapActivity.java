@@ -81,6 +81,11 @@ import com.nooz.nooz.util.SearchType;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.PagerContainer;
 
+/**
+ * 
+ * @author Rob Stein
+ *
+ */
 public class MapActivity extends BaseFragmentActivity implements OnClickListener, OnMapClickListener,
 		OnCameraChangeListener, GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {

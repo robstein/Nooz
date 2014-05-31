@@ -1,5 +1,12 @@
 package com.nooz.nooz.util;
 
+/**
+ * Represents one of the six Nooz categories: people, community, sports, food,
+ * public safety, arts and life.
+ * 
+ * @author Rob Stein
+ * 
+ */
 public enum Category {
 	PEOPLE("PEOPLE"), COMMUNITY("COMMUNITY"), SPORTS("SPORTS"), FOOD("FOOD"), PUBLIC_SAFETY("PUBLIC_SAFETY"), ARTS_AND_LIFE(
 			"ARTS_AND_LIFE");

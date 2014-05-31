@@ -8,6 +8,11 @@ import android.widget.TextView;
 
 import com.nooz.nooz.R;
 
+/**
+ * 
+ * @author Rob Stein
+ *
+ */
 public class ProfileActivity extends BaseActivity implements OnClickListener {
 
 	ImageView mButtonBack;

@@ -4,6 +4,11 @@ import android.app.Dialog;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 
+/**
+ * 
+ * @author Rob Stein
+ *
+ */
 public class ErrorDialogFragment extends DialogFragment {
 	// Global field to contain the error dialog
 	private Dialog mDialog;

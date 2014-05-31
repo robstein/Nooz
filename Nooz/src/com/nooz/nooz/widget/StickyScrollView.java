@@ -17,6 +17,11 @@ import android.widget.ScrollView;
 
 import com.nooz.nooz.R;
 
+/**
+ * @author Emil Sj�lander - sjolander.emil@gmail.com
+ * @author Rob Stein
+ *
+ */
 public class StickyScrollView extends ScrollView {
 
 	/**
@@ -320,10 +325,10 @@ public class StickyScrollView extends ScrollView {
 	}
 
 	private void startStickingView(View viewThatShouldStick) {
+		// TODO make transition slicker
 		currentlyStickingView = viewThatShouldStick;
 		TransitionDrawable transition = (TransitionDrawable) currentlyStickingView.getBackground();
 		transition.startTransition(1000);
-		//currentlyStickingView.setBackgroundColor(0xFF333333);
 		if (getStringTagForView(currentlyStickingView).contains(FLAG_HASTRANSPARANCY)) {
 			hideView(currentlyStickingView);
 		}
@@ -333,6 +338,7 @@ public class StickyScrollView extends ScrollView {
 	}
 
 	private void stopStickingCurrentlyStickingView() {
+		// TODO make transition slicker
 		TransitionDrawable transition = (TransitionDrawable) currentlyStickingView.getBackground();
 		transition.reverseTransition(1000);
 		if (getStringTagForView(currentlyStickingView).contains(FLAG_HASTRANSPARANCY)) {

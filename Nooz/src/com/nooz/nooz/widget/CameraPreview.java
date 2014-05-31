@@ -9,7 +9,12 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-/** A basic Camera preview class */
+/**
+ * A basic camera preview class
+ * 
+ * @author Rob Stein
+ * 
+ */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final String TAG = "CameraPreview";
 

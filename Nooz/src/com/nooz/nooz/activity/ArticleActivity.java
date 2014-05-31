@@ -36,6 +36,11 @@ import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.Tools;
 
+/**
+ * 
+ * @author Rob Stein
+ *
+ */
 public class ArticleActivity extends BaseActivity implements OnClickListener {
 	private static final String TAG = "ArticleActivity";
 

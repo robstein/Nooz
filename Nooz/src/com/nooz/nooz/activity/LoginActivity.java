@@ -19,6 +19,11 @@ import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.Alert;
 
+/**
+ * 
+ * @author Rob Stein
+ *
+ */
 public class LoginActivity extends BaseActivity implements OnClickListener {
 
 	private static final String TAG = "LoginActivity";
@@ -42,6 +47,10 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 
 	private Animation mSlideInBottom;
 	private Animation mSlideOutBottom;
+	
+	private Boolean mSignupFormsUp = false;
+	private Boolean mLoginFormsUp = false;
+	
 
 	ProgressDialog progress;
 
@@ -95,6 +104,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 	}
 
 	private void showSignupForms() {
+		mSignupFormsUp = true;
 		mLinearLayoutLoginActivityTop.setVisibility(View.INVISIBLE);
 		mLinearLayoutLoginActivityTop.startAnimation(mSlideOutBottom);
 		mLinearLayoutSignup.setVisibility(View.VISIBLE);
@@ -103,6 +113,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 	}
 
 	private void showLoginForms() {
+		mLoginFormsUp = true;
 		mLinearLayoutLoginActivityTop.setVisibility(View.INVISIBLE);
 		mLinearLayoutLoginActivityTop.startAnimation(mSlideOutBottom);
 		mLinearLayoutLogin.setVisibility(View.VISIBLE);
@@ -111,6 +122,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 	}
 
 	private void goBackFromLogin() {
+		mLoginFormsUp = false;
 		mLinearLayoutLogin.setVisibility(View.INVISIBLE);
 		mLinearLayoutLogin.startAnimation(mSlideOutBottom);
 		mLinearLayoutLoginActivityTop.setVisibility(View.VISIBLE);
@@ -130,6 +142,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 	}
 
 	private void goBackFromSignup() {
+		mSignupFormsUp = false;
 		mLinearLayoutSignup.setVisibility(View.INVISIBLE);
 		mLinearLayoutSignup.startAnimation(mSlideOutBottom);
 		mLinearLayoutLoginActivityTop.setVisibility(View.VISIBLE);
@@ -216,6 +229,17 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 			submitSignup();
 			break;
 
+		}
+	}
+	
+	@Override
+	public void onBackPressed() {
+		if (mSignupFormsUp) {
+			goBackFromSignup();
+		} else if (mLoginFormsUp) {
+			goBackFromLogin();
+		} else {
+			finish();
 		}
 	}
 

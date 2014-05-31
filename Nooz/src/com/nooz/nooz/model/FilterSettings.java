@@ -2,6 +2,12 @@ package com.nooz.nooz.model;
 
 import com.nooz.nooz.R;
 
+/**
+ * FilterSettings for searching the map.
+ * 
+ * @author Rob Stein
+ * 
+ */
 public class FilterSettings {
 
 	// Time
@@ -21,6 +27,12 @@ public class FilterSettings {
 	public Boolean PublicSafety;
 	public Boolean ArtsAndLife;
 
+	/**
+	 * New default FilterSettings object which has every medium and category
+	 * boolean set to false. The DefaultMedium and DefaultCategory boolean
+	 * variables are always true when all of their section's variables are
+	 * false. Thus they are initially set to true by default.
+	 **/
 	public FilterSettings() {
 		// Time
 
@@ -40,6 +52,15 @@ public class FilterSettings {
 		ArtsAndLife = false;
 	}
 
+	/**
+	 * Toggles the boolean value associated with a given button on the
+	 * filters/settings layout. If this causes all booleans in the Medium
+	 * section or the Category section to be false, the DefaultMedium or
+	 * DefaultCategory variable will be set to true.
+	 * 
+	 * @param imageViewId
+	 *            the given filters button's id
+	 */
 	public void toggle(int imageViewId) {
 		switch (imageViewId) {
 		case R.id.button_filter_mic:
@@ -114,7 +135,7 @@ public class FilterSettings {
 		} else if (!Audio || !Picture || !Video) {
 			// Turn off default if just one or two is off
 			DefaultMedium = false;
-		} else  if (Audio && Picture && Video) {
+		} else if (Audio && Picture && Video) {
 			// Turn on when all are on
 			DefaultMedium = true;
 		}

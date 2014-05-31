@@ -36,9 +36,17 @@ import com.nooz.nooz.activity.LoginActivity;
 import com.nooz.nooz.model.FilterSettings;
 import com.nooz.nooz.model.Story;
 
+/**
+ * Service object which handles all interaction with Azure.
+ * 
+ * @author Rob Stein
+ * 
+ */
 public class NoozService {
 
 	private static final String TAG = "NoozService";
+	private static final String NOOZ_URL = "https://nooz.azure-mobile.net/";
+	private static final String NOOZ_KEY = "TGeCQCabrSEBxuTBSAuJKqsXUnHBdb80";
 
 	private Context mContext;
 	private MobileServiceClient mClient;
@@ -47,11 +55,21 @@ public class NoozService {
 	private MobileServiceJsonTable mTableRelevance;
 	private MobileServiceJsonTable mTableBlobs;
 
+	private List<Story> mLoadedStories;
+
+	private JsonObject mLoadedBlob;
+	private HashMap<Integer, JsonObject> mStoryImages;
+
+	/**
+	 * New NoozService.
+	 * 
+	 * @param context
+	 *            current context
+	 */
 	public NoozService(Context context) {
 		mContext = context;
 		try {
-			mClient = new MobileServiceClient("https://nooz.azure-mobile.net/", "TGeCQCabrSEBxuTBSAuJKqsXUnHBdb80",
-					mContext).withFilter(new MyServiceFilter());
+			mClient = new MobileServiceClient(NOOZ_URL, NOOZ_KEY, mContext).withFilter(new MyServiceFilter());
 
 			mTableAccounts = mClient.getTable("accounts");
 			mTableStories = mClient.getTable("stories");
@@ -63,43 +81,42 @@ public class NoozService {
 
 	}
 
-	public void saveRelevanceInput(String storyId, Integer input, TableJsonOperationCallback callback) {
-		JsonObject story = new JsonObject();
-		story.addProperty("story_id", storyId);
-		story.addProperty("user_id", mClient.getCurrentUser().getUserId());
-		story.addProperty("input", input);
-		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-		parameters.add(new Pair<String, String>("postRelevanceInput", "true"));
-		mTableRelevance.insert(story, parameters, callback);
+	private class MyServiceFilter implements ServiceFilter {
+		@Override
+		public void handleRequest(final ServiceFilterRequest request,
+				final NextServiceFilterCallback nextServiceFilterCallback,
+				final ServiceFilterResponseCallback responseCallback) {
+			if (nextServiceFilterCallback != null) {
+				nextServiceFilterCallback.onNext(request, new ServiceFilterResponseCallback() {
+					@Override
+					public void onResponse(ServiceFilterResponse response, Exception exception) {
+						if (exception != null) {
+							Log.e(TAG, "MyServiceFilter onResponse Exception: " + exception.getMessage());
+						}
+
+						responseCallback.onResponse(response, exception);
+					}
+				});
+			}
+		}
 	}
 
-	public void saveStory(String medium, String category, String headline, String caption, String keyword1,
-			String keyword2, String keyword3, LatLng location, boolean sharefb, boolean sharetw, boolean sharetu,
-			TableJsonOperationCallback callback) {
-		JsonObject story = new JsonObject();
-		story.addProperty("author_id", mClient.getCurrentUser().getUserId());
-		story.addProperty("medium", medium);
-		story.addProperty("category", category);
-		story.addProperty("headline", headline);
-		story.addProperty("caption", caption);
-		story.addProperty("keyword1", keyword1);
-		story.addProperty("keyword2", keyword2);
-		story.addProperty("keyword3", keyword3);
-		story.addProperty("lat", location.latitude);
-		story.addProperty("lng", location.longitude);
-		story.addProperty("sharefb", sharefb);
-		story.addProperty("sharetw", sharetw);
-		story.addProperty("sharetu", sharetu);
-		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-		parameters.add(new Pair<String, String>("postStory", "true"));
-		mTableStories.insert(story, parameters, callback);
-	}
-
+	/**
+	 * Change NoozService context
+	 * 
+	 * @param context
+	 */
 	public void setContext(Context context) {
 		mContext = context;
 		mClient.setContext(context);
 	}
 
+	/**
+	 * Check if user should be automatically logged in
+	 * 
+	 * @return true if user is authenticated, false if user should not be logged
+	 *         in
+	 */
 	public boolean isUserAuthenticated() {
 		SharedPreferences settings = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
 		if (settings != null) {
@@ -113,15 +130,20 @@ public class NoozService {
 		return false;
 	}
 
-	public void login(String email, String password, TableJsonOperationCallback callback) {
-		JsonObject customUser = new JsonObject();
-		customUser.addProperty("email", email);
-		customUser.addProperty("password", password);
-		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-		parameters.add(new Pair<String, String>("login", "true"));
-		mTableAccounts.insert(customUser, parameters, callback);
-	}
-
+	/**
+	 * Sends the user's new info to be saved in Azure. Returns with callback.
+	 * 
+	 * @param firstName
+	 *            new user first name
+	 * @param lastName
+	 *            new user last name
+	 * @param email
+	 *            new user email
+	 * @param password
+	 *            new user password
+	 * @param callback
+	 *            the callback function
+	 */
 	public void registerUser(String firstName, String lastName, String email, String password,
 			TableJsonOperationCallback callback) {
 		JsonObject newUser = new JsonObject();
@@ -132,6 +154,32 @@ public class NoozService {
 		mTableAccounts.insert(newUser, callback);
 	}
 
+	/**
+	 * Attempts to authenticated user login info in Azure. Returns with
+	 * callback.
+	 * 
+	 * @param email
+	 *            user's email
+	 * @param password
+	 *            user's password
+	 * @param callback
+	 *            the callback function
+	 */
+	public void login(String email, String password, TableJsonOperationCallback callback) {
+		JsonObject customUser = new JsonObject();
+		customUser.addProperty("email", email);
+		customUser.addProperty("password", password);
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("login", "true"));
+		mTableAccounts.insert(customUser, parameters, callback);
+	}
+
+	/**
+	 * Save login info.
+	 * 
+	 * @param jsonObject
+	 *            Response object
+	 */
 	public void setUserAndSaveDataLogin(JsonObject jsonObject) {
 		JsonObject user = jsonObject.getAsJsonObject("user");
 		String userId = user.getAsJsonPrimitive("userId").getAsString();
@@ -157,51 +205,140 @@ public class NoozService {
 		preferencesEditor.commit();
 	}
 
-	private class MyServiceFilter implements ServiceFilter {
-		@Override
-		public void handleRequest(final ServiceFilterRequest request,
-				final NextServiceFilterCallback nextServiceFilterCallback,
-				final ServiceFilterResponseCallback responseCallback) {
-			if (nextServiceFilterCallback != null) {
-				nextServiceFilterCallback.onNext(request, new ServiceFilterResponseCallback() {
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						if (exception != null) {
-							Log.e(TAG, "MyServiceFilter onResponse Exception: " + exception.getMessage());
-						}
-
-						responseCallback.onResponse(response, exception);
-					}
-				});
-			}
-		}
-	}
-
+	/**
+	 * Logs the user out of Nooz
+	 */
 	public void logout() {
 		// Clear the cookies so they won't auto login to a provider again
 		CookieSyncManager.createInstance(mContext);
 		CookieManager cookieManager = CookieManager.getInstance();
 		cookieManager.removeAllCookie();
+
 		// Clear the user id and token from the shared preferences
 		SharedPreferences settings = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
 		SharedPreferences.Editor preferencesEditor = settings.edit();
 		preferencesEditor.clear();
 		preferencesEditor.apply();
+
 		// Clear the user and return to the login activity
 		mClient.logout();
-		Intent loggedInIntent = new Intent(mContext, LoginActivity.class);
-		mContext.startActivity(loggedInIntent);
+		Intent logoutIntent = new Intent(mContext, LoginActivity.class);
+		mContext.startActivity(logoutIntent);
 		((Activity) mContext).finish();
 	}
 
-	private List<Story> mLoadedStories;
+	/**
+	 * Sends the user's relevance input to Azure. Returns with callback.
+	 * 
+	 * @param storyId
+	 *            the story id
+	 * @param input
+	 *            the input: -1, 0, or 1
+	 * @param callback
+	 *            the callback function
+	 */
+	public void saveRelevanceInput(String storyId, Integer input, TableJsonOperationCallback callback) {
+		JsonObject story = new JsonObject();
+		story.addProperty("story_id", storyId);
+		story.addProperty("user_id", mClient.getCurrentUser().getUserId());
+		story.addProperty("input", input);
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("postRelevanceInput", "true"));
+		mTableRelevance.insert(story, parameters, callback);
+	}
 
+	/**
+	 * Saves the user's story to Azure. Returns with callback.
+	 * <p>
+	 * DOES NOT DO ANYTHING WITH AUDIO, PICTURES, OR VIDEO
+	 * 
+	 * @param medium
+	 *            story medium
+	 * @param category
+	 *            story category
+	 * @param headline
+	 *            story headline
+	 * @param caption
+	 *            story caption
+	 * @param keyword1
+	 *            story keyword 1
+	 * @param keyword2
+	 *            story keyword 2
+	 * @param keyword3
+	 *            story keyword 3
+	 * @param location
+	 *            story location
+	 * @param sharefb
+	 *            whether to share on facebook or not
+	 * @param sharetw
+	 *            whether to share on twitter or not
+	 * @param sharetu
+	 *            whether to share on tumblr or not
+	 * @param callback
+	 *            the callback function
+	 */
+	public void saveStory(String medium, String category, String headline, String caption, String keyword1,
+			String keyword2, String keyword3, LatLng location, boolean sharefb, boolean sharetw, boolean sharetu,
+			TableJsonOperationCallback callback) {
+		JsonObject story = new JsonObject();
+		story.addProperty("author_id", mClient.getCurrentUser().getUserId());
+		story.addProperty("medium", medium);
+		story.addProperty("category", category);
+		story.addProperty("headline", headline);
+		story.addProperty("caption", caption);
+		story.addProperty("keyword1", keyword1);
+		story.addProperty("keyword2", keyword2);
+		story.addProperty("keyword3", keyword3);
+		story.addProperty("lat", location.latitude);
+		story.addProperty("lng", location.longitude);
+		story.addProperty("sharefb", sharefb);
+		story.addProperty("sharetw", sharetw);
+		story.addProperty("sharetu", sharetu);
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("postStory", "true"));
+		mTableStories.insert(story, parameters, callback);
+	}
+
+	/**
+	 * 
+	 * @return List of Story objects
+	 */
 	public List<Story> getLoadedStories() {
 		return mLoadedStories;
 	}
 
-	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings, SearchType currentSearchType) {
+	/**
+	 * 
+	 * @return the loaded blob
+	 */
+	public JsonObject getLoadedBlob() {
+		return this.mLoadedBlob;
+	}
 
+	/**
+	 * 
+	 * @param i
+	 *            index
+	 * @return storyimage blob at index i
+	 */
+	public JsonObject getLoadedStoryImage(int i) {
+		return mStoryImages.get(i);
+	}
+
+	/**
+	 * Queries Azure for stories. A list of Story objects will be loaded into
+	 * the NoozService and will be available from getLoadedStories() after a
+	 * broadcast intent is sent out.
+	 * 
+	 * @param bounds
+	 *            boundaries of the map
+	 * @param filterSettings
+	 *            filter settings
+	 * @param currentSearchType
+	 *            relevant or breaking
+	 * @see #getLoadedStories()
+	 */
+	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings, SearchType currentSearchType) {
 		JsonObject body = new JsonObject();
 		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
 		body.addProperty("northeastLat", bounds.northeast.latitude);
@@ -250,15 +387,14 @@ public class NoozService {
 
 	}
 
-	/* ***** BLOB STORAGE ***** */
-
-	private JsonObject mLoadedBlob;
-
-	public JsonObject getLoadedBlob() {
-		return this.mLoadedBlob;
-	}
-
-	/** Inserting blobs **/
+	/**
+	 * Inserts a blob
+	 * 
+	 * @param containerName
+	 *            requested blob container
+	 * @param blobName
+	 *            requested blob name
+	 */
 	public void getSasForNewBlob(String containerName, String blobName) {
 		// Create the json Object we'll send over and fill it with the required
 		// id property - otherwise we'll get kicked back
@@ -286,7 +422,17 @@ public class NoozService {
 		});
 	}
 
-	/** Loading individual blob data **/
+	/**
+	 * Loads data from an individual blob. The blob data will be loaded into the
+	 * NoozService and will be available from getLoadedBlob() after a broadcast
+	 * intent is sent out.
+	 * 
+	 * @param containerName
+	 *            requested blob container
+	 * @param blobName
+	 *            requested blob name
+	 * @see #getLoadedBlob()
+	 */
 	public void getBlobSas(String containerName, String blobName) {
 		// Create the json Object we'll send over and fill it with the required
 		// id property - otherwise we'll get kicked back
@@ -314,9 +460,16 @@ public class NoozService {
 		});
 	}
 
-	HashMap<Integer, JsonObject> mStoryImages;
-	
-	/** Loading blob data for list of stories **/
+	/**
+	 * Loads blob data for a list of Story objects. A HashMap<Integer,
+	 * JsonObject> of blob data will be loaded into the NoozService and will be
+	 * available from getLoadedStoryImage(int) after a broadcast intent is sent
+	 * out.
+	 * 
+	 * @param containerName
+	 * @param stories
+	 * @see #getLoadedStoryImage(int)
+	 */
 	public void getBlobSases(String containerName, List<Story> stories) {
 		int i = 0;
 		mStoryImages = new HashMap<Integer, JsonObject>();
@@ -334,7 +487,8 @@ public class NoozService {
 					@Override
 					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
-							Log.e(TAG, "There was an error loading blob data for a list of stories: " +  exception.getCause().getMessage());
+							Log.e(TAG, "There was an error loading blob data for a list of stories: "
+									+ exception.getCause().getMessage());
 							return;
 						}
 						// Set the loaded blob
@@ -349,10 +503,6 @@ public class NoozService {
 			}
 			i++;
 		}
-	}
-
-	public JsonObject getLoadedStoryImage(int i) {
-		return mStoryImages.get(i);
 	}
 
 }

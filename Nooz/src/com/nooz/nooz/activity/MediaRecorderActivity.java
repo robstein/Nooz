@@ -49,6 +49,11 @@ import com.nooz.nooz.util.MediaMode;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.CameraPreview;
 
+/**
+ * 
+ * @author Rob Stein
+ *
+ */
 public class MediaRecorderActivity extends BaseFragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
 

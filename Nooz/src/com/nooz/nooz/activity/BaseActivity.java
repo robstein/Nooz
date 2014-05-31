@@ -7,6 +7,11 @@ import android.os.Bundle;
 import com.nooz.nooz.NoozApplication;
 import com.nooz.nooz.util.NoozService;
 
+/**
+ * 
+ * @author Rob Stein
+ *
+ */
 public class BaseActivity extends Activity {
 	protected NoozService mNoozService;
 	protected Context mContext;

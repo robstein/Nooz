@@ -41,9 +41,15 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
+import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.Tools;
 
+/**
+ * 
+ * @author Rob Stein
+ *
+ */
 public class NewArticleActivity extends BaseActivity implements OnClickListener {
 
 	private static final String TAG = "NewArticleActivity";
@@ -102,12 +108,13 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 			mNewArticleImage.setImageDrawable(getResources().getDrawable(R.drawable.micbig));
 		}
 		if ("PICTURE".equals(mMedium)) {
-			mNewArticleImage.setImageDrawable(Drawable.createFromPath(getFilesDir().getAbsolutePath() + "/picture.jpg"));
+			mNewArticleImage
+					.setImageDrawable(Drawable.createFromPath(getFilesDir().getAbsolutePath() + "/picture.jpg"));
 		}
 		if ("VIDEO".equals(mMedium)) {
 
 		}
-		
+
 		// Make the square image fill the width of the screen
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
@@ -133,10 +140,10 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		mTogglerShareTumblr.setOnClickListener(this);
 
 		mInputTextHeadline = (EditText) findViewById(R.id.input_headline);
-		mInputTextHeadline.setOnFocusChangeListener(new OnFocusChangeListener() {		
+		mInputTextHeadline.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
-				if(mInputTextHeadline.getText().toString().length() > 0) {
+				if (mInputTextHeadline.getText().toString().length() > 0) {
 					mInputTextHeadline.setSelection(0);
 				}
 			}
