@@ -8,21 +8,17 @@ import java.util.List;
 import java.util.Locale;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ActivityOptions;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,12 +47,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
@@ -76,6 +67,7 @@ import com.nooz.nooz.model.FilterSettings;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.BubbleSizer;
+import com.nooz.nooz.util.CategoryResourceHelper;
 import com.nooz.nooz.util.GlobeTrigonometry;
 import com.nooz.nooz.util.SearchType;
 import com.nooz.nooz.util.Tools;
@@ -113,18 +105,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 	// Colors
 	private static final int SEARCH_TYPE_ACTIVE_COLOR = 0xFF000000;
 	private static final int SEARCH_TYPE_FADED_COLOR = 0xFF979797;
-	private static int COLOR_PEOPLE;
-	private static int COLOR_COMMUNITY;
-	private static int COLOR_SPORTS;
-	private static int COLOR_FOOD;
-	private static int COLOR_PUBLIC_SAFETY;
-	private static int COLOR_ARTS_AND_LIFE;
-	private static final int COLOR_PEOPLE_STROKE = 0xFF8DCFFF;
-	private static final int COLOR_COMMUNITY_STROKE = 0xFF6B9EF1;
-	private static final int COLOR_SPORTS_STROKE = 0xFFEF766B;
-	private static final int COLOR_FOOD_STROKE = 0xFF83D193;
-	private static final int COLOR_PUBLIC_SAFETY_STROKE = 0xFFEEAF7A;
-	private static final int COLOR_ARTS_AND_LIFE_STROKE = 0xFFAE7DCE;
 
 	// Main map views
 	private RelativeLayout mMapContainer;
@@ -286,13 +266,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 		// Create filter settings
 		mFilterSettings = new FilterSettings();
 
-		// Colors
-		COLOR_PEOPLE = getResources().getColor(R.color.category_people);
-		COLOR_COMMUNITY = getResources().getColor(R.color.category_community);
-		COLOR_SPORTS = getResources().getColor(R.color.category_sports);
-		COLOR_FOOD = getResources().getColor(R.color.category_food);
-		COLOR_PUBLIC_SAFETY = getResources().getColor(R.color.category_public_safety);
-		COLOR_ARTS_AND_LIFE = getResources().getColor(R.color.category_arts_and_life);
 		// Animations
 		mSlideInBottom = AnimationUtils.loadAnimation(this, R.anim.slide_in_bottom);
 		mSlideOutBottom = AnimationUtils.loadAnimation(this, R.anim.slide_out_bottom);
@@ -736,17 +709,19 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 
 		GroundOverlayOptions groundOverlayOptions;
 		if (mCircles.indexOf(c) == mResumeStory) {
-			c.setFillColor(getColorByCategory(category, HIGHLIGHT));
-			c.setStrokeColor(getStrokeColorByCategory(category, HIGHLIGHT));
+			c.setFillColor(CategoryResourceHelper.getColorByCategory(category, HIGHLIGHT));
+			c.setStrokeColor(CategoryResourceHelper.getStrokeColorByCategory(category, HIGHLIGHT));
 			groundOverlayOptions = new GroundOverlayOptions()
-					.image(BitmapDescriptorFactory.fromResource(getActiveGroundOverlayByCategory(category)))
-					.anchor(0.5f, 0.5f).position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
+					.image(BitmapDescriptorFactory.fromResource(CategoryResourceHelper
+							.getActiveGroundOverlayByCategory(category))).anchor(0.5f, 0.5f)
+					.position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
 		} else {
-			c.setFillColor(getColorByCategory(category, SHADE));
-			c.setStrokeColor(getStrokeColorByCategory(category, SHADE));
+			c.setFillColor(CategoryResourceHelper.getColorByCategory(category, SHADE));
+			c.setStrokeColor(CategoryResourceHelper.getStrokeColorByCategory(category, SHADE));
 			groundOverlayOptions = new GroundOverlayOptions()
-					.image(BitmapDescriptorFactory.fromResource(getGroundOverlayByCategory(category)))
-					.anchor(0.5f, 0.5f).position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
+					.image(BitmapDescriptorFactory.fromResource(CategoryResourceHelper
+							.getGroundOverlayByCategory(category))).anchor(0.5f, 0.5f)
+					.position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
 		}
 		GroundOverlay icon = mMap.addGroundOverlay(groundOverlayOptions);
 		mGroundOverlays.add(icon);
@@ -849,7 +824,8 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 
 			title.setText(mStories.get(position).headline);
 			author.setText(mStories.get(position).firstName + " " + mStories.get(position).lastName);
-			categoryRuler.setBackgroundColor(getColorByCategory(mStories.get(position).category, HIGHLIGHT));
+			categoryRuler.setBackgroundColor(CategoryResourceHelper.getColorByCategory(mStories.get(position).category,
+					HIGHLIGHT));
 			if (position == mResumeStory) {
 				View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
 				storyItemShader.setBackgroundColor(0x40000000);
@@ -905,13 +881,13 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 			View layout = mPager.findViewWithTag(mCurrentStory);
 			View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
 			storyItemShader.setBackgroundColor(0xC0000000);
-			mCircles.get(mCurrentStory).setFillColor(getColorByCategory(mStories.get(mCurrentStory).category, SHADE));
+			mCircles.get(mCurrentStory).setFillColor(
+					CategoryResourceHelper.getColorByCategory(mStories.get(mCurrentStory).category, SHADE));
 			mCircles.get(mCurrentStory).setStrokeColor(
-					getStrokeColorByCategory(mStories.get(mCurrentStory).category, SHADE));
-			mGroundOverlays
-					.get(mCurrentStory)
-					.setImage(
-							BitmapDescriptorFactory.fromResource(getGroundOverlayByCategory(mStories.get(mCurrentStory).category)));
+					CategoryResourceHelper.getStrokeColorByCategory(mStories.get(mCurrentStory).category, SHADE));
+			mGroundOverlays.get(mCurrentStory).setImage(
+					BitmapDescriptorFactory.fromResource(CategoryResourceHelper.getGroundOverlayByCategory(mStories
+							.get(mCurrentStory).category)));
 
 			// Change current selected view
 			mCurrentStory = position;
@@ -921,13 +897,12 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 			storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
 			storyItemShader.setBackgroundColor(0x40000000);
 			mCircles.get(mCurrentStory).setFillColor(
-					getColorByCategory(mStories.get(mCurrentStory).category, HIGHLIGHT));
+					CategoryResourceHelper.getColorByCategory(mStories.get(mCurrentStory).category, HIGHLIGHT));
 			mCircles.get(mCurrentStory).setStrokeColor(
-					getStrokeColorByCategory(mStories.get(mCurrentStory).category, HIGHLIGHT));
-			mGroundOverlays.get(mCurrentStory)
-					.setImage(
-							BitmapDescriptorFactory.fromResource(getActiveGroundOverlayByCategory(mStories
-									.get(mCurrentStory).category)));
+					CategoryResourceHelper.getStrokeColorByCategory(mStories.get(mCurrentStory).category, HIGHLIGHT));
+			mGroundOverlays.get(mCurrentStory).setImage(
+					BitmapDescriptorFactory.fromResource(CategoryResourceHelper
+							.getActiveGroundOverlayByCategory(mStories.get(mCurrentStory).category)));
 
 		}
 
@@ -1127,78 +1102,4 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 	}
 
 	/* ***** SEARCH TYPE END ***** */
-
-	/* ***** GET THEME RESOURCES BY CATEGORY BEGIN ***** */
-
-	protected int getColorByCategory(String category, boolean highlight) {
-		int retval;
-		if ("People".equals(category)) {
-			retval = COLOR_PEOPLE;
-		} else if ("Community".equals(category)) {
-			retval = COLOR_COMMUNITY;
-		} else if ("Sports".equals(category)) {
-			retval = COLOR_SPORTS;
-		} else if ("Food".equals(category)) {
-			retval = COLOR_FOOD;
-		} else if ("Public Safety".equals(category)) {
-			retval = COLOR_PUBLIC_SAFETY;
-		} else { // Arts and Life
-			retval = COLOR_ARTS_AND_LIFE;
-		}
-		return highlight ? retval : retval & 0xC0FFFFFF;
-	}
-
-	private int getStrokeColorByCategory(String category, boolean highlight) {
-		int retval;
-		if ("People".equals(category)) {
-			retval = COLOR_PEOPLE_STROKE;
-		} else if ("Community".equals(category)) {
-			retval = COLOR_COMMUNITY_STROKE;
-		} else if ("Sports".equals(category)) {
-			retval = COLOR_SPORTS_STROKE;
-		} else if ("Food".equals(category)) {
-			retval = COLOR_FOOD_STROKE;
-		} else if ("Public Safety".equals(category)) {
-			retval = COLOR_PUBLIC_SAFETY_STROKE;
-		} else { // Arts and Life
-			retval = COLOR_ARTS_AND_LIFE_STROKE;
-		}
-		return highlight ? retval : retval & 0xC0FFFFFF;
-
-	}
-
-	private int getGroundOverlayByCategory(String category) {
-		if ("People".equals(category)) {
-			return R.drawable.people_white;
-		} else if ("Community".equals(category)) {
-			return R.drawable.community_white;
-		} else if ("Sports".equals(category)) {
-			return R.drawable.sports_white;
-		} else if ("Food".equals(category)) {
-			return R.drawable.food_white;
-		} else if ("Public Safety".equals(category)) {
-			return R.drawable.public_saftey_white;
-		} else { // Arts and Life
-			return R.drawable.arts_and_life_white;
-		}
-	}
-
-	private int getActiveGroundOverlayByCategory(String category) {
-		if ("People".equals(category)) {
-			return R.drawable.people_white_active;
-		} else if ("Community".equals(category)) {
-			return R.drawable.community_white_active;
-		} else if ("Sports".equals(category)) {
-			return R.drawable.sports_white_active;
-		} else if ("Food".equals(category)) {
-			return R.drawable.food_white_active;
-		} else if ("Public Safety".equals(category)) {
-			return R.drawable.public_saftey_white_active;
-		} else { // Arts and Life
-			return R.drawable.arts_and_life_white_active;
-		}
-	}
-
-	/* ***** GET THEME RESOURCES BY CATEGORY END ***** */
-
 }

@@ -52,7 +52,7 @@ import com.nooz.nooz.widget.CameraPreview;
 /**
  * 
  * @author Rob Stein
- *
+ * 
  */
 public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 
@@ -113,7 +113,7 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
 			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 		}
-		
+
 		// Create our Preview view and set it as the content of our activity.
 		mCameraPreview = new CameraPreview(this, mCamera);
 		mFrameLayoutPreview = (FrameLayout) findViewById(R.id.camera_preview);

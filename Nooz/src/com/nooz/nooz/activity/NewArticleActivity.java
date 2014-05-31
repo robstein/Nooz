@@ -41,14 +41,12 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
-import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
-import com.nooz.nooz.util.Tools;
 
 /**
  * 
  * @author Rob Stein
- *
+ * 
  */
 public class NewArticleActivity extends BaseActivity implements OnClickListener {
 
