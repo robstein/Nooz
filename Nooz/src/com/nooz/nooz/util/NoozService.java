@@ -33,6 +33,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.activity.LoginActivity;
+import com.nooz.nooz.activity.MapActivity;
 import com.nooz.nooz.model.FilterSettings;
 import com.nooz.nooz.model.Story;
 
@@ -221,8 +222,13 @@ public class NoozService {
 		preferencesEditor.apply();
 
 		// Clear the user and return to the login activity
+		// In order to return to the login activity without leaving some other
+		// activity (namely MapActivity) on the Activity stack, we point our
+		// intent to MapActivity and have a special logout case in its onCreate
 		mClient.logout();
-		Intent logoutIntent = new Intent(mContext, LoginActivity.class);
+		Intent logoutIntent = new Intent(mContext, MapActivity.class);
+		logoutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		logoutIntent.putExtra("finish", true);
 		mContext.startActivity(logoutIntent);
 		((Activity) mContext).finish();
 	}

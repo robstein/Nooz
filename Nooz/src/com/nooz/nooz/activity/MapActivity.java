@@ -84,7 +84,7 @@ import com.nooz.nooz.widget.PagerContainer;
 /**
  * 
  * @author Rob Stein
- *
+ * 
  */
 public class MapActivity extends BaseFragmentActivity implements OnClickListener, OnMapClickListener,
 		OnCameraChangeListener, GooglePlayServicesClient.ConnectionCallbacks,
@@ -188,6 +188,21 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		boolean finish = getIntent().getBooleanExtra("finish", false);
+		if (finish) {
+			Intent logoutIntent = new Intent(mContext, LoginActivity.class);
+			mContext.startActivity(logoutIntent);
+			startActivity(logoutIntent);
+			SharedPreferences settings = getSharedPreferences("map_settings", MODE_PRIVATE);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putFloat("latitude", (float) USA.latitude);
+			editor.putFloat("longitude", (float) USA.longitude);
+			editor.putFloat("zoom", (float) ZOOM_USA);
+			editor.putInt("current_story", 0);
+			editor.commit();
+			finish();
+			return;
+		}
 		setContentView(R.layout.activity_map);
 
 		// Initialize stories, their circles, and their icons so that we don't
@@ -322,7 +337,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		registerReceiver(receiver, filter);
 
 		setUpMapIfNeeded();
-		
+
 		SharedPreferences userData = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
 		mButtonProfile.setText(userData.getString("user_name", ""));
 
@@ -343,7 +358,7 @@ public class MapActivity extends BaseFragmentActivity implements OnClickListener
 		}
 		mResumeStory = settings.getInt("current_story", 0);
 		mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), zoom));
-		
+
 		clearAndPopulateStories();
 	}
 

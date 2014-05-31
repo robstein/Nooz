@@ -178,6 +178,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 			if (exception == null) {
 				String email = jsonObject.getAsJsonPrimitive("email").getAsString();
 				String password = jsonObject.getAsJsonPrimitive("password").getAsString();
+				mSignupFormsUp = false;
 				mNoozService.login(email, password, onLogin);
 			} else {
 				Log.e(TAG, "There was an error registering the user: " + exception.getMessage());
@@ -198,6 +199,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 				mNoozService.setUserAndSaveDataLogin(jsonObject);
 				Intent loggedInIntent = new Intent(getApplicationContext(), MapActivity.class);
 				startActivity(loggedInIntent);
+				mLoginFormsUp = false;
 				finish();
 			} else {
 				Log.e(TAG, "Error loggin in: " + exception.getMessage());
@@ -239,7 +241,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
 		} else if (mLoginFormsUp) {
 			goBackFromLogin();
 		} else {
-			finish();
+			super.onBackPressed();
 		}
 	}
 
