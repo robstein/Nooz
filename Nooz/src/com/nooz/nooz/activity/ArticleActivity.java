@@ -41,7 +41,7 @@ import com.nooz.nooz.util.Tools;
  * @author Rob Stein
  *
  */
-public class ArticleActivity extends BaseActivity implements OnClickListener {
+public class ArticleActivity extends BaseLocationFragmentActivity implements OnClickListener {
 	private static final String TAG = "ArticleActivity";
 
 	private static int COLOR_PEOPLE;
@@ -389,7 +389,7 @@ public class ArticleActivity extends BaseActivity implements OnClickListener {
 		} else if (mIrrelevant) {
 			input = -1;
 		}
-		mNoozService.saveRelevanceInput(mStory.id, input, onSaveRelevance);
+		mNoozService.saveRelevanceInput(mStory.id, input, mCurrentLocation, onSaveRelevance);
 	}
 
 	TableJsonOperationCallback onSaveRelevance = new TableJsonOperationCallback() {

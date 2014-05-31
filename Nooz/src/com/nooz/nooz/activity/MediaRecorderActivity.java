@@ -54,8 +54,7 @@ import com.nooz.nooz.widget.CameraPreview;
  * @author Rob Stein
  *
  */
-public class MediaRecorderActivity extends BaseFragmentActivity implements
-		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
+public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 
 	private static final String TAG = "MediaRecorderActivity";
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
@@ -77,8 +76,6 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	private ImageView mButtonCapturePicture;
 	private ImageView mButtonRecordVideo;
 
-	private LocationClient mLocationClient;
-	private Location mCurrentLocation;
 	private int mScreenWidthInPixels;
 	protected MediaMode mMode = MediaMode.PICTURE;
 	protected boolean mIsRecordingAudio = false;
@@ -140,8 +137,6 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 		mButtonRecordVideo = (ImageView) findViewById(R.id.btn_record_video);
 		mButtonRecordVideo.setOnTouchListener(new VideoButtonTouchListner());
 
-		//
-		mLocationClient = new LocationClient(this, this, this);
 	}
 
 	/** A safe way to get an instance of the Camera object. */
@@ -162,22 +157,6 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
-		// Connect the client.
-		if (servicesConnected()) {
-			mLocationClient.connect();
-		}
-	}
-
-	/*
-	 * Called by Location Services when the request to connect the client
-	 * finishes successfully. At this point, you can request the current
-	 * location or start periodic updates
-	 */
-	@Override
-	public void onConnected(Bundle connectionHint) {
-		// Display the connection status
-		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-		mCurrentLocation = mLocationClient.getLastLocation();
 	}
 
 	@Override
@@ -206,19 +185,7 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	 */
 	@Override
 	protected void onStop() {
-		// Disconnecting the client invalidates it.
-		mLocationClient.disconnect();
 		super.onStop();
-	}
-
-	/*
-	 * Called by Location Services if the connection to the location client
-	 * drops because of an error.
-	 */
-	@Override
-	public void onDisconnected() {
-		// Display the connection status
-		Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
 	}
 
 	/* ***** ACTIVITY SETUP END ***** */
@@ -583,93 +550,5 @@ public class MediaRecorderActivity extends BaseFragmentActivity implements
 	}
 
 	/* ***** CONTROL BUTTON ONTOUCHLISTENERS END ***** */
-
-	/* ***** GOOGLE PLAY SERVICES BLOAT BEGIN ***** */
-
-	/*
-	 * Handle results returned to the FragmentActivity by Google Play services
-	 */
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// Decide what to do based on the original request code
-		switch (requestCode) {
-		case CONNECTION_FAILURE_RESOLUTION_REQUEST:
-			/*
-			 * If the result code is Activity.RESULT_OK, try to connect again
-			 */
-			switch (resultCode) {
-			case Activity.RESULT_OK:
-				/*
-				 * Try the request again
-				 */
-				break;
-			}
-		}
-	}
-
-	private boolean servicesConnected() {
-		// Check that Google Play services is available
-		int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-		// If Google Play services is available
-		if (ConnectionResult.SUCCESS == resultCode) {
-			// In debug mode, log the status
-			Log.d("Location Updates", "Google Play services is available.");
-			// Continue
-			return true;
-			// Google Play services was not available for some reason
-		} else {
-			// Get the error dialog from Google Play services
-			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-					CONNECTION_FAILURE_RESOLUTION_REQUEST);
-
-			// If Google Play services can provide an error dialog
-			if (errorDialog != null) {
-				// Create a new DialogFragment for the error dialog
-				ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-				// Set the dialog in the DialogFragment
-				errorFragment.setDialog(errorDialog);
-				// Show the error dialog in the DialogFragment
-				errorFragment.show(getSupportFragmentManager(), "Location Updates");
-			}
-			return false;
-		}
-	}
-
-	/*
-	 * Called by Location Services if the attempt to Location Services fails.
-	 */
-	@Override
-	public void onConnectionFailed(ConnectionResult connectionResult) {
-		/*
-		 * Google Play services can resolve some errors it detects. If the error
-		 * has a resolution, try sending an Intent to start a Google Play
-		 * services activity that can resolve error.
-		 */
-		if (connectionResult.hasResolution()) {
-			try {
-				// Start an Activity that tries to resolve the error
-				connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
-				/*
-				 * Thrown if Google Play services canceled the original
-				 * PendingIntent
-				 */
-			} catch (IntentSender.SendIntentException e) {
-				// Log the error
-				e.printStackTrace();
-			}
-		} else {
-			/*
-			 * If no resolution is available, display a dialog to the user with
-			 * the error.
-			 */
-			showErrorDialog(connectionResult.getErrorCode());
-		}
-	}
-
-	void showErrorDialog(int code) {
-		GooglePlayServicesUtil.getErrorDialog(code, this, REQUEST_CODE_RECOVER_PLAY_SERVICES).show();
-	}
-
-	/* ***** GOOGLE PLAY SERVICES BLOAT END ***** */
 
 }

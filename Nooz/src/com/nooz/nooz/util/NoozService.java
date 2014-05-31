@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.util.Log;
 import android.util.Pair;
 import android.webkit.CookieManager;
@@ -240,17 +241,20 @@ public class NoozService {
 	 *            the story id
 	 * @param input
 	 *            the input: -1, 0, or 1
+	 * @param currentLocation 
 	 * @param callback
 	 *            the callback function
 	 */
-	public void saveRelevanceInput(String storyId, Integer input, TableJsonOperationCallback callback) {
-		JsonObject story = new JsonObject();
-		story.addProperty("story_id", storyId);
-		story.addProperty("user_id", mClient.getCurrentUser().getUserId());
-		story.addProperty("input", input);
+	public void saveRelevanceInput(String storyId, Integer input, Location currentLocation, TableJsonOperationCallback callback) {
+		JsonObject relevanceinput = new JsonObject();
+		relevanceinput.addProperty("story_id", storyId);
+		relevanceinput.addProperty("user_id", mClient.getCurrentUser().getUserId());
+		relevanceinput.addProperty("input", input);
+		relevanceinput.addProperty("lat", currentLocation.getLatitude());
+		relevanceinput.addProperty("lng", currentLocation.getLongitude());
 		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("postRelevanceInput", "true"));
-		mTableRelevance.insert(story, parameters, callback);
+		mTableRelevance.insert(relevanceinput, parameters, callback);
 	}
 
 	/**
