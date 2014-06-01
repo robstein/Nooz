@@ -15,14 +15,14 @@ import com.nooz.nooz.R;
  */
 public class ProfileActivity extends BaseActivity implements OnClickListener {
 
-	ImageView mButtonBack;
-	TextView mProfileName;
-	TextView mProfileLocation;
-	ImageView mProfilePictureFull;
-	ImageView mButtonProfileCup;
-	TextView mButtonProfileNumbers;
-	ImageView mButtonProfilePersons;
-	ImageView mButtonProfileSettings;
+	private ImageView mButtonBack;
+	private TextView mProfileName;
+	private TextView mProfileLocation;
+	private ImageView mProfilePictureFull;
+	private ImageView mButtonProfileCup;
+	private TextView mButtonProfileNumbers;
+	private ImageView mButtonProfilePersons;
+	private ImageView mButtonProfileSettings;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

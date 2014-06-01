@@ -68,6 +68,7 @@ import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.BubbleSizer;
 import com.nooz.nooz.util.CategoryResourceHelper;
+import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.util.GlobeTrigonometry;
 import com.nooz.nooz.util.SearchType;
 import com.nooz.nooz.util.Tools;
@@ -88,11 +89,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 	private static final boolean SHADE = false;
 	private static final LatLng USA = new LatLng(37.09024, -95.712891);
 	private static final int ZOOM_USA = 3;
-	private static final int TOP_LEFT = 0;
-	private static final int TOP_RIGHT = 1;
-	private static final int BOTTOM_LEFT = 2;
-	private static final int BOTTOM_RIGHT = 3;
-	private static final String CONTAINER_NAME = "media";
 
 	// Animations
 	private Animation mSlideInBottom;
@@ -603,7 +599,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 		drawCirlesOnMap();
 		mPager.setCurrentItem(mResumeStory);
 		// Get pictures
-		mNoozService.getBlobSases(CONTAINER_NAME, mStories);
+		mNoozService.getBlobSases(GlobalConstant.CONTAINER_NAME, mStories);
 	}
 
 	private void getStoryImageCallBack(int i) {

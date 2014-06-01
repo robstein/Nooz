@@ -45,6 +45,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.Alert;
+import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.util.MediaMode;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.CameraPreview;
@@ -57,12 +58,9 @@ import com.nooz.nooz.widget.CameraPreview;
 public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 
 	private static final String TAG = "MediaRecorderActivity";
-	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-	private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
 	public static final int MEDIA_TYPE_AUDIO = 0;
 	public static final int MEDIA_TYPE_IMAGE = 1;
 	public static final int MEDIA_TYPE_VIDEO = 2;
-	public static final int TOP_BAR_HEIGHT = 61;
 	private static final int COLOR_RED = 0xFFFF0000;
 	private static final int COLOR_WHITE = 0xFFFFFFFF;
 
@@ -96,7 +94,7 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 		mMediaControlLayer = (LinearLayout) findViewById(R.id.media_control_layer);
 		RelativeLayout.LayoutParams controlLayoutParams = (RelativeLayout.LayoutParams) mMediaControlLayer
 				.getLayoutParams();
-		controlLayoutParams.setMargins(0, (int) Tools.dipToPixels(this, TOP_BAR_HEIGHT) + mScreenWidthInPixels, 0, 0);
+		controlLayoutParams.setMargins(0, (int) Tools.dipToPixels(this, GlobalConstant.TOP_BAR_HEIGHT) + mScreenWidthInPixels, 0, 0);
 		mMediaControlLayer.setLayoutParams(controlLayoutParams);
 
 		// Create an instance of Camera

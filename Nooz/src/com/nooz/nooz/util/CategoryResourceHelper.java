@@ -22,6 +22,8 @@ public class CategoryResourceHelper {
 	private static final int COLOR_FOOD_STROKE = 0xFF83D193;
 	private static final int COLOR_PUBLIC_SAFETY_STROKE = 0xFFEEAF7A;
 	private static final int COLOR_ARTS_AND_LIFE_STROKE = 0xFFAE7DCE;
+	
+	public static final int COLOR_WHITE = 0xFFFFFFFF;
 
 	public static int getColorByCategory(String category, boolean highlight) {
 		int retval;

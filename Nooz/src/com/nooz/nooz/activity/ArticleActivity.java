@@ -35,6 +35,7 @@ import com.nooz.nooz.R;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.CategoryResourceHelper;
+import com.nooz.nooz.util.GlobalConstant;
 
 /**
  * 
@@ -43,9 +44,6 @@ import com.nooz.nooz.util.CategoryResourceHelper;
  */
 public class ArticleActivity extends BaseLocationFragmentActivity implements OnClickListener {
 	private static final String TAG = "ArticleActivity";
-
-	private static final int COLOR_WHITE = 0xFFFFFFFF;
-	private static final String CONTAINER_NAME = "media";
 
 	private ImageView mArticleCategoryLogo;
 	private TextView mArticleCategory;
@@ -77,6 +75,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 
 	/* ***** ACTIVITY SETUP BEGIN ***** */
 
+	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +83,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		setContentView(R.layout.activity_article);
 		Bundle bundle = getIntent().getParcelableExtra("bundle");
 		mStory = bundle.getParcelable("story");
-		mNoozService.getBlobSas(CONTAINER_NAME, mStory.id);
+		mNoozService.getBlobSas(GlobalConstant.CONTAINER_NAME, mStory.id);
 
 		mArticleCategoryLogo = (ImageView) findViewById(R.id.article_category_logo);
 		mArticleCategory = (TextView) findViewById(R.id.article_category);
@@ -278,7 +277,6 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	 */
 	private class AudioFetcherTask extends AsyncTask<Void, Void, Boolean> {
 		private String mUrl;
-		private Bitmap mBitmap;
 
 		public AudioFetcherTask(String url) {
 			mUrl = url;
@@ -394,6 +392,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		}
 	};
 
+	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	private void invertRelevant() {
 		if (mRelevant) {
@@ -409,7 +408,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 				mButtonRelevant.setBackgroundDrawable(button);
 				mRelevanceScore.setBackgroundDrawable(scoreCircle);
 			}
-			mRelevanceScore.setTextColor(COLOR_WHITE);
+			mRelevanceScore.setTextColor(CategoryResourceHelper.COLOR_WHITE);
 			mRelevanceLabel.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
 			mRelevant = false;
 		} else {
@@ -419,7 +418,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 			Drawable scoreCircle = getResources().getDrawable(
 					CategoryResourceHelper.getScoreBackgroundByCategory(mStory.category));
 			button.setColorFilter(CategoryResourceHelper.getColorByCategory(mStory.category), Mode.MULTIPLY);
-			scoreCircle.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+			scoreCircle.setColorFilter(CategoryResourceHelper.COLOR_WHITE, Mode.SRC_ATOP);
 			if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
 				mButtonRelevant.setBackground(button);
 				mRelevanceScore.setBackground(scoreCircle);
@@ -428,11 +427,12 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 				mRelevanceScore.setBackgroundDrawable(scoreCircle);
 			}
 			mRelevanceScore.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
-			mRelevanceLabel.setTextColor(COLOR_WHITE);
+			mRelevanceLabel.setTextColor(CategoryResourceHelper.COLOR_WHITE);
 			mRelevant = true;
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	private void invertIrrelevant() {
 		if (mIrrelevant) {
@@ -448,7 +448,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 				mButtonIrrelevant.setBackgroundDrawable(button);
 				mIrrelevanceScore.setBackgroundDrawable(scoreCircle);
 			}
-			mIrrelevanceScore.setTextColor(COLOR_WHITE);
+			mIrrelevanceScore.setTextColor(CategoryResourceHelper.COLOR_WHITE);
 			mIrrelevanceLabel.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
 			mIrrelevant = false;
 		} else {
@@ -458,7 +458,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 			Drawable scoreCircle = getResources().getDrawable(
 					CategoryResourceHelper.getScoreBackgroundByCategory(mStory.category));
 			button.setColorFilter(CategoryResourceHelper.getColorByCategory(mStory.category), Mode.MULTIPLY);
-			scoreCircle.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
+			scoreCircle.setColorFilter(CategoryResourceHelper.COLOR_WHITE, Mode.SRC_ATOP);
 			if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
 				mButtonIrrelevant.setBackground(button);
 				mIrrelevanceScore.setBackground(scoreCircle);
@@ -467,7 +467,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 				mIrrelevanceScore.setBackgroundDrawable(scoreCircle);
 			}
 			mIrrelevanceScore.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
-			mIrrelevanceLabel.setTextColor(COLOR_WHITE);
+			mIrrelevanceLabel.setTextColor(CategoryResourceHelper.COLOR_WHITE);
 			mIrrelevant = true;
 		}
 	}

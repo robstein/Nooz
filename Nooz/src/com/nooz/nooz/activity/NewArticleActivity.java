@@ -42,6 +42,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.Alert;
+import com.nooz.nooz.util.GlobalConstant;
 
 /**
  * 
@@ -51,7 +52,6 @@ import com.nooz.nooz.util.Alert;
 public class NewArticleActivity extends BaseActivity implements OnClickListener {
 
 	private static final String TAG = "NewArticleActivity";
-	private static final String CONTAINER_NAME = "media";
 
 	private LinearLayout mLayoutStoryDetails;
 	private ImageView mNewArticleImage;
@@ -80,8 +80,6 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 	Bitmap mBitmap;
 
 	private String mMedium;
-
-	public static final int TOP_BAR_HEIGHT = 61;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -215,7 +213,7 @@ public class NewArticleActivity extends BaseActivity implements OnClickListener 
 		public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
 			if (exception == null) {
 				String story_id = jsonObject.getAsJsonPrimitive("id").getAsString();
-				mNoozService.getSasForNewBlob(CONTAINER_NAME, story_id);
+				mNoozService.getSasForNewBlob(GlobalConstant.CONTAINER_NAME, story_id);
 			} else {
 				removeSplashLoadingScreen();
 				Log.e(TAG, "Error posting story in: " + exception.getMessage());
