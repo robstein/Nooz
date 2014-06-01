@@ -90,6 +90,10 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 	private static final LatLng USA = new LatLng(37.09024, -95.712891);
 	private static final int ZOOM_USA = 3;
 
+	// Colors
+	private static final int SEARCH_TYPE_ACTIVE_COLOR = 0xFF000000;
+	private static final int SEARCH_TYPE_FADED_COLOR = 0xFF979797;
+
 	// Animations
 	private Animation mSlideInBottom;
 	private Animation mSlideOutBottom;
@@ -97,10 +101,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 	private Animation mSlideOutLeft;
 	private Animation mFadeIn;
 	private Animation mFadeOut;
-
-	// Colors
-	private static final int SEARCH_TYPE_ACTIVE_COLOR = 0xFF000000;
-	private static final int SEARCH_TYPE_FADED_COLOR = 0xFF979797;
 
 	// Main map views
 	private RelativeLayout mMapContainer;
@@ -144,14 +144,50 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 	private Integer mCurrentStory = 0;
 	private int mResumeStory = 0;
 
-	//
-	private float mPreviousZoomLevel = -1.0f; // Init to a non-valid zoom value
-	private boolean mIsZooming = false;
+	/* Other fields */
+	/**
+	 * Used to store zoom level on camera updates. Is compared with current zoom
+	 * level to determine if we should resize bubbles. Initialized to a
+	 * non-valid zoom value.
+	 */
+	private float mPreviousZoomLevel = -1.0f;
+
+	/**
+	 * Stores the current SearchType: "RELEVANT" or "BREAKING"
+	 * 
+	 * @see com.nooz.nooz.util.SearchType
+	 */
 	private SearchType mCurrentSearchType = SearchType.RELEVANT;
+
+	/**
+	 * Boolean representation of whether or not the settings menu is currently
+	 * open.
+	 */
 	private Boolean settingsMenuIsOpen = false;
+
+	/**
+	 * Boolean representation of whether or not the filters menu is currently
+	 * open.
+	 */
 	private Boolean filtersMenuIsOpen = false;
+
+	/**
+	 * Screen width in pixels measured in onCreate via
+	 * getWindowManager().getDefaultDisplay().getSize(Point). Used to compute
+	 * the footer layout parameters to make the pager the correct height across
+	 * various devices. Also used to compute the map width in meters.
+	 */
 	private int mScreenWidthInPixels;
+
+	/**
+	 * Updated on zoom changes. Is used to determine size of bubbles.
+	 */
 	private double mMapWidthInMeters;
+
+	/**
+	 * A FilterSettings instance representing the user's current search
+	 * settings.
+	 */
 	private FilterSettings mFilterSettings;
 
 	/* ***** APP SETUP BEGIN ***** */
@@ -339,19 +375,31 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 		editor.putInt("current_story", mCurrentStory);
 		editor.commit();
 
-		mStories.clear();
-		clearMap();
-		mFooterAdapter.notifyDataSetChanged();
+		clearStories();
 
 		super.onPause();
 	}
 
 	/**
-	 * Clears all elements in the Circles and GroundOverlay Lists as well as
-	 * removes the objects from the GMap. Removing the objects in this way
-	 * solved the huge ass
-	 * "java.lang.IllegalArgumentException: Released unknown bitmap reference"
-	 * bug
+	 * Clears mStories, mCircles, and mGroundOverlays.
+	 * <p>
+	 * First clears mStories, then calls clearMap(), then notifies the footer
+	 * adapter that its data has changed, and then invokes clearMap().
+	 * 
+	 * @see #clearMap()
+	 */
+	private void clearStories() {
+		// Clear Stories list
+		mStories.clear();
+		// Notify adapter that data has changed.
+		mFooterAdapter.notifyDataSetChanged();
+		// Clear map
+		clearMap();
+	}
+
+	/**
+	 * Removes each of the Circle and GroundOverlay objects from the Google Map,
+	 * and then clears all elements in the Circles and GroundOverlay Lists.
 	 **/
 	private void clearMap() {
 		for (Circle c : mCircles) {
@@ -582,45 +630,9 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 	/* ***** STORIES BEGIN ***** */
 
 	private void clearAndPopulateStories() {
-		// Clear Stories list
-		mStories.clear();
-		// Clear map
-		clearMap();
-		// Notify adapter that data has changed.
-		mFooterAdapter.notifyDataSetChanged();
+		clearStories();
 		LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 		mNoozService.getAllStories(bounds, mFilterSettings, mCurrentSearchType);
-	}
-
-	private void getStoriesCallBack() {
-		mStories = mNoozService.getLoadedStories();
-		// Reset footer
-		mFooterAdapter.notifyDataSetChanged();
-		drawCirlesOnMap();
-		mPager.setCurrentItem(mResumeStory);
-		// Get pictures
-		mNoozService.getBlobSases(GlobalConstant.CONTAINER_NAME, mStories);
-	}
-
-	private void getStoryImageCallBack(int i) {
-		// Load the image using the SAS URL
-		JsonObject blob = mNoozService.getLoadedStoryImage(i);
-		String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();
-		sasUrl = sasUrl.replace("\"", "");
-		if ("PICTURE".equals(mStories.get(i).medium)) {
-			(new ImageFetcherTask(sasUrl, i)).execute();
-		}
-		if ("VIDEO".equals(mStories.get(i).medium)) {
-
-		}
-		if ("AUDIO".equals(mStories.get(i).medium)) {
-			View v = mPager.findViewWithTag(i);
-			ProgressBar loading = (ProgressBar) v.findViewById(R.id.loading);
-			loading.setVisibility(View.GONE);
-
-			ImageView mic = (ImageView) v.findViewById(R.id.story_medium_icon);
-			mic.setImageDrawable(getResources().getDrawable(R.drawable.mic_small));
-		}
 	}
 
 	/**
@@ -690,7 +702,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 	private void drawBubble(double lat, double lng, double radius, String category) {
 
 		final double targetRadius = radius;
-		final long duration = 4000;
+		final long duration = 2000;
 		final Handler handler = new Handler();
 		final long start = SystemClock.uptimeMillis();
 		final double startRadius = 0;
@@ -746,7 +758,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
 
 			final double targetRadius = newRadius;
-			final long duration = 4000;
+			final long duration = 2000;
 			final Handler handler = new Handler();
 			final long start = SystemClock.uptimeMillis();
 			final double startRadius = s.radius;
@@ -1098,4 +1110,36 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnClick
 	}
 
 	/* ***** SEARCH TYPE END ***** */
+
+	public void getStoriesCallBack() {
+		mStories = mNoozService.getLoadedStories();
+		// Reset footer
+		mFooterAdapter.notifyDataSetChanged();
+		drawCirlesOnMap();
+		mPager.setCurrentItem(mResumeStory);
+		// Get pictures
+		mNoozService.getBlobSases(GlobalConstant.CONTAINER_NAME, mStories);
+	}
+
+	public void getStoryImageCallBack(int i) {
+		// Load the image using the SAS URL
+		JsonObject blob = mNoozService.getLoadedStoryImage(i);
+		String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();
+		sasUrl = sasUrl.replace("\"", "");
+		if ("PICTURE".equals(mStories.get(i).medium)) {
+			(new ImageFetcherTask(sasUrl, i)).execute();
+		}
+		if ("VIDEO".equals(mStories.get(i).medium)) {
+
+		}
+		if ("AUDIO".equals(mStories.get(i).medium)) {
+			View v = mPager.findViewWithTag(i);
+			ProgressBar loading = (ProgressBar) v.findViewById(R.id.loading);
+			loading.setVisibility(View.GONE);
+
+			ImageView mic = (ImageView) v.findViewById(R.id.story_medium_icon);
+			mic.setImageDrawable(getResources().getDrawable(R.drawable.mic_small));
+		}
+	}
+
 }

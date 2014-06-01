@@ -24,7 +24,7 @@ import com.nooz.nooz.util.Alert;
  * @author Rob Stein
  *
  */
-public class LoginActivity extends BaseActivity implements OnClickListener {
+public class LoginActivity extends BaseFragmentActivity implements OnClickListener {
 
 	private static final String TAG = "LoginActivity";
 

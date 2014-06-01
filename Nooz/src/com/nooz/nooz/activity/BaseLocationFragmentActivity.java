@@ -19,16 +19,16 @@ public class BaseLocationFragmentActivity extends BaseFragmentActivity implement
 
 	private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	private static final int REQUEST_CODE_RECOVER_PLAY_SERVICES = 1001;
-	
+
 	protected LocationClient mLocationClient;
 	protected Location mCurrentLocation;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mLocationClient = new LocationClient(this, this, this);
 	}
-	
+
 	/*
 	 * Called when the Activity becomes visible.
 	 */
@@ -40,7 +40,7 @@ public class BaseLocationFragmentActivity extends BaseFragmentActivity implement
 			mLocationClient.connect();
 		}
 	}
-	
+
 	/*
 	 * Called when the Activity is no longer visible.
 	 */
@@ -52,7 +52,6 @@ public class BaseLocationFragmentActivity extends BaseFragmentActivity implement
 		super.onStop();
 	}
 
-	
 	/*
 	 * Called by Location Services when the request to connect the client
 	 * finishes successfully. At this point, you can request the current
@@ -64,7 +63,7 @@ public class BaseLocationFragmentActivity extends BaseFragmentActivity implement
 		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
 		mCurrentLocation = mLocationClient.getLastLocation();
 	}
-	
+
 	/*
 	 * Called by Location Services if the connection to the location client
 	 * drops because of an error.

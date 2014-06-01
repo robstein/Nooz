@@ -13,7 +13,7 @@ import com.nooz.nooz.R;
  * @author Rob Stein
  * 
  */
-public class ProfileActivity extends BaseActivity implements OnClickListener {
+public class ProfileActivity extends BaseFragmentActivity implements OnClickListener {
 
 	private ImageView mButtonBack;
 	private TextView mProfileName;
@@ -45,6 +45,7 @@ public class ProfileActivity extends BaseActivity implements OnClickListener {
 		mButtonProfilePersons.setOnClickListener(this);
 		mButtonProfileSettings = (ImageView) findViewById(R.id.button_profile_settings);
 		mButtonProfileSettings.setOnClickListener(this);
+
 	}
 
 	@Override

@@ -49,7 +49,7 @@ import com.nooz.nooz.util.GlobalConstant;
  * @author Rob Stein
  * 
  */
-public class NewArticleActivity extends BaseActivity implements OnClickListener {
+public class NewArticleActivity extends BaseFragmentActivity implements OnClickListener {
 
 	private static final String TAG = "NewArticleActivity";
 
