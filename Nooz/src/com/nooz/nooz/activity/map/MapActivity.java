@@ -404,7 +404,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	protected void onPause() {
 		unRegisterReceivers();
 		saveSettings();
-		mStoryDataController.clearStories();
 
 		super.onPause();
 	}
