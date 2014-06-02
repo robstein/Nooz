@@ -11,7 +11,7 @@ import android.view.View.OnClickListener;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.ArticleActivity;
 import com.nooz.nooz.activity.MediaRecorderActivity;
-import com.nooz.nooz.activity.ProfileActivity;
+import com.nooz.nooz.activity.profile.ProfileActivity;
 import com.nooz.nooz.util.Alert;
 
 public class MapActivityOnClickListener implements OnClickListener {
@@ -58,13 +58,15 @@ public class MapActivityOnClickListener implements OnClickListener {
 			mC.mMenuController.hideFiltersLayout();
 			break;
 		case R.id.button_profile:
+			Intent profileIntent = new Intent(mC.getApplicationContext(), ProfileActivity.class);
+			Bundle args = new Bundle();
+			args.putString("user_id", mC.mUserId);
+			profileIntent.putExtra("bundle", args);
 			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-				Intent profileIntent = new Intent(mC.getApplicationContext(), ProfileActivity.class);
 				Bundle bndlanimation = ActivityOptions.makeCustomAnimation(mC.getApplicationContext(),
 						R.anim.slide_in_left, R.anim.fade_out).toBundle();
 				mC.startActivity(profileIntent, bndlanimation);
 			} else {
-				Intent profileIntent = new Intent(mC.getApplicationContext(), ProfileActivity.class);
 				mC.startActivity(profileIntent);
 			}
 		}

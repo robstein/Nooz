@@ -14,6 +14,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -51,7 +52,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.LoginActivity;
-import com.nooz.nooz.model.FilterSettings;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.CategoryResourceHelper;
 import com.nooz.nooz.util.Tools;
@@ -115,6 +115,13 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	Integer mResumeStory;
 
 	/* Other fields */
+
+	/**
+	 * We hold onto the user's Id because when the user access the profile page,
+	 * we pass it along to that activity.
+	 */
+	String mUserId;
+
 	/**
 	 * Used to store zoom level on camera updates. Is compared with current zoom
 	 * level to determine if we should resize bubbles. Initialized to a
@@ -190,7 +197,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		if (handleLogoutIntent()) {
 			return;
 		}
-		
+
 		initFields();
 		initViews();
 		initViewListeners();
@@ -209,7 +216,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		mFilterSettingsToggler = new FilterSettingsToggler(this);
 		mOnStorySwipe = new StoryAdapterPageChangeListener(this);
 		mStoryDataController = new StoryDataController(this);
-		mMenuController = new MapMenusController(this);		
+		mMenuController = new MapMenusController(this);
 	}
 
 	/**
@@ -368,6 +375,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	private void getUserData() {
 		SharedPreferences userData = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
 		mButtonProfile.setText(userData.getString("user_name", ""));
+		mUserId = userData.getString("userid", null);
 	}
 
 	private void restoreSettings() {
@@ -466,9 +474,11 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	void drawCirlesOnMap() {
 		int i = 0;
 		for (Story s : mStories) {
-			//double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
+			// double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(),
+			// mMapWidthInMeters);
 			// Force bubble size at zoom 13
-			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, 13));
+			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(),
+					GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, 13));
 			s.setRadius(newRadius);
 			mStories.get(i).setRadius(newRadius);
 			drawBubble(s.lat, s.lng, s.radius, s.category);
@@ -504,18 +514,15 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	}
 
 	/*
-	private void updateBubbleSizes() {
-		int i = 0;
-		for (Story s : mStories) {
-			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
-
-			mStories.get(i).setRadius(newRadius);
-			mCircles.get(i).setRadius(newRadius);
-			mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int) (newRadius * 3 / 4));
-			i++;
-		}
-	}
-	*/
+	 * private void updateBubbleSizes() { int i = 0; for (Story s : mStories) {
+	 * double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(),
+	 * mMapWidthInMeters);
+	 * 
+	 * mStories.get(i).setRadius(newRadius);
+	 * mCircles.get(i).setRadius(newRadius);
+	 * mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int)
+	 * (newRadius * 3 / 4)); i++; } }
+	 */
 
 	/* ***** BUBBLES END ***** */
 
@@ -556,7 +563,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		// Update Bubbles
 		if (mPreviousZoomLevel != position.zoom) {
 			mMapWidthInMeters = GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, position.zoom);
-			//updateBubbleSizes();
+			// updateBubbleSizes();
 		}
 		mPreviousZoomLevel = position.zoom;
 

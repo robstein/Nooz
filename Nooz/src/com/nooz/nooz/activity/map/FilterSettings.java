@@ -1,4 +1,4 @@
-package com.nooz.nooz.model;
+package com.nooz.nooz.activity.map;
 
 import com.nooz.nooz.R;
 

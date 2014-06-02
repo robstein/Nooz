@@ -32,8 +32,9 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
+import com.nooz.nooz.activity.map.FilterSettings;
 import com.nooz.nooz.activity.map.MapActivity;
-import com.nooz.nooz.model.FilterSettings;
+import com.nooz.nooz.model.ProfileInfo;
 import com.nooz.nooz.model.Story;
 
 /**
@@ -56,9 +57,9 @@ public class NoozService {
 	private MobileServiceJsonTable mTableBlobs;
 
 	private List<Story> mLoadedStories;
-
 	private JsonObject mLoadedBlob;
 	private HashMap<Integer, JsonObject> mStoryImages;
+	private ProfileInfo mLoadedProfileInfo;
 
 	/**
 	 * New NoozService.
@@ -239,11 +240,12 @@ public class NoozService {
 	 *            the story id
 	 * @param input
 	 *            the input: -1, 0, or 1
-	 * @param currentLocation 
+	 * @param currentLocation
 	 * @param callback
 	 *            the callback function
 	 */
-	public void saveRelevanceInput(String storyId, Integer input, Location currentLocation, TableJsonOperationCallback callback) {
+	public void saveRelevanceInput(String storyId, Integer input, Location currentLocation,
+			TableJsonOperationCallback callback) {
 		JsonObject relevanceinput = new JsonObject();
 		relevanceinput.addProperty("story_id", storyId);
 		relevanceinput.addProperty("user_id", mClient.getCurrentUser().getUserId());
@@ -511,6 +513,52 @@ public class NoozService {
 			}
 			i++;
 		}
+	}
+
+	public ProfileInfo getLoadedProfileInfo() {
+		return mLoadedProfileInfo;
+	}
+
+	/**
+	 * Queries Azure for stories. A list of Story objects will be loaded into
+	 * the NoozService and will be available from getLoadedStories() after a
+	 * broadcast intent is sent out.
+	 * 
+	 * @param bounds
+	 *            boundaries of the map
+	 * @param filterSettings
+	 *            filter settings
+	 * @param currentSearchType
+	 *            relevant or breaking
+	 * @see #getLoadedStories()
+	 */
+	public void getProfileInfo(String userId) {
+		JsonObject body = new JsonObject();
+		body.addProperty("user_id", userId);
+
+		mClient.invokeApi("getprofile", body, new ApiJsonOperationCallback() {
+
+			@Override
+			public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+				if (exception == null) {
+					ProfileInfo profileInfo = new Gson().fromJson(jsonObject, ProfileInfo.class);
+					mLoadedProfileInfo = profileInfo;
+
+					// In case we don't have location
+					if (profileInfo.homeLocation == null)
+						profileInfo.homeLocation = "";
+
+					Intent broadcast = new Intent();
+					broadcast.setAction(GlobalConstant.PROFILE_INFO_LOADED_ACTION);
+					mContext.sendBroadcast(broadcast);
+
+				} else {
+					Log.e(TAG, "There was an error retrieving profile info: " + exception.getMessage());
+				}
+			}
+
+		});
+
 	}
 
 }

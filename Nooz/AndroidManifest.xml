@@ -62,7 +62,7 @@
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
-            android:name="com.nooz.nooz.activity.ProfileActivity"
+            android:name="com.nooz.nooz.activity.profile.ProfileActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustPan" >
         </activity>
