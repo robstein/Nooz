@@ -32,7 +32,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.nooz.nooz.activity.MapActivity;
+import com.nooz.nooz.activity.map.MapActivity;
 import com.nooz.nooz.model.FilterSettings;
 import com.nooz.nooz.model.Story;
 

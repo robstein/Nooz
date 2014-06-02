@@ -43,7 +43,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.nooz.nooz.activity.MapActivity"
+            android:name="com.nooz.nooz.activity.map.MapActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" >
         </activity>
         <activity

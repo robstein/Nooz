@@ -17,6 +17,7 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
+import com.nooz.nooz.activity.map.MapActivity;
 import com.nooz.nooz.util.Alert;
 
 /**

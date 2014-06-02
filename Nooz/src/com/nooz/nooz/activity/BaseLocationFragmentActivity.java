@@ -23,6 +23,10 @@ public class BaseLocationFragmentActivity extends BaseFragmentActivity implement
 	protected LocationClient mLocationClient;
 	protected Location mCurrentLocation;
 
+	public Location getCurrentLocation() {
+		return mCurrentLocation;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

@@ -1,4 +1,4 @@
-package com.nooz.nooz.util;
+package com.nooz.nooz.activity.map;
 
 /**
  * Static class for Geo math.

@@ -32,6 +32,14 @@ public class BaseFragmentActivity extends FragmentActivity {
 
 		mContext = this;
 	}
+	
+	
+
+	public NoozService getNoozService() {
+		return mNoozService;
+	}
+
+
 
 	private static final String STORIES_TEXT_LOADED = "stories.loaded";
 	private static final String STORY_IMAGE_LOADED = "storyImage.loaded";
