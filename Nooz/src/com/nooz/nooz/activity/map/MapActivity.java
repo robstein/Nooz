@@ -466,7 +466,9 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	void drawCirlesOnMap() {
 		int i = 0;
 		for (Story s : mStories) {
-			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
+			//double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
+			// Force bubble size at zoom 13
+			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, 13));
 			s.setRadius(newRadius);
 			mStories.get(i).setRadius(newRadius);
 			drawBubble(s.lat, s.lng, s.radius, s.category);
@@ -476,17 +478,8 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 
 	private void drawBubble(double lat, double lng, double radius, String category) {
 
-		final double targetRadius = radius;
-		final long duration = 2000;
-		final Handler handler = new Handler();
-		final long start = SystemClock.uptimeMillis();
-		final double startRadius = 0;
-		final Interpolator interpolator = new LinearInterpolator();
-
 		CircleOptions circleOptions;
-		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(startRadius);
-		// circleOptions = new CircleOptions().center(new LatLng(lat,
-		// lng)).radius(targetRadius);
+		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(radius);
 		final Circle c = mMap.addCircle(circleOptions);
 		mCircles.add(c);
 
@@ -508,61 +501,21 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		}
 		GroundOverlay icon = mMap.addGroundOverlay(groundOverlayOptions);
 		mGroundOverlays.add(icon);
-
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				long elapsed = SystemClock.uptimeMillis() - start;
-				float t = interpolator.getInterpolation((float) elapsed / duration);
-				double r = Math.max(0, t * targetRadius + (1 - t) * startRadius);
-				c.setRadius(r);
-				if (t < 1.0) {
-					// Post again 16ms later == 60 frames per second
-					handler.postDelayed(this, 16);
-				} else {
-					// animation ended
-				}
-			}
-		});
-
 	}
 
+	/*
 	private void updateBubbleSizes() {
 		int i = 0;
 		for (Story s : mStories) {
 			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
 
-			final double targetRadius = newRadius;
-			final long duration = 2000;
-			final Handler handler = new Handler();
-			final long start = SystemClock.uptimeMillis();
-			final double startRadius = s.radius;
-			final Interpolator interpolator = new LinearInterpolator();
-
-			final Circle c = mCircles.get(i);
-
-			handler.post(new Runnable() {
-				@Override
-				public void run() {
-					long elapsed = SystemClock.uptimeMillis() - start;
-					float t = interpolator.getInterpolation((float) elapsed / duration);
-					double r = Math.max(0, t * targetRadius + (1 - t) * startRadius);
-					c.setRadius(r);
-					if (t < 1.0) {
-						// Post again 16ms later == 60 frames per second
-						handler.postDelayed(this, 16);
-					} else {
-						// animation ended
-					}
-				}
-			});
-
 			mStories.get(i).setRadius(newRadius);
-			// mCircles.get(i).setRadius(newRadius);
+			mCircles.get(i).setRadius(newRadius);
 			mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int) (newRadius * 3 / 4));
 			i++;
 		}
 	}
+	*/
 
 	/* ***** BUBBLES END ***** */
 
@@ -603,7 +556,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		// Update Bubbles
 		if (mPreviousZoomLevel != position.zoom) {
 			mMapWidthInMeters = GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, position.zoom);
-			updateBubbleSizes();
+			//updateBubbleSizes();
 		}
 		mPreviousZoomLevel = position.zoom;
 
