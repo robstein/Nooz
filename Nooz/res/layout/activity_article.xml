@@ -96,6 +96,7 @@
                     android:layout_below="@id/headline"
                     android:layout_marginTop="6dp"
                     android:contentDescription="Profile Picture"
+                    android:clickable="true"
                     android:src="@drawable/thumb_profile_example" />
 
                 <TextView
@@ -109,6 +110,7 @@
                     android:singleLine="true"
                     android:text="Default Author"
                     android:textColor="#FEFEFE"
+                    android:clickable="true"
                     android:textColorHint="#FEFEFE"
                     android:textSize="14sp" />
             </RelativeLayout>

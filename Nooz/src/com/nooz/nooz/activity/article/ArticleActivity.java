@@ -22,6 +22,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
+import com.nooz.nooz.activity.profile.ProfileLauncher;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.CategoryResourceHelper;
@@ -115,8 +116,10 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	}
 
 	private void initViewListeners() {
-		mArticleImage.setOnClickListener(this);
 		mArticleInfo.setOnClickListener(this);
+		mArticleImage.setOnClickListener(this);
+		mAuthorPicture.setOnClickListener(this);
+		mAuthor.setOnClickListener(this);
 		mButtonRelevant.setOnClickListener(this);
 		mButtonIrrelevant.setOnClickListener(this);
 		mButtonComments.setOnClickListener(this);
@@ -271,6 +274,12 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 			if (mLoaded) {
 				mMediaModule.onPlay();
 			}
+			break;
+		case R.id.author_picture:
+			ProfileLauncher.openProfile(this, mStory.authorId);
+			break;
+		case R.id.author:
+			ProfileLauncher.openProfile(this, mStory.authorId);
 			break;
 		case R.id.button_relevant:
 			clickRelevant();

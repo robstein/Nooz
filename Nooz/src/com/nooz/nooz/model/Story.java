@@ -23,6 +23,12 @@ public class Story implements Parcelable {
 	public String id;
 
 	/**
+	 * author id
+	 */
+	@SerializedName("authorId")
+	public String authorId;
+	
+	/**
 	 * story author's first name
 	 */
 	@SerializedName("firstName")
@@ -144,6 +150,7 @@ public class Story implements Parcelable {
 		dest.writeInt(scoreRelevance);
 		dest.writeInt(scoreIrrelevance);
 		dest.writeString(medium);
+		dest.writeString(authorId);
 
 		dest.writeDouble(radius);
 	}
@@ -172,6 +179,7 @@ public class Story implements Parcelable {
 		scoreRelevance = pc.readInt();
 		scoreIrrelevance = pc.readInt();
 		medium = pc.readString();
+		authorId = pc.readString();
 
 		radius = pc.readDouble();
 	}
@@ -475,5 +483,23 @@ public class Story implements Parcelable {
 	public void setBitmap(Bitmap bitmap) {
 		this.bitmap = bitmap;
 	}
+
+	/**
+	 * 
+	 * @return authorId
+	 */
+	public String getAuthorId() {
+		return authorId;
+	}
+
+	/**
+	 * 
+	 * @param authorId
+	 */
+	public void setAuthorId(String authorId) {
+		this.authorId = authorId;
+	}
+	
+	
 
 }
