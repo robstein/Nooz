@@ -1,7 +1,9 @@
 package com.nooz.nooz;
 
 import android.app.Activity;
+import android.content.Context;
 
+import com.nooz.nooz.util.BitmapLruCache;
 import com.nooz.nooz.util.NoozService;
 
 /**
@@ -40,6 +42,7 @@ public class NoozSingleton {
 
 	private Activity mCurrentActivity;
 	private NoozService mNoozService;
+	private BitmapLruCache mCache;
 
 	/**
 	 * 
@@ -68,5 +71,12 @@ public class NoozSingleton {
 			mNoozService = new NoozService(mCurrentActivity);
 		}
 		return mNoozService;
+	}
+
+	public BitmapLruCache getCache(Context context) {
+		if (mCache == null) {
+			mCache = new BitmapLruCache(context);
+		}
+		return mCache;
 	}
 }

@@ -251,7 +251,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 
 	private void initVolleyRequestQueue() {
 		mRequestQueue = Volley.newRequestQueue(this);
-		mImageLoader = new ImageLoader(mRequestQueue, new BitmapLruCache(this));		
+		mImageLoader = new ImageLoader(mRequestQueue, mCache);		
 	}
 	
 	@Override

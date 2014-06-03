@@ -2,7 +2,9 @@ package com.nooz.nooz;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 
+import com.nooz.nooz.util.BitmapLruCache;
 import com.nooz.nooz.util.NoozService;
 
 /**
@@ -50,5 +52,9 @@ public class NoozApplication extends Application {
 	 */
 	public NoozService getNoozService() {
 		return NoozSingleton.getInstance().getNoozService();
+	}
+
+	public BitmapLruCache getCache(Context context) {
+		return NoozSingleton.getInstance().getCache(context);
 	}
 }
