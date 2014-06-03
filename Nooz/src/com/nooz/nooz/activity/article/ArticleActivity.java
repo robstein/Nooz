@@ -17,6 +17,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.Volley;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
@@ -25,6 +29,7 @@ import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.profile.ProfileLauncher;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
+import com.nooz.nooz.util.BitmapLruCache;
 import com.nooz.nooz.util.CategoryResourceHelper;
 import com.nooz.nooz.util.GlobalConstant;
 
@@ -35,11 +40,13 @@ import com.nooz.nooz.util.GlobalConstant;
  */
 public class ArticleActivity extends BaseLocationFragmentActivity implements OnClickListener {
 	private static final String TAG = "ArticleActivity";
+	
+	private static final String BASE_URL = "http://nooz.blob.core.windows.net/media/";
 
 	private ImageView mArticleCategoryLogo;
 	private TextView mArticleCategory;
 	private ImageView mArticleInfo;
-	ImageView mArticleImage;
+	NetworkImageView mArticleImage;
 	private RelativeLayout mArticleHeader;
 	private TextView mHeadline;
 	private ImageView mAuthorPicture;
@@ -70,6 +77,10 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 
 	ArticleModule mMediaModule;
 
+	private RequestQueue mRequestQueue;
+
+	private ImageLoader mImageLoader;
+
 	/* ***** ACTIVITY SETUP BEGIN ***** */
 
 	@Override
@@ -83,6 +94,8 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		initBundleParameters();
 		initStory();
 		initModule();
+		initVolleyRequestQueue();
+
 	}
 
 	private void initFields() {
@@ -100,7 +113,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mArticleCategoryLogo = (ImageView) findViewById(R.id.article_category_logo);
 		mArticleCategory = (TextView) findViewById(R.id.article_category);
 		mArticleInfo = (ImageView) findViewById(R.id.article_info);
-		mArticleImage = (ImageView) findViewById(R.id.article_image);
+		mArticleImage = (NetworkImageView) findViewById(R.id.article_image);
 		mArticleHeader = (RelativeLayout) findViewById(R.id.article_header);
 		mHeadline = (TextView) findViewById(R.id.headline);
 		mAuthorPicture = (ImageView) findViewById(R.id.author_picture);
@@ -236,12 +249,17 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		}
 	}
 
+	private void initVolleyRequestQueue() {
+		mRequestQueue = Volley.newRequestQueue(this);
+		mImageLoader = new ImageLoader(mRequestQueue, new BitmapLruCache(this));		
+	}
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
 
 		registerReceivers();
-		mArticleDataController.populateMedia();
+		mArticleImage.setImageUrl(BASE_URL + mStory.id, mImageLoader);
 	}
 
 	private void registerReceivers() {

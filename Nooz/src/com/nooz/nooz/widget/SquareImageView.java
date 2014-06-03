@@ -1,5 +1,7 @@
 package com.nooz.nooz.widget;
 
+import com.android.volley.toolbox.NetworkImageView;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -10,7 +12,7 @@ import android.widget.ImageView;
  * @author Rob Stein
  * 
  */
-public class SquareImageView extends ImageView {
+public class SquareImageView extends NetworkImageView {
 	public SquareImageView(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
