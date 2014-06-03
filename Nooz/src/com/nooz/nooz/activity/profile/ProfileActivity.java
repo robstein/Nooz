@@ -96,6 +96,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	@Override
 	protected void onPause() {
 		unRegisterReceivers();
+		
 		super.onPause();
 	}
 

@@ -20,4 +20,10 @@ public class GlobalConstant {
 	 * Broadcast Receiver handling profile info loads.
 	 */
 	public static final String PROFILE_INFO_LOADED_ACTION = "profile info loaded";
+
+	/**
+	 * Intent action constant for communication between NoozService and a
+	 * Broadcast Receiver handling blobs.
+	 */
+	public static final String BLOB_LOADED_ACTION = "blob loaded";
 }

@@ -9,8 +9,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.nooz.nooz.R;
-import com.nooz.nooz.activity.ArticleActivity;
 import com.nooz.nooz.activity.MediaRecorderActivity;
+import com.nooz.nooz.activity.article.ArticleActivity;
 import com.nooz.nooz.activity.profile.ProfileActivity;
 import com.nooz.nooz.util.Alert;
 

@@ -1,21 +1,10 @@
-package com.nooz.nooz.activity;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+package com.nooz.nooz.activity.article;
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -32,6 +21,7 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
+import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.CategoryResourceHelper;
@@ -48,7 +38,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	private ImageView mArticleCategoryLogo;
 	private TextView mArticleCategory;
 	private ImageView mArticleInfo;
-	private ImageView mArticleImage;
+	ImageView mArticleImage;
 	private RelativeLayout mArticleHeader;
 	private TextView mHeadline;
 	private ImageView mAuthorPicture;
@@ -62,34 +52,55 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	private TextView mIrrelevanceLabel;
 	private ImageView mButtonComments;
 
-	private MediaPlayer mPlayer = null;
-	private boolean mCurrentlyPlayingAudio = false;
-	private boolean mLoaded = false;
-	private Story mStory;
-	private Boolean mRelevant = false;
-	private Boolean mIrrelevant = false;
-	private Integer mScoreRel = 0;
-	private Integer mScoreIrr = 0;
-
+	boolean mLoaded;
+	Story mStory;
+	private Boolean mRelevant;
+	private Boolean mIrrelevant;
+	private Integer mScoreRel;
+	private Integer mScoreIrr;
 	private int mScreenWidthInPixels;
+
+	/***
+	 * Broadcast mReceiver handles a blob being loaded
+	 */
+	private ArticleBroadcastReceiver mReceiver;
+
+	ArticleDataController mArticleDataController;
+
+	ArticleModule mMediaModule;
 
 	/* ***** ACTIVITY SETUP BEGIN ***** */
 
-	@SuppressWarnings("deprecation")
-	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_article);
-		Bundle bundle = getIntent().getParcelableExtra("bundle");
-		mStory = bundle.getParcelable("story");
-		mNoozService.getBlobSas(GlobalConstant.CONTAINER_NAME, mStory.id);
+		initFields();
+		initViews();
+		initViewListeners();
+		initScreenMeasurements();
+		initPictureParameters();
+		initBundleParameters();
+		initStory();
+		initModule();
+	}
 
+	private void initFields() {
+		mReceiver = new ArticleBroadcastReceiver();
+		mArticleDataController = new ArticleDataController(this);
+		mLoaded = false;
+		mRelevant = false;
+		mIrrelevant = false;
+		mScoreRel = 0;
+		mScoreIrr = 0;
+	}
+
+	private void initViews() {
+		setContentView(R.layout.activity_article);
 		mArticleCategoryLogo = (ImageView) findViewById(R.id.article_category_logo);
 		mArticleCategory = (TextView) findViewById(R.id.article_category);
 		mArticleInfo = (ImageView) findViewById(R.id.article_info);
 		mArticleImage = (ImageView) findViewById(R.id.article_image);
-		// mArticleHeader = (RelativeLayout) findViewById(R.id.article_header);
+		mArticleHeader = (RelativeLayout) findViewById(R.id.article_header);
 		mHeadline = (TextView) findViewById(R.id.headline);
 		mAuthorPicture = (ImageView) findViewById(R.id.author_picture);
 		mAuthor = (TextView) findViewById(R.id.author);
@@ -101,33 +112,68 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mIrrelevanceScore = (TextView) findViewById(R.id.irrelevance_score);
 		mIrrelevanceLabel = (TextView) findViewById(R.id.irrelevance_label);
 		mButtonComments = (ImageView) findViewById(R.id.btn_comments);
+	}
 
-		// Make picture the right size
-		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		mScreenWidthInPixels = size.x;
-		RelativeLayout.LayoutParams imageLayoutParams = (RelativeLayout.LayoutParams) mArticleImage.getLayoutParams();
-		imageLayoutParams.height = mScreenWidthInPixels;
-		imageLayoutParams.width = mScreenWidthInPixels;
-		mArticleImage.setLayoutParams(imageLayoutParams);
-
+	private void initViewListeners() {
 		mArticleImage.setOnClickListener(this);
 		mArticleInfo.setOnClickListener(this);
 		mButtonRelevant.setOnClickListener(this);
 		mButtonIrrelevant.setOnClickListener(this);
 		mButtonComments.setOnClickListener(this);
+	}
 
+	private void initScreenMeasurements() {
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		mScreenWidthInPixels = size.x;
+	}
+
+	/**
+	 * Make the article picture the right size
+	 */
+	private void initPictureParameters() {
+		RelativeLayout.LayoutParams imageLayoutParams = (RelativeLayout.LayoutParams) mArticleImage.getLayoutParams();
+		imageLayoutParams.height = mScreenWidthInPixels;
+		imageLayoutParams.width = mScreenWidthInPixels;
+		mArticleImage.setLayoutParams(imageLayoutParams);
+	}
+
+	private void initBundleParameters() {
+		Bundle bundle = getIntent().getParcelableExtra("bundle");
+		mStory = bundle.getParcelable("story");
+	}
+
+	/**
+	 * Uses the input parcelable story to populate the whole activity's layout.
+	 * However, the media is not loaded until a broadcast receiver is registered
+	 * to receive isLoaded intents.
+	 */
+	private void initStory() {
+		drawArticleHeader();
+		drawArticleHeadlineAuthorAndText();
+		drawArticleRelevance();
+		drawArticleComments();
+	}
+
+	private void drawArticleHeader() {
 		mArticleCategoryLogo.setImageResource(CategoryResourceHelper.getLogoByCategory(mStory.category));
 		mArticleCategory.setText(mStory.category);
 		mArticleCategory.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
 		mArticleInfo.setImageResource(CategoryResourceHelper.getInfoByCategory(mStory.category));
-		// Set mArticleImage
-		// Happens in the broadcast recevier
+	}
+
+	private void drawArticleHeadlineAuthorAndText() {
 		mHeadline.setText(mStory.headline);
-		// Set mAuthorPicture
+		// TODO Set mAuthorPicture
 		mAuthor.setText(mStory.firstName + " " + mStory.lastName);
 		mCaption.setText(mStory.caption);
+	}
+
+	@SuppressLint("NewApi")
+	@SuppressWarnings("deprecation")
+	private void drawArticleRelevance() {
+		// Draw buttons
 		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
 		if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
 			mButtonRelevant.setBackground(getResources().getDrawable(
@@ -148,69 +194,71 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 			mIrrelevanceScore.setBackgroundDrawable(getResources().getDrawable(
 					CategoryResourceHelper.getScoreBackgroundByCategory(mStory.category)));
 		}
+
+		// Draw text inside circles
 		mRelevanceLabel.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
 		mIrrelevanceLabel.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
-		mButtonComments.setImageResource(CategoryResourceHelper.getCommentsByCategory(mStory.category));
+		mRelevanceScore.setText(mStory.scoreRelevance.toString());
+		mIrrelevanceScore.setText(mStory.scoreIrrelevance.toString());
 
+		// Invert if user has already inverted a button
 		if (mStory.userRelevance == 1) {
 			invertRelevant();
 		} else if (mStory.userRelevance == -1) {
 			invertIrrelevant();
 		}
-
-		mRelevanceScore.setText(mStory.scoreRelevance.toString());
-		mIrrelevanceScore.setText(mStory.scoreIrrelevance.toString());
 	}
 
-	/***
-	 * Register for broadcasts
-	 */
+	private void drawArticleComments() {
+		mButtonComments.setImageResource(CategoryResourceHelper.getCommentsByCategory(mStory.category));
+	}
+
+	private void initModule() {
+		getModule(mStory.medium);
+		mMediaModule.init();
+	}
+
+	private void getModule(String medium) {
+		// Init AudioModule
+		if ("AUDIO".equals(medium)) {
+			mMediaModule = new AudioModule(this);
+		}
+		// Init PictureModule
+		if ("PICTURE".equals(medium)) {
+			mMediaModule = new PictureModule(this);
+		}
+		// Init VideoModule
+		if ("VIDEO".equals(medium)) {
+			mMediaModule = new VideoModule(this);
+		}
+	}
+
 	@Override
 	protected void onResume() {
-		IntentFilter filter = new IntentFilter();
-		filter.addAction("blob.loaded");
-		registerReceiver(receiver, filter);
 		super.onResume();
+
+		registerReceivers();
+		mArticleDataController.populateMedia();
 	}
 
-	/***
-	 * Unregister for broadcasts
-	 */
+	private void registerReceivers() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(GlobalConstant.BLOB_LOADED_ACTION);
+		registerReceiver(mReceiver, filter);
+	}
+
 	@Override
 	protected void onPause() {
-		unregisterReceiver(receiver);
-		if (mCurrentlyPlayingAudio) {
-			stopPlaying();
-		}
+		unRegisterReceivers();
+
+		mMediaModule.onPause();
+
 		super.onPause();
 	}
 
-	/***
-	 * Broadcast receiver handles a blob being loaded
-	 */
-	private BroadcastReceiver receiver = new BroadcastReceiver() {
-		public void onReceive(Context context, android.content.Intent intent) {
-			String intentAction = intent.getAction();
-			if (intentAction.equals("blob.loaded")) {
-				// Load the image using the SAS URL
-				JsonObject blob = mNoozService.getLoadedBlob();
-				String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();
-				sasUrl = sasUrl.replace("\"", "");
-				if ("AUDIO".equals(mStory.medium)) {
-					(new AudioFetcherTask(sasUrl)).execute();
-					mArticleImage.setImageDrawable(getResources().getDrawable(R.drawable.play));
-					mLoaded = true;
-				}
-				if ("PICTURE".equals(mStory.medium)) {
-					(new ImageFetcherTask(sasUrl)).execute();
-					mLoaded = true;
-				}
-				if ("VIDEO".equals(mStory.medium)) {
-
-				}
-			}
-		}
-	};
+	private void unRegisterReceivers() {
+		unregisterReceiver(mReceiver);
+	}
 
 	/* ***** ACTIVITY SETUP END ***** */
 
@@ -220,10 +268,8 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.article_image:
-			if ("AUDIO".equals(mStory.medium)) {
-				if (mLoaded) {
-					onPlay(!mCurrentlyPlayingAudio);
-				}
+			if (mLoaded) {
+				mMediaModule.onPlay();
 			}
 			break;
 		case R.id.button_relevant:
@@ -244,99 +290,6 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	}
 
 	/* ***** ONCLICKLISTENERS END ***** */
-
-	/* ***** AUDIO BEGIN ***** */
-
-	private void onPlay(boolean start) {
-		if (start) {
-			startPlaying();
-		} else {
-			stopPlaying();
-		}
-	}
-
-	private void startPlaying() {
-		try {
-			mPlayer.prepare();
-			mPlayer.start();
-			mCurrentlyPlayingAudio = true;
-		} catch (IOException e) {
-			Log.e(TAG, "prepare() failed");
-		}
-	}
-
-	private void stopPlaying() {
-		mPlayer.release();
-		mPlayer = null;
-		mCurrentlyPlayingAudio = false;
-	}
-
-	/**
-	 * This class specifically handles fetching an audio file from a URL and
-	 * loading the player with its data
-	 */
-	private class AudioFetcherTask extends AsyncTask<Void, Void, Boolean> {
-		private String mUrl;
-
-		public AudioFetcherTask(String url) {
-			mUrl = url;
-		}
-
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			try {
-				mPlayer = new MediaPlayer();
-				Log.d(TAG, "mPlayer is not null");
-				Uri myUri = Uri.parse(mUrl);
-				mPlayer.setDataSource(mContext, myUri);
-			} catch (Exception e) {
-				Log.e(TAG, e.getMessage());
-				return false;
-			}
-			return true;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean loaded) {
-
-		}
-	}
-
-	/* ***** AUDIO END ***** */
-
-	/**
-	 * This class specifically handles fetching an image from a URL and setting
-	 * the image view source on the screen
-	 */
-	private class ImageFetcherTask extends AsyncTask<Void, Void, Boolean> {
-		private String mUrl;
-		private Bitmap mBitmap;
-
-		public ImageFetcherTask(String url) {
-			mUrl = url;
-		}
-
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			try {
-				mBitmap = BitmapFactory.decodeStream((InputStream) new URL(mUrl).getContent());
-			} catch (Exception e) {
-				Log.e(TAG, e.getMessage());
-				return false;
-			}
-			return true;
-		}
-
-		/***
-		 * If the image was loaded successfully, set the image view
-		 */
-		@Override
-		protected void onPostExecute(Boolean loaded) {
-			if (loaded) {
-				mArticleImage.setImageBitmap(mBitmap);
-			}
-		}
-	}
 
 	/* ***** RELEVANCE BEGIN ***** */
 
@@ -472,10 +425,6 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		}
 	}
 
-	/* ***** RELEVANCE BEGIN ***** */
-
-	/* ***** GET THEME RESOURCES BY CATEGORY BEGIN ***** */
-
-	/* ***** GET THEME RESOURCES BY CATEGORY END ***** */
+	/* ***** RELEVANCE END ***** */
 
 }

@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.gson.JsonObject;
 import com.nooz.nooz.R;
-import com.nooz.nooz.activity.ArticleActivity;
+import com.nooz.nooz.activity.article.ArticleActivity;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.util.NoozService;
