@@ -9,6 +9,8 @@ package com.nooz.nooz.util;
 public class GlobalConstant {
 
 	public static final String CONTAINER_NAME = "media";
+	
+	public static final String MEDIA_URL = "http://nooz.blob.core.windows.net/media/";
 
 	/**
 	 * Height in pixels of the top pseudo-action bar.

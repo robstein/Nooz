@@ -36,6 +36,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
@@ -188,6 +191,9 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	 */
 	MapMenusController mMenuController;
 
+	RequestQueue mRequestQueue;
+	ImageLoader mImageLoader;
+
 	/* ***** ACTIVITY LIFECYCLE BEGIN ***** */
 
 	@Override
@@ -203,6 +209,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		initViewListeners();
 		initScreenMeasurements();
 		initPager();
+		initVolleyRequestQueue();
 	}
 
 	private void initFields() {
@@ -326,6 +333,11 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 				(int) ((mScreenWidthInPixels - footer_height) / 2) + (int) Tools.dipToPixels(this, 4), 0,
 				(int) ((mScreenWidthInPixels - footer_height) / 2) + (int) Tools.dipToPixels(this, 4), 0);
 		mPager.setLayoutParams(footerLayoutParams);
+	}
+
+	private void initVolleyRequestQueue() {
+		mRequestQueue = Volley.newRequestQueue(this);
+		mImageLoader = new ImageLoader(mRequestQueue, mCache);
 	}
 
 	/**

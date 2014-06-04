@@ -1,7 +1,9 @@
 package com.nooz.nooz.activity.map;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.CategoryResourceHelper;
+import com.nooz.nooz.util.GlobalConstant;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
@@ -29,15 +31,11 @@ public class StoryAdapter extends PagerAdapter {
 		View layout = inflater.inflate(R.layout.story_item, null);
 		layout.setOnClickListener((OnClickListener) mC.mActivityOnClickListener);
 
-		ImageView image = (ImageView) layout.findViewById(R.id.story_item_article_image);
+		NetworkImageView image = (NetworkImageView) layout.findViewById(R.id.story_item_article_image);
 		if ("PICTURE".equals(mC.mStories.get(position).medium)) {
-			if (mC.mStories.get(position).bitmap != null) {
-				image.setImageBitmap(mC.mStories.get(position).bitmap);
+			image.setImageUrl(GlobalConstant.MEDIA_URL + mC.mStories.get(position).id, mC.mImageLoader);
+			image.setImageBitmap(mC.mStories.get(position).bitmap);
 
-				ProgressBar loading = (ProgressBar) layout.findViewById(R.id.loading);
-				loading.setVisibility(View.GONE);
-				image.setVisibility(View.VISIBLE);
-			}
 		}
 		if ("AUDIO".equals(mC.mStories.get(position).medium)) {
 			ProgressBar loading = (ProgressBar) layout.findViewById(R.id.loading);

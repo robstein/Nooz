@@ -19,13 +19,6 @@ public class MapBroadcastReceiver extends BroadcastReceiver {
 				Log.e(TAG, "There was a problem in getStoriesCallBack: " + e.getMessage());
 			}
 		}
-		if (intentAction.equals("storyImage.loaded")) {
-			try {
-				((MapActivity) context).mStoryDataController.getStoryImageCallBack(intent.getIntExtra("index", -1));
-			} catch (Exception e) {
-				Log.e(TAG, "There was a problem in getStoryImageCallBack: " + e.getMessage());
-			}
-		}
 	}
 
 }

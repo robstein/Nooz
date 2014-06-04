@@ -41,8 +41,6 @@ import com.nooz.nooz.util.GlobalConstant;
 public class ArticleActivity extends BaseLocationFragmentActivity implements OnClickListener {
 	private static final String TAG = "ArticleActivity";
 	
-	private static final String BASE_URL = "http://nooz.blob.core.windows.net/media/";
-
 	private ImageView mArticleCategoryLogo;
 	private TextView mArticleCategory;
 	private ImageView mArticleInfo;
@@ -259,7 +257,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		super.onResume();
 
 		registerReceivers();
-		mArticleImage.setImageUrl(BASE_URL + mStory.id, mImageLoader);
+		mArticleImage.setImageUrl(GlobalConstant.MEDIA_URL + mStory.id, mImageLoader);
 	}
 
 	private void registerReceivers() {
