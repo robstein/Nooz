@@ -9,10 +9,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Interpolator;
 import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -22,6 +25,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -37,6 +41,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
@@ -45,6 +50,7 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.LoginActivity;
@@ -487,12 +493,79 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	}
 
 	private void moveBubblesToPreventOverlap() {
-		// TODO Auto-generated method stub
-		
+		List<LatLng> newLocations = reposition(mStories);
+		int i = 0;
+		for (LatLng o : newLocations) {
+			animateBubbleAdjust(i, o, true);
+			i++;
+		}
+	}
+
+	/**
+	 * Given a list of circles, compute new positions of the circles such no
+	 * circle overlaps with another.
+	 * <p>
+	 * You can use and fill .latitude and .longitude members of LatLng objects.
+	 * 
+	 * @author Matt Birkel
+	 * @param stories
+	 * @return
+	 * @see GlobeTrigonometry#distBetween(double, double, double, double)
+	 * @see LatLng
+	 * @see Story
+	 * @see List
+	 */
+	private List<LatLng> reposition(List<Story> stories) {
+		// TODO Matt, implement this function
+		// Right now it just outputs the input coordinates
+
+		List<LatLng> returnList = new ArrayList<LatLng>();
+
+		// This is foreach notation, read it as "for each Story, s, in stories"
+		for (Story s : stories) {
+			returnList.add(new LatLng(s.lat, s.lng));
+		}
+
+		return returnList;
+	}
+
+	private void animateBubbleAdjust(final int bubbleIndex, final LatLng toPosition, final boolean hideMarker) {
+		final Handler handler = new Handler();
+		final long start = SystemClock.uptimeMillis();
+		Projection proj = mMap.getProjection();
+		Point startPoint = proj.toScreenLocation(mCircles.get(bubbleIndex).getCenter());
+		final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+		final long duration = 500;
+		final LinearInterpolator interpolator = new LinearInterpolator();
+
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				long elapsed = SystemClock.uptimeMillis() - start;
+				float t = interpolator.getInterpolation((float) elapsed / duration);
+				double lng = t * toPosition.longitude + (1 - t) * startLatLng.longitude;
+				double lat = t * toPosition.latitude + (1 - t) * startLatLng.latitude;
+				LatLng nextLocation = new LatLng(lat, lng);
+				mCircles.get(bubbleIndex).setCenter(nextLocation);
+				mGroundOverlays.get(bubbleIndex).setPosition(nextLocation);
+
+				if (t < 1.0) {
+					// Post again 16ms later.
+					handler.postDelayed(this, 16);
+				} else {
+					if (hideMarker) {
+						mCircles.get(bubbleIndex).setVisible(false);
+						mGroundOverlays.get(bubbleIndex).setVisible(false);
+					} else {
+						mCircles.get(bubbleIndex).setVisible(true);
+						mGroundOverlays.get(bubbleIndex).setVisible(true);
+					}
+				}
+			}
+		});
 	}
 
 	private void drawBubble(double lat, double lng, double radius, String category) {
-
 		CircleOptions circleOptions;
 		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(radius);
 		final Circle c = mMap.addCircle(circleOptions);

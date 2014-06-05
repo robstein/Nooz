@@ -12,8 +12,8 @@ public class GlobeTrigonometry {
 	public static double EARTH_RADIUS = 6378100; // in meters
 
 	/**
-	 * Gets the distance between two geo-coordinates using the haversine
-	 * formula.
+	 * Gets the distance (in meters) between two geo-coordinates using the
+	 * haversine formula.
 	 * 
 	 * @param lat1
 	 *            latitude of point 1
