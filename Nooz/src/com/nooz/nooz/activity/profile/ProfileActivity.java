@@ -1,9 +1,10 @@
 package com.nooz.nooz.activity.profile;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.Animation;
@@ -12,9 +13,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader.ImageContainer;
-import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseFragmentActivity;
@@ -34,7 +32,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 
 	// Animations
 	private Animation mFadeIn;
-	
+
 	// Profile Views
 	private ImageView mButtonBack;
 	TextView mProfileName;
@@ -118,7 +116,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 
 		registerReceivers();
 		mUserDataController.populateProfile();
-		
+
 		// If you are using normal ImageView
 		mProfilePictureFull.setImageUrl(GlobalConstant.PROFILE_URL + mUserId, mImageLoader);
 	}
@@ -166,7 +164,16 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 			finishWithAnimation();
 			break;
 		case R.id.button_profile_settings:
-			mNoozService.logout();
+			new AlertDialog.Builder(this).setTitle("Logout").setMessage("Are you sure you want to logout?")
+					.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							mNoozService.logout();
+						}
+					}).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							// do nothing
+						}
+					}).setIcon(android.R.drawable.ic_dialog_alert).show();
 			break;
 		case R.id.profile_picture_full:
 			mProfilePictureController.selectImage();
