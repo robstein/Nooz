@@ -41,7 +41,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	private ImageView mButtonProfileCup;
 	TextView mButtonProfileNumbers;
 	private ImageView mButtonProfilePersons;
-	private ImageView mButtonProfileSettings;
+	private ImageView mButtonProfileSettingsOrPm;
 
 	// Crop Image Views
 	ImageView mButtonBackFromCrop;
@@ -58,17 +58,24 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	ProfilePictureController mProfilePictureController;
 	public RelativeLayout mProfileLayout;
 	public RelativeLayout mCropPictureLayout;
+	Boolean mIsMyProfile;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		initBundleParameters();
 		initFields();
 		initViews();
 		initViewListeners();
-		initBundleParameters();
+	}
+
+	private void initBundleParameters() {
+		Bundle bundle = getIntent().getParcelableExtra("bundle");
+		mUserId = bundle.getString("user_id", "");
 	}
 
 	private void initFields() {
+		mIsMyProfile = mUserId.equals(mNoozService.getUserId());
 		mReceiver = new ProfileBroadcastReceiver();
 		mUserDataController = new UserDataController(this);
 		mProfilePictureController = new ProfilePictureController(this);
@@ -88,7 +95,10 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		mButtonProfileCup = (ImageView) findViewById(R.id.button_profile_cup);
 		mButtonProfileNumbers = (TextView) findViewById(R.id.button_profile_numbers);
 		mButtonProfilePersons = (ImageView) findViewById(R.id.button_profile_persons);
-		mButtonProfileSettings = (ImageView) findViewById(R.id.button_profile_settings);
+		mButtonProfileSettingsOrPm = (ImageView) findViewById(R.id.button_profile_settings);
+		if (!mIsMyProfile) {
+			mButtonProfileSettingsOrPm.setImageDrawable(getResources().getDrawable(R.drawable.profile_pm));
+		}
 
 		// Crop image views
 		mCropPictureLayout = (RelativeLayout) findViewById(R.id.profile_crop_picture);
@@ -98,16 +108,13 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		// Profile listeners
 		mButtonBack.setOnClickListener(this);
 		mProfileName.setOnClickListener(this);
-		mProfilePictureFull.setOnClickListener(this);
+		if (mIsMyProfile) {
+			mProfilePictureFull.setOnClickListener(this);
+		}
 		mButtonProfileCup.setOnClickListener(this);
 		mButtonProfileNumbers.setOnClickListener(this);
 		mButtonProfilePersons.setOnClickListener(this);
-		mButtonProfileSettings.setOnClickListener(this);
-	}
-
-	private void initBundleParameters() {
-		Bundle bundle = getIntent().getParcelableExtra("bundle");
-		mUserId = bundle.getString("user_id", "");
+		mButtonProfileSettingsOrPm.setOnClickListener(this);
 	}
 
 	@Override
@@ -164,16 +171,20 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 			finishWithAnimation();
 			break;
 		case R.id.button_profile_settings:
-			new AlertDialog.Builder(this).setTitle("Logout").setMessage("Are you sure you want to logout?")
-					.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							mNoozService.logout();
-						}
-					}).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							// do nothing
-						}
-					}).setIcon(android.R.drawable.ic_dialog_alert).show();
+			if (mIsMyProfile) {
+				new AlertDialog.Builder(this).setTitle("Logout").setMessage("Are you sure you want to logout?")
+						.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {
+								mNoozService.logout();
+							}
+						}).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int which) {
+								// do nothing
+							}
+						}).setIcon(android.R.drawable.ic_dialog_alert).show();
+			} else {
+				
+			}
 			break;
 		case R.id.profile_picture_full:
 			mProfilePictureController.selectImage();

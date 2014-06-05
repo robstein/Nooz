@@ -200,10 +200,18 @@ public class NoozService {
 	private void saveUserData(String firstName, String lastName) {
 		SharedPreferences settings = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
 		SharedPreferences.Editor preferencesEditor = settings.edit();
-		preferencesEditor.putString("userid", mClient.getCurrentUser().getUserId());
+		preferencesEditor.putString("userid", getUserId());
 		preferencesEditor.putString("token", mClient.getCurrentUser().getAuthenticationToken());
 		preferencesEditor.putString("user_name", firstName + " " + lastName);
 		preferencesEditor.commit();
+	}
+	
+	/**
+	 * 
+	 * @return userId of the current authenticated user
+	 */
+	public String getUserId() {
+		return mClient.getCurrentUser().getUserId();
 	}
 
 	/**
