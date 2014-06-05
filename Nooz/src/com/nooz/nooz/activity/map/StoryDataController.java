@@ -68,6 +68,9 @@ public class StoryDataController {
 	 * @see #clearMap()
 	 */
 	void clearStories() {
+		// Reset index
+		mC.mResumeStory = 0;
+		mC.mCurrentStory = 0;
 		// Clear Stories list
 		mC.mStories.clear();
 		// Notify adapter that data has changed.
