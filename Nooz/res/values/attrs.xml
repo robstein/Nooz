@@ -5,5 +5,9 @@
         <attr name="stuckShadowHeight" format="dimension" />
         <attr name="stuckShadowDrawable" format="reference" />
     </declare-styleable>
+    
+    <declare-styleable name="ProfileImage">
+        <attr name="large" format="boolean"/>
+    </declare-styleable>
 
 </resources>

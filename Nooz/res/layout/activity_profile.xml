@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.nooz.nooz"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -41,20 +42,26 @@
             android:layout_below="@id/profile_name"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="2dp"
+            android:paddingBottom="16dp"
             android:text="--"
             android:textColor="#656565"
             android:textSize="16sp" />
 
-        <ImageView
+        <com.nooz.nooz.widget.ProfileImageView
             android:id="@+id/profile_picture_full"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
             android:layout_below="@id/profile_location"
             android:layout_centerHorizontal="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
             android:clickable="true"
             android:contentDescription="Profile Picture"
-            android:paddingTop="16dp"
-            android:src="@drawable/profile_example" />
+            android:scaleType="centerCrop"
+            android:src="@drawable/profile_example"
+            custom:large="true" />
 
         <View
             android:id="@+id/strut"

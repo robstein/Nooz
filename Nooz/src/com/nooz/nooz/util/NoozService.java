@@ -426,7 +426,7 @@ public class NoozService {
 				mLoadedBlob = jsonObject;
 				// Broadcast that we are ready to upload the blob data
 				Intent broadcast = new Intent();
-				broadcast.setAction("blob.created");
+				broadcast.setAction(GlobalConstant.BLOB_CREATED_ACTION);
 				mContext.sendBroadcast(broadcast);
 			}
 		});

@@ -1,26 +1,20 @@
 package com.nooz.nooz.activity.profile;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseFragmentActivity;
 import com.nooz.nooz.model.ProfileInfo;
 import com.nooz.nooz.util.GlobalConstant;
+import com.soundcloud.android.crop.Crop;
 
 /**
  * 
@@ -36,7 +30,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	private ImageView mButtonBack;
 	TextView mProfileName;
 	TextView mProfileLocation;
-	private ImageView mProfilePictureFull;
+	private NetworkImageView mProfilePictureFull;
 	private ImageView mButtonProfileCup;
 	TextView mButtonProfileNumbers;
 	private ImageView mButtonProfilePersons;
@@ -45,7 +39,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	// Crop Image Views
 	ImageView mButtonBackFromCrop;
 	ImageView mButtonCropOk;
-	ImageView mButtonPictureUncropped;
+	ImageView mResultView;
 
 	/**
 	 * The user id of the user whose profile is being viewed.
@@ -82,7 +76,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		mProfileName = (TextView) findViewById(R.id.profile_name);
 		mProfileLocation = (TextView) findViewById(R.id.profile_location);
 		mProfileLocation.setOnClickListener(this);
-		mProfilePictureFull = (ImageView) findViewById(R.id.profile_picture_full);
+		mProfilePictureFull = (NetworkImageView) findViewById(R.id.profile_picture_full);
 		mButtonProfileCup = (ImageView) findViewById(R.id.button_profile_cup);
 		mButtonProfileNumbers = (TextView) findViewById(R.id.button_profile_numbers);
 		mButtonProfilePersons = (ImageView) findViewById(R.id.button_profile_persons);
@@ -90,9 +84,6 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 
 		// Crop image views
 		mCropPictureLayout = (RelativeLayout) findViewById(R.id.profile_crop_picture);
-		mButtonBackFromCrop = (ImageView) findViewById(R.id.button_back_from_crop);
-		mButtonCropOk = (ImageView) findViewById(R.id.button_crop_ok);
-		mButtonPictureUncropped = (ImageView) findViewById(R.id.profile_picture_uncropped);
 	}
 
 	private void initViewListeners() {
@@ -104,10 +95,6 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		mButtonProfileNumbers.setOnClickListener(this);
 		mButtonProfilePersons.setOnClickListener(this);
 		mButtonProfileSettings.setOnClickListener(this);
-		
-		// Crop image listeners
-		mButtonBackFromCrop.setOnClickListener(this);
-		mButtonCropOk.setOnClickListener(this);
 	}
 
 	private void initBundleParameters() {
@@ -121,11 +108,13 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 
 		registerReceivers();
 		mUserDataController.populateProfile();
+		mProfilePictureFull.setImageUrl(GlobalConstant.PROFILE_URL + mUserId, mImageLoader);
 	}
 
 	private void registerReceivers() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(GlobalConstant.PROFILE_INFO_LOADED_ACTION);
+		filter.addAction(GlobalConstant.BLOB_CREATED_ACTION);
 		registerReceiver(mReceiver, filter);
 	}
 
@@ -146,8 +135,11 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		mProfilePictureController.handleResultFromGallery(requestCode, resultCode, data);
+		if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) {
+			mProfilePictureController.beginCrop(data.getData());
+		} else if (requestCode == Crop.REQUEST_CROP) {
+			mProfilePictureController.handleCrop(resultCode, data);
+		}
 	}
 
 	@Override
@@ -166,12 +158,6 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 			break;
 		case R.id.profile_picture_full:
 			mProfilePictureController.selectImage();
-			break;
-		case R.id.button_back_from_crop:
-			mProfilePictureController.cancel();
-			break;
-		case R.id.button_crop_ok:
-			mProfilePictureController.confirm();
 			break;
 		}
 	}

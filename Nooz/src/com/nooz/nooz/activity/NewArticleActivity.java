@@ -295,6 +295,7 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	private void changeThemeColor(AdapterView<?> chooseCategoryAdapterView, int drawableButtonBorders, int textColor,
 			int logo) {
@@ -340,7 +341,7 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 	private BroadcastReceiver receiver = new BroadcastReceiver() {
 		public void onReceive(Context context, android.content.Intent intent) {
 			String intentAction = intent.getAction();
-			if (intentAction.equals("blob.created")) {
+			if (GlobalConstant.BLOB_CREATED_ACTION.equals(intentAction)) {
 				// If a blob has been created, upload the image
 				JsonObject blob = mNoozService.getLoadedBlob();
 				String sasUrl = blob.getAsJsonPrimitive("sasUrl").toString();
@@ -381,6 +382,7 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 					bos.write(b, 0, bytesRead);
 				}
 				byte[] bytes = bos.toByteArray();
+				fis.close();
 				// Post our image data (byte array) to the server
 				URL url = new URL(mUrl.replace("\"", ""));
 				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -438,6 +440,7 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 					bos.write(b, 0, bytesRead);
 				}
 				byte[] bytes = bos.toByteArray();
+				fis.close();
 				// Post our image data (byte array) to the server
 				URL url = new URL(mUrl.replace("\"", ""));
 				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();

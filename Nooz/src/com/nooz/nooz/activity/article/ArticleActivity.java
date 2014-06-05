@@ -47,7 +47,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	NetworkImageView mArticleImage;
 	private RelativeLayout mArticleHeader;
 	private TextView mHeadline;
-	private ImageView mAuthorPicture;
+	private NetworkImageView mAuthorPicture;
 	private TextView mAuthor;
 	private TextView mCaption;
 	private LinearLayout mButtonRelevant;
@@ -109,7 +109,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mArticleImage = (NetworkImageView) findViewById(R.id.article_image);
 		mArticleHeader = (RelativeLayout) findViewById(R.id.article_header);
 		mHeadline = (TextView) findViewById(R.id.headline);
-		mAuthorPicture = (ImageView) findViewById(R.id.author_picture);
+		mAuthorPicture = (NetworkImageView) findViewById(R.id.author_picture);
 		mAuthor = (TextView) findViewById(R.id.author);
 		mCaption = (TextView) findViewById(R.id.caption);
 		mButtonRelevant = (LinearLayout) findViewById(R.id.button_relevant);
@@ -248,6 +248,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 
 		registerReceivers();
 		mArticleImage.setImageUrl(GlobalConstant.MEDIA_URL + mStory.id, mImageLoader);
+		mAuthorPicture.setImageUrl(GlobalConstant.PROFILE_URL + mStory.authorId, mImageLoader);
 	}
 
 	private void registerReceivers() {

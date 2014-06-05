@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
+import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.nooz.nooz.NoozApplication;
 import com.nooz.nooz.util.NoozService;
@@ -18,6 +19,7 @@ public class BaseFragmentActivity extends FragmentActivity {
 	protected NoozService mNoozService;
 	protected Context mContext;
 	protected ImageLoader mImageLoader;
+	protected RequestQueue mRequestQueue;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +28,7 @@ public class BaseFragmentActivity extends FragmentActivity {
 		NoozApplication myApp = (NoozApplication) getApplication();
 		myApp.setCurrentActivity(this);
 		mImageLoader = myApp.getImageLoader();
+		mRequestQueue = myApp.getRequestQueue();
 		mNoozService = myApp.getNoozService();
 		mNoozService.setContext(this);
 
@@ -34,6 +37,10 @@ public class BaseFragmentActivity extends FragmentActivity {
 
 	public NoozService getNoozService() {
 		return mNoozService;
+	}
+
+	public RequestQueue getRequestQueue() {
+		return mRequestQueue;
 	}
 
 	public ImageLoader getImageLoader() {

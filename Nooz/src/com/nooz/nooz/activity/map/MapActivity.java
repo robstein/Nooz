@@ -13,9 +13,6 @@ import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Parcelable;
-import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -25,8 +22,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
-import android.view.animation.Interpolator;
-import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -36,9 +31,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
@@ -57,6 +50,7 @@ import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.LoginActivity;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.CategoryResourceHelper;
+import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.PagerContainer;
 
@@ -92,7 +86,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 
 	// Settings menu views
 	RelativeLayout mMenuSettings;
-	private ImageView mIconProfile;
+	private NetworkImageView mIconProfile;
 	private TextView mButtonProfile;
 	private TextView mButtonMapFilters;
 	private TextView mButtonTopNooz;
@@ -251,6 +245,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 
 		// Settings menu views
 		mMenuSettings = (RelativeLayout) findViewById(R.id.menu_settings);
+		mIconProfile = (NetworkImageView) findViewById(R.id.icon_profile);
 		mButtonProfile = (TextView) findViewById(R.id.button_profile);
 		mButtonMapFilters = (TextView) findViewById(R.id.button_map_filters);
 
@@ -373,6 +368,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		getUserData();
 		restoreSettings();
 		mStoryDataController.clearAndPopulateStories();
+		mIconProfile.setImageUrl(GlobalConstant.PROFILE_URL + mUserId, mImageLoader);
 	}
 
 	private void getUserData() {
