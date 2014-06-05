@@ -29,6 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:paddingTop="10dp"
+            android:text="-- --"
             android:textColor="#222222"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -40,6 +41,7 @@
             android:layout_below="@id/profile_name"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="2dp"
+            android:text="--"
             android:textColor="#656565"
             android:textSize="16sp" />
 
@@ -84,6 +86,7 @@
             android:clickable="true"
             android:gravity="center"
             android:singleLine="true"
+            android:text="-"
             android:textColor="#FFF"
             android:textSize="16sp"
             android:textStyle="bold" />
