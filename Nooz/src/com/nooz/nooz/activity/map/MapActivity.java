@@ -483,6 +483,12 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 			drawBubble(s.lat, s.lng, s.radius, s.category);
 			i++;
 		}
+		moveBubblesToPreventOverlap();
+	}
+
+	private void moveBubblesToPreventOverlap() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void drawBubble(double lat, double lng, double radius, String category) {
