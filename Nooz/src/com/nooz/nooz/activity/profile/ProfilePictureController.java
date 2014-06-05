@@ -4,24 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
-import com.nooz.nooz.R;
 import com.nooz.nooz.util.GlobalConstant;
 import com.soundcloud.android.crop.Crop;
 
@@ -31,17 +23,10 @@ public class ProfilePictureController {
 
 	private ProfileActivity mC;
 
-	// Animations
-	private Animation mFadeIn;
-	private Animation mFadeOut;
-
 	private File mNewPic;
 
 	ProfilePictureController(ProfileActivity c) {
 		this.mC = c;
-
-		mFadeIn = AnimationUtils.loadAnimation(mC, R.anim.fade_in);
-		mFadeOut = AnimationUtils.loadAnimation(mC, R.anim.fade_out);
 	}
 
 	/**

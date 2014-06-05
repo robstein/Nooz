@@ -3,12 +3,18 @@ package com.nooz.nooz.activity.profile;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader.ImageContainer;
+import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.android.volley.toolbox.NetworkImageView;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseFragmentActivity;
@@ -26,6 +32,9 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	private static final String TAG = "ProfileActivity";
 	static final int RESULT_LOAD_IMAGE = 1111;
 
+	// Animations
+	private Animation mFadeIn;
+	
 	// Profile Views
 	private ImageView mButtonBack;
 	TextView mProfileName;
@@ -65,6 +74,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		mReceiver = new ProfileBroadcastReceiver();
 		mUserDataController = new UserDataController(this);
 		mProfilePictureController = new ProfilePictureController(this);
+		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 	}
 
 	private void initViews() {
@@ -108,6 +118,8 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 
 		registerReceivers();
 		mUserDataController.populateProfile();
+		
+		// If you are using normal ImageView
 		mProfilePictureFull.setImageUrl(GlobalConstant.PROFILE_URL + mUserId, mImageLoader);
 	}
 
