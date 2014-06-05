@@ -1,27 +1,15 @@
 package com.nooz.nooz.activity.map;
 
-import java.io.InputStream;
-import java.net.URL;
+import java.util.List;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.gson.JsonObject;
-import com.nooz.nooz.R;
 import com.nooz.nooz.activity.article.ArticleActivity;
 import com.nooz.nooz.model.Story;
-import com.nooz.nooz.util.GlobalConstant;
-import com.nooz.nooz.util.NoozService;
 
 public class StoryDataController {
 
@@ -32,17 +20,20 @@ public class StoryDataController {
 	}
 
 	void clearAndPopulateStories() {
-		clearStories();
 		LatLngBounds bounds = mC.mMap.getProjection().getVisibleRegion().latLngBounds;
 		mC.getNoozService().getAllStories(bounds, mC.mFilterSettings, mC.mMenuController.mCurrentSearchType);
 	}
 
 	void getStoriesCallBack() {
-		mC.mStories = mC.getNoozService().getLoadedStories();
-		// Reset footer
-		mC.mFooterAdapter.notifyDataSetChanged();
-		mC.drawCirlesOnMap();
-		mC.mPager.setCurrentItem(mC.mResumeStory);
+		List<Story> newStories = mC.getNoozService().getLoadedStories();
+		if (!newStories.equals(mC.mStories)) {
+			clearStories();
+			mC.mStories = newStories;
+			// Reset footer
+			mC.mFooterAdapter.notifyDataSetChanged();
+			mC.drawCirlesOnMap();
+			mC.mPager.setCurrentItem(mC.mResumeStory);
+		}
 	}
 
 	/**

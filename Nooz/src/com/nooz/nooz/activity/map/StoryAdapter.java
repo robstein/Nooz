@@ -34,8 +34,6 @@ public class StoryAdapter extends PagerAdapter {
 		NetworkImageView image = (NetworkImageView) layout.findViewById(R.id.story_item_article_image);
 		if ("PICTURE".equals(mC.mStories.get(position).medium)) {
 			image.setImageUrl(GlobalConstant.MEDIA_URL + mC.mStories.get(position).id, mC.getImageLoader());
-			image.setImageBitmap(mC.mStories.get(position).bitmap);
-
 		}
 		if ("AUDIO".equals(mC.mStories.get(position).medium)) {
 			ProgressBar loading = (ProgressBar) layout.findViewById(R.id.loading);

@@ -128,6 +128,7 @@
                 android:layout_centerInParent="true"
                 android:clickable="true"
                 android:contentDescription="Refresh"
+                android:visibility="gone"
                 android:src="@drawable/refresh" />
 
             <ImageView

@@ -567,8 +567,9 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		mPreviousZoomLevel = position.zoom;
 
 		// Update City
-		updateCity();
+		// updateCity();
 
+		mStoryDataController.clearAndPopulateStories();
 	}
 
 	/* ***** LISTENERS END ***** */
