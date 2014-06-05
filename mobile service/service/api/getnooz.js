@@ -86,7 +86,6 @@ exports.post = function(request, response) {
             sql = sql + ") ";
         }
         console.log(request.body);
-        console.log(sql);
         mssql.query(sql, [request.body.user_id, request.body.southwestLat, request.body.northeastLat, request.body.southwestLng, request.body.northeastLng], {
             success: function(results) {
                 if ("RELEVANT" == request.body.searchType) {
@@ -115,5 +114,5 @@ function rankingFunction(a,b) {
 }
 
 exports.get = function(request, response) {
-    response.send(statusCodes.OK, { message : 'Hello World!' });
+    response.send(statusCodes.OK, { message : 'Hello World!'});
 };
