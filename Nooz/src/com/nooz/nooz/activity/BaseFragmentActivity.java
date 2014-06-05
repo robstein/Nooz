@@ -1,15 +1,11 @@
 package com.nooz.nooz.activity;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.nooz.nooz.NoozApplication;
-import com.nooz.nooz.util.BitmapLruCache;
-import com.nooz.nooz.util.BlobReceiver;
 import com.nooz.nooz.util.NoozService;
 
 /**
@@ -21,7 +17,7 @@ public class BaseFragmentActivity extends FragmentActivity {
 	private static final String TAG = "BaseFragmentActivity";
 	protected NoozService mNoozService;
 	protected Context mContext;
-	protected BitmapLruCache mCache;
+	protected ImageLoader mImageLoader;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -29,22 +25,19 @@ public class BaseFragmentActivity extends FragmentActivity {
 
 		NoozApplication myApp = (NoozApplication) getApplication();
 		myApp.setCurrentActivity(this);
-		mCache = myApp.getCache(this);
+		mImageLoader = myApp.getImageLoader();
 		mNoozService = myApp.getNoozService();
 		mNoozService.setContext(this);
 
 		mContext = this;
 	}
-	
-	
 
 	public NoozService getNoozService() {
 		return mNoozService;
 	}
 
-
-
-	private static final String STORIES_TEXT_LOADED = "stories.loaded";
-	private static final String STORY_IMAGE_LOADED = "storyImage.loaded";
+	public ImageLoader getImageLoader() {
+		return mImageLoader;
+	}
 
 }

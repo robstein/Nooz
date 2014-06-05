@@ -40,7 +40,7 @@ import com.nooz.nooz.util.GlobalConstant;
  */
 public class ArticleActivity extends BaseLocationFragmentActivity implements OnClickListener {
 	private static final String TAG = "ArticleActivity";
-	
+
 	private ImageView mArticleCategoryLogo;
 	private TextView mArticleCategory;
 	private ImageView mArticleInfo;
@@ -75,10 +75,6 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 
 	ArticleModule mMediaModule;
 
-	private RequestQueue mRequestQueue;
-
-	private ImageLoader mImageLoader;
-
 	/* ***** ACTIVITY SETUP BEGIN ***** */
 
 	@Override
@@ -92,7 +88,6 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		initBundleParameters();
 		initStory();
 		initModule();
-		initVolleyRequestQueue();
 
 	}
 
@@ -247,11 +242,6 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		}
 	}
 
-	private void initVolleyRequestQueue() {
-		mRequestQueue = Volley.newRequestQueue(this);
-		mImageLoader = new ImageLoader(mRequestQueue, mCache);		
-	}
-	
 	@Override
 	protected void onResume() {
 		super.onResume();
