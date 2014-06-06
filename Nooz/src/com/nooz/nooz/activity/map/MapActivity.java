@@ -496,7 +496,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		List<LatLng> newLocations = reposition(mStories);
 		int i = 0;
 		for (LatLng o : newLocations) {
-			animateBubbleAdjust(i, o, true);
+			animateBubbleAdjust(i, o, false);
 			i++;
 		}
 	}
@@ -505,7 +505,15 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	 * Given a list of circles, compute new positions of the circles such no
 	 * circle overlaps with another.
 	 * <p>
-	 * You can use and fill .latitude and .longitude members of LatLng objects.
+	 * You can use and fill {@link LatLng#latitude} and {@link LatLng#longitude}
+	 * members of LatLng objects or just make new LatLng objects with the
+	 * {@link LatLng#LatLng(double, double)} constructor.
+	 * <p>
+	 * Also you can access the latitude, longitude, and radius component of the
+	 * initial story from {@link Story#lat}, {@link Story#lng}, and
+	 * {@link Story#radius}.
+	 * <p>
+	 * TODO @MATT add your implementation details here
 	 * 
 	 * @author Matt Birkel
 	 * @param stories
@@ -516,7 +524,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	 * @see List
 	 */
 	private List<LatLng> reposition(List<Story> stories) {
-		// TODO Matt, implement this function
+		// TODO @MATT, implement this function
 		// Right now it just outputs the input coordinates
 
 		List<LatLng> returnList = new ArrayList<LatLng>();
