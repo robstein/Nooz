@@ -28,6 +28,7 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.commonsware.cwac.camera.CameraFragment;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.NewArticleActivity;
@@ -50,9 +51,9 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 
 	private ImageView mButtonCancelNewMedia;
 	private RelativeLayout mRelativeLayoutCamera;
-	NoozCameraFragment mCameraFragment;
+	CameraFragment mCameraFragment;
 	private ImageView mButtonRecordAudio;
-	private ImageView mButtonCapturePicture;
+	ImageView mButtonCapturePicture;
 	private ImageView mButtonRecordVideo;
 
 	private int mScreenWidthInPixels;
@@ -83,7 +84,7 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 		setContentView(R.layout.activity_media_recorder);
 		mButtonCancelNewMedia = (ImageView) findViewById(R.id.btn_cancel_new_media);
 		mRelativeLayoutCamera = (RelativeLayout) findViewById(R.id.camera_layout_camera);
-		mCameraFragment = (NoozCameraFragment) getFragmentManager().findFragmentById(R.id.camera_preview);
+		mCameraFragment = (CameraFragment) getFragmentManager().findFragmentById(R.id.camera_preview);
 		mButtonRecordAudio = (ImageView) findViewById(R.id.btn_record_audio);
 		mButtonCapturePicture = (ImageView) findViewById(R.id.btn_snap_picture);
 		mButtonRecordVideo = (ImageView) findViewById(R.id.btn_record_video);
@@ -376,7 +377,7 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 							// take the picture
 							// picturecallback will save the picture
 							// picturecallback also launches new intent
-							mCameraFragment.takeSimplePicture();
+							mCameraFragment.takePicture();
 						}
 					}
 					return true;

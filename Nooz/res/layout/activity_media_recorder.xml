@@ -31,7 +31,7 @@
 
         <fragment
             android:id="@+id/camera_preview"
-            android:name="com.nooz.nooz.activity.mediarecorder.NoozCameraFragment"
+            android:name="com.commonsware.cwac.camera.CameraFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </RelativeLayout>
