@@ -5,8 +5,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.nooz.nooz.R;
-import com.nooz.nooz.activity.MediaRecorderActivity;
 import com.nooz.nooz.activity.profile.ProfileLauncher;
+import com.nooz.nooz.mediarecorder.MediaRecorderActivity;
 import com.nooz.nooz.util.Alert;
 
 public class MapActivityOnClickListener implements OnClickListener {

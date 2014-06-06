@@ -1,4 +1,4 @@
-package com.nooz.nooz.activity;
+package com.nooz.nooz.mediarecorder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -44,6 +44,8 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.nooz.nooz.R;
+import com.nooz.nooz.activity.BaseLocationFragmentActivity;
+import com.nooz.nooz.activity.NewArticleActivity;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.util.MediaMode;

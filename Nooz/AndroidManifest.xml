@@ -55,7 +55,7 @@
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
-            android:name="com.nooz.nooz.activity.MediaRecorderActivity"
+            android:name="com.nooz.nooz.mediarecorder.MediaRecorderActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" >
