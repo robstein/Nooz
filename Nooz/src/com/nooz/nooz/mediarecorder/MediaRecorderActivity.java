@@ -2,18 +2,13 @@ package com.nooz.nooz.mediarecorder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -21,9 +16,6 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
-import android.location.Location;
-import android.media.AudioFormat;
-import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,24 +25,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.location.LocationClient;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.NewArticleActivity;
 import com.nooz.nooz.util.Alert;
-import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.util.MediaMode;
-import com.nooz.nooz.util.Tools;
-import com.nooz.nooz.widget.CameraPreview;
 
 /**
  * 
@@ -66,89 +48,74 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 	private static final int COLOR_RED = 0xFFFF0000;
 	private static final int COLOR_WHITE = 0xFFFFFFFF;
 
-	private Camera mCamera;
-	private CameraPreview mCameraPreview;
-	private FrameLayout mFrameLayoutPreview;
-
 	private ImageView mButtonCancelNewMedia;
-	private LinearLayout mMediaControlLayer;
+	private RelativeLayout mRelativeLayoutCamera;
+	NoozCameraFragment mCameraFragment;
 	private ImageView mButtonRecordAudio;
 	private ImageView mButtonCapturePicture;
 	private ImageView mButtonRecordVideo;
 
 	private int mScreenWidthInPixels;
-	protected MediaMode mMode = MediaMode.PICTURE;
-	protected boolean mIsRecordingAudio = false;
-	protected boolean mIsCapturingPicture = false;
-	protected boolean mIsRecordingVideo = false;
+	protected MediaMode mMode;
+	protected boolean mIsRecordingAudio;
+	protected boolean mIsCapturingPicture;
+	protected boolean mIsRecordingVideo;
 
 	/* ***** ACTIVITY SETUP BEGIN ***** */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		initFields();
+		initViews();
+		initViewListeners();
+		initScreenMeasurements();
+		initSquareCameraParameters();
+	}
+
+	private void initFields() {
+		mMode = MediaMode.PICTURE;
+		mIsRecordingAudio = false;
+		mIsCapturingPicture = false;
+		mIsRecordingVideo = false;
+	}
+
+	private void initViews() {
 		setContentView(R.layout.activity_media_recorder);
-
-		// Move the control buttons down to where they should be
-		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		mScreenWidthInPixels = size.x;
-		mMediaControlLayer = (LinearLayout) findViewById(R.id.media_control_layer);
-		RelativeLayout.LayoutParams controlLayoutParams = (RelativeLayout.LayoutParams) mMediaControlLayer
-				.getLayoutParams();
-		controlLayoutParams.setMargins(0, (int) Tools.dipToPixels(this, GlobalConstant.TOP_BAR_HEIGHT) + mScreenWidthInPixels, 0, 0);
-		mMediaControlLayer.setLayoutParams(controlLayoutParams);
-
-		// Create an instance of Camera
-		mCamera = getCameraInstance();
-		if (mCamera == null) {
-			finish();
-		}
-		Camera.Parameters camParams = mCamera.getParameters();
-		camParams.setRotation(90);
-		mCamera.setParameters(camParams);
-		mCamera.setDisplayOrientation(90);
-
-		List<String> focusModes = camParams.getSupportedFocusModes();
-		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-			camParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
-		}
-
-		// Create our Preview view and set it as the content of our activity.
-		mCameraPreview = new CameraPreview(this, mCamera);
-		mFrameLayoutPreview = (FrameLayout) findViewById(R.id.camera_preview);
-		mFrameLayoutPreview.addView(mCameraPreview);
-
-		// Add a listener to the cancel button
 		mButtonCancelNewMedia = (ImageView) findViewById(R.id.btn_cancel_new_media);
+		mRelativeLayoutCamera = (RelativeLayout) findViewById(R.id.camera_layout_camera);
+		mCameraFragment = (NoozCameraFragment) getFragmentManager().findFragmentById(R.id.camera_preview);
+		mButtonRecordAudio = (ImageView) findViewById(R.id.btn_record_audio);
+		mButtonCapturePicture = (ImageView) findViewById(R.id.btn_snap_picture);
+		mButtonRecordVideo = (ImageView) findViewById(R.id.btn_record_video);
+	}
+
+	private void initViewListeners() {
+		// Add a listener to the cancel button
 		mButtonCancelNewMedia.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				finish();
 			}
 		});
-		// Add a listener to the audio record button
-		mButtonRecordAudio = (ImageView) findViewById(R.id.btn_record_audio);
+		// Add listeners to the control buttons
 		mButtonRecordAudio.setOnTouchListener(new AudioButtonTouchListner());
-		// Add a listener to the Capture button
-		mButtonCapturePicture = (ImageView) findViewById(R.id.btn_snap_picture);
 		mButtonCapturePicture.setOnTouchListener(new CameraButtonTouchListner());
-		// Add a listener to the Capture button
-		mButtonRecordVideo = (ImageView) findViewById(R.id.btn_record_video);
 		mButtonRecordVideo.setOnTouchListener(new VideoButtonTouchListner());
-
 	}
 
-	/** A safe way to get an instance of the Camera object. */
-	public static Camera getCameraInstance() {
-		Camera c = null;
-		try {
-			c = Camera.open(); // attempt to get a Camera instance
-		} catch (Exception e) {
-			// Camera is not available (in use or does not exist)
-			Log.d(TAG, "Camera is not available (in use or does not exist) " + e.getMessage());
-		}
-		return c; // returns null if camera is unavailable
+	private void initScreenMeasurements() {
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		mScreenWidthInPixels = size.x;
+	}
+
+	private void initSquareCameraParameters() {
+		RelativeLayout.LayoutParams cameraLayoutParams = (RelativeLayout.LayoutParams) mRelativeLayoutCamera
+				.getLayoutParams();
+		cameraLayoutParams.height = mScreenWidthInPixels;
+		cameraLayoutParams.width = mScreenWidthInPixels;
+		mRelativeLayoutCamera.setLayoutParams(cameraLayoutParams);
 	}
 
 	/*
@@ -163,20 +130,12 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 	protected void onPause() {
 		super.onPause();
 		releaseRecorder(); // release MediaRecorder first
-		releaseCamera(); // release the camera immediately on pause event
 	}
 
 	private void releaseRecorder() {
 		if (mRecorder != null) {
 			mRecorder.release(); // release the recorder object
 			mRecorder = null;
-		}
-	}
-
-	private void releaseCamera() {
-		if (mCamera != null) {
-			mCamera.release(); // release the camera for other applications
-			mCamera = null;
 		}
 	}
 
@@ -417,7 +376,7 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 							// take the picture
 							// picturecallback will save the picture
 							// picturecallback also launches new intent
-							mCamera.takePicture(null, null, mPictureCallback);
+							mCameraFragment.takeSimplePicture();
 						}
 					}
 					return true;

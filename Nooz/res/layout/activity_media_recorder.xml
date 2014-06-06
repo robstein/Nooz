@@ -3,42 +3,44 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="61dp"
-        >
-
-        <FrameLayout
-            android:id="@+id/camera_preview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </RelativeLayout>
-
     <LinearLayout
+        android:id="@+id/camera_layout_top_bar"
         android:layout_width="match_parent"
         android:layout_height="61dp"
         android:background="#FF222222"
         android:orientation="horizontal"
         android:paddingBottom="10dp"
-        android:paddingTop="10dp"
-        >
+        android:paddingTop="10dp" >
 
         <ImageView
             android:id="@+id/btn_cancel_new_media"
-            android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="20dp"
             android:clickable="true"
             android:contentDescription="Cancel"
             android:src="@drawable/cancel_new_media_white" />
     </LinearLayout>
 
+    <RelativeLayout
+        android:id="@+id/camera_layout_camera"
+        android:layout_below="@id/camera_layout_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <fragment
+            android:id="@+id/camera_preview"
+            android:name="com.nooz.nooz.activity.mediarecorder.NoozCameraFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+
     <LinearLayout
         android:id="@+id/media_control_layer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/camera_layout_camera"
         android:background="#FF222222"
         android:orientation="vertical" >
 
@@ -85,7 +87,6 @@
                 android:src="@drawable/recorder_grey"
                 android:visibility="invisible" />
         </LinearLayout>
-
     </LinearLayout>
 
 </RelativeLayout>
