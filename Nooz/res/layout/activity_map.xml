@@ -79,7 +79,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:contentDescription="SettingsAndFilters"
-                android:src="@drawable/settings" />
+                android:src="@drawable/selector_button_settings" />
 
             <TextView
                 android:id="@+id/button_breaking"
@@ -135,11 +135,11 @@
                 android:id="@+id/button_new_story"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentLeft="true"
                 android:layout_centerInParent="true"
                 android:clickable="true"
                 android:contentDescription="NewStory"
-                android:src="@drawable/new_story" />
+                android:background="@drawable/selector_button_new_story" />
         </RelativeLayout>
 
         <include layout="@layout/layout_settings" />

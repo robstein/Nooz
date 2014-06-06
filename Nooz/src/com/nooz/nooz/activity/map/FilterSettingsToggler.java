@@ -62,23 +62,23 @@ public class FilterSettingsToggler implements OnClickListener {
 	private int getFilterOffImageByViewId(int imageViewId) {
 		switch (imageViewId) {
 		case R.id.button_filter_mic:
-			return R.drawable.filter_mic;
+			return R.drawable.selector_button_filter_mic;
 		case R.id.button_filter_camera:
-			return R.drawable.filter_camera;
+			return R.drawable.selector_button_filter_camera;
 		case R.id.button_filter_video:
-			return R.drawable.filter_video;
+			return R.drawable.selector_button_filter_video;
 		case R.id.button_filter_people:
-			return R.drawable.filter_people;
+			return R.drawable.selector_button_filter_people;
 		case R.id.button_filter_community:
-			return R.drawable.filter_community;
+			return R.drawable.selector_button_filter_community;
 		case R.id.button_filter_sports:
-			return R.drawable.filter_sports;
+			return R.drawable.selector_button_filter_sports;
 		case R.id.button_filter_food:
-			return R.drawable.filter_food;
+			return R.drawable.selector_button_filter_food;
 		case R.id.button_filter_public_safety:
-			return R.drawable.filter_public_safety;
+			return R.drawable.selector_button_filter_public_safety;
 		case R.id.button_filter_arts_and_life:
-			return R.drawable.filter_arts_and_life;
+			return R.drawable.selector_button_filter_arts_and_life;
 		}
 		return -1;
 	}
@@ -86,23 +86,23 @@ public class FilterSettingsToggler implements OnClickListener {
 	private int getFilterOnImageByViewId(int imageViewId) {
 		switch (imageViewId) {
 		case R.id.button_filter_mic:
-			return R.drawable.filter_mic_active;
+			return R.drawable.selector_button_filter_mic_active;
 		case R.id.button_filter_camera:
-			return R.drawable.filter_camera_active;
+			return R.drawable.selector_button_filter_camera_active;
 		case R.id.button_filter_video:
-			return R.drawable.filter_video_active;
+			return R.drawable.selector_button_filter_video_active;
 		case R.id.button_filter_people:
-			return R.drawable.filter_people_active;
+			return R.drawable.selector_button_filter_people_active;
 		case R.id.button_filter_community:
-			return R.drawable.filter_community_active;
+			return R.drawable.selector_button_filter_community_active;
 		case R.id.button_filter_sports:
-			return R.drawable.filter_sports_active;
+			return R.drawable.selector_button_filter_sports_active;
 		case R.id.button_filter_food:
-			return R.drawable.filter_food_active;
+			return R.drawable.selector_button_filter_food_active;
 		case R.id.button_filter_public_safety:
-			return R.drawable.filter_public_safety_active;
+			return R.drawable.selector_button_filter_public_safety_active;
 		case R.id.button_filter_arts_and_life:
-			return R.drawable.filter_arts_and_life_active;
+			return R.drawable.selector_button_filter_arts_and_life_active;
 		}
 		return -1;
 	}

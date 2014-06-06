@@ -42,7 +42,7 @@ public class MapActivityOnClickListener implements OnClickListener {
 				mC.startActivity(mediaRecorderIntent);
 			}
 			break;
-		case R.id.story_item_layout:
+		case R.id.story_item_shader:
 			mC.mStoryDataController.openStory(mC.mStories.get(mC.mCurrentStory));
 			break;
 		case R.id.button_map_filters:

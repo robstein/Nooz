@@ -29,7 +29,8 @@ public class StoryAdapter extends PagerAdapter {
 
 		LayoutInflater inflater = (LayoutInflater) mC.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View layout = inflater.inflate(R.layout.story_item, null);
-		layout.setOnClickListener((OnClickListener) mC.mActivityOnClickListener);
+		View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
+		storyItemShader.setOnClickListener((OnClickListener) mC.mActivityOnClickListener);
 
 		NetworkImageView image = (NetworkImageView) layout.findViewById(R.id.story_item_article_image);
 		if ("PICTURE".equals(mC.mStories.get(position).medium)) {
@@ -52,8 +53,8 @@ public class StoryAdapter extends PagerAdapter {
 		categoryRuler.setBackgroundColor(CategoryResourceHelper.getColorByCategory(mC.mStories.get(position).category,
 				mC.HIGHLIGHT));
 		if (position == mC.mResumeStory) {
-			View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
-			storyItemShader.setBackgroundColor(0x40000000);
+			storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
+			storyItemShader.setBackgroundDrawable((mC.getResources().getDrawable(R.drawable.selector_footer_story_item_highlighted)));
 		}
 
 		layout.setTag(position);

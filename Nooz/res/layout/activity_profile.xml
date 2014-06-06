@@ -20,9 +20,9 @@
             android:layout_marginBottom="13dp"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="13dp"
+            android:background="@drawable/selector_button_back"
             android:clickable="true"
-            android:contentDescription="Back"
-            android:src="@drawable/back" />
+            android:contentDescription="Back" />
 
         <TextView
             android:id="@+id/profile_name"

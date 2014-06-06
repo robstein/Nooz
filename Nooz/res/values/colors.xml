@@ -10,5 +10,14 @@
     <color name="category_arts_and_life">#FF9A55BF</color>
     <color name="category_sports_wrong">#FFE94D3E</color>
     <color name="almost_black">#FF222222</color>
+    <color name="footer_story_item_highlighted_background_normal">#40000000</color>
+    <color name="footer_story_item_highlighted_background_focused">#20000000</color>
+    <color name="footer_story_item_highlighted_background_pressed">#20000000</color>
+    <color name="footer_story_item_unhighlighted_background_normal">#C0000000</color>
+    <color name="footer_story_item_unhighlighted_background_focused">#C0000000</color>
+    <color name="footer_story_item_unhighlighted_background_pressed">#C0000000</color>
+    <color name="settings_button_background_normal">#00FFFFFF</color>
+    <color name="settings_button_background_pressed">#60FFFFFF</color>
+    <color name="settings_button_background_focused">#60FFFFFF</color>
 
 </resources>

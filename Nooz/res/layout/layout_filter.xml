@@ -24,9 +24,9 @@
             android:layout_gravity="center_vertical"
             android:layout_marginBottom="3dp"
             android:layout_marginTop="3dp"
+            android:background="@drawable/selector_button_back"
             android:clickable="true"
-            android:contentDescription="Category Logo"
-            android:src="@drawable/back" />
+            android:contentDescription="Category Logo" />
 
         <TextView
             android:id="@+id/filters_title"
@@ -116,7 +116,7 @@
             android:layout_gravity="center_vertical"
             android:clickable="true"
             android:contentDescription="Audio"
-            android:src="@drawable/filter_mic" />
+            android:src="@drawable/selector_button_filter_mic" />
 
         <ImageView
             android:id="@+id/button_filter_camera"
@@ -126,7 +126,7 @@
             android:layout_gravity="center_vertical"
             android:clickable="true"
             android:contentDescription="Image"
-            android:src="@drawable/filter_camera" />
+            android:src="@drawable/selector_button_filter_camera" />
 
         <ImageView
             android:id="@+id/button_filter_video"
@@ -136,7 +136,7 @@
             android:layout_gravity="center_vertical"
             android:clickable="true"
             android:contentDescription="Video"
-            android:src="@drawable/filter_video" />
+            android:src="@drawable/selector_button_filter_video" />
     </RelativeLayout>
 
     <TextView
@@ -166,7 +166,7 @@
             android:layout_gravity="center_vertical"
             android:clickable="true"
             android:contentDescription="Community"
-            android:src="@drawable/filter_community" />
+            android:src="@drawable/selector_button_filter_community" />
 
         <ImageView
             android:id="@+id/button_filter_people"
@@ -176,7 +176,7 @@
             android:layout_gravity="center_vertical"
             android:clickable="true"
             android:contentDescription="People"
-            android:src="@drawable/filter_people" />
+            android:src="@drawable/selector_button_filter_people" />
 
         <ImageView
             android:id="@+id/button_filter_public_safety"
@@ -186,16 +186,15 @@
             android:layout_gravity="center_vertical"
             android:clickable="true"
             android:contentDescription="Public Safety"
-            android:src="@drawable/filter_public_safety" />
+            android:src="@drawable/selector_button_filter_public_safety" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="61dp"
-        android:layout_marginBottom="20dp"
         android:layout_marginLeft="60dp"
         android:layout_marginRight="60dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="4dp"
         android:background="#FFF" >
 
         <ImageView
@@ -206,7 +205,7 @@
             android:layout_gravity="center_vertical"
             android:clickable="true"
             android:contentDescription="Arts and Life"
-            android:src="@drawable/filter_arts_and_life" />
+            android:src="@drawable/selector_button_filter_arts_and_life" />
 
         <ImageView
             android:id="@+id/button_filter_sports"
@@ -216,7 +215,7 @@
             android:layout_gravity="center_vertical"
             android:clickable="true"
             android:contentDescription="Sports"
-            android:src="@drawable/filter_sports" />
+            android:src="@drawable/selector_button_filter_sports" />
 
         <ImageView
             android:id="@+id/button_filter_food"
@@ -226,7 +225,7 @@
             android:layout_gravity="center_vertical"
             android:clickable="true"
             android:contentDescription="Food"
-            android:src="@drawable/filter_food" />
+            android:src="@drawable/selector_button_filter_food" />
     </RelativeLayout>
 
 </LinearLayout>

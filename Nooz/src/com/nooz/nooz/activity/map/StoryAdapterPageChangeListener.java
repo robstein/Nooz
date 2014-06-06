@@ -29,7 +29,7 @@ public class StoryAdapterPageChangeListener implements OnPageChangeListener {
 		// Shade old view
 		View layout = mC.mPager.findViewWithTag(mC.mCurrentStory);
 		View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
-		storyItemShader.setBackgroundColor(0xC0000000);
+		storyItemShader.setBackgroundDrawable((mC.getResources().getDrawable(R.drawable.selector_footer_story_item_unhighlighted)));
 		mC.mCircles.get(mC.mCurrentStory).setFillColor(
 				CategoryResourceHelper.getColorByCategory(mC.mStories.get(mC.mCurrentStory).category, mC.SHADE));
 		mC.mCircles.get(mC.mCurrentStory).setStrokeColor(
@@ -44,7 +44,7 @@ public class StoryAdapterPageChangeListener implements OnPageChangeListener {
 		// Brighten current view
 		layout = mC.mPager.findViewWithTag(mC.mCurrentStory);
 		storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
-		storyItemShader.setBackgroundColor(0x40000000);
+		storyItemShader.setBackgroundDrawable((mC.getResources().getDrawable(R.drawable.selector_footer_story_item_highlighted)));
 		mC.mCircles.get(mC.mCurrentStory).setFillColor(
 				CategoryResourceHelper.getColorByCategory(mC.mStories.get(mC.mCurrentStory).category, mC.HIGHLIGHT));
 		mC.mCircles.get(mC.mCurrentStory).setStrokeColor(

@@ -93,7 +93,7 @@ public class MapMenusController {
 			mC.mStoryFooter.startAnimation(mFadeIn);
 
 			// change color of settings icon and show relevant, breaking buttons
-			mC.mButtonSettingsAndFilters.setImageResource(R.drawable.settings);
+			mC.mButtonSettingsAndFilters.setImageResource(R.drawable.selector_button_settings);
 
 			mC.mButtonRelevant.setVisibility(View.VISIBLE);
 			mC.mButtonRelevant.startAnimation(mFadeIn);
@@ -109,7 +109,7 @@ public class MapMenusController {
 			mC.mStoryFooter.startAnimation(mFadeOut);
 
 			// change color of settings icon and hide relevant, breaking buttons
-			mC.mButtonSettingsAndFilters.setImageResource(R.drawable.settings_active);
+			mC.mButtonSettingsAndFilters.setImageResource(R.drawable.selector_button_settings_active);
 
 			mC.mButtonRelevant.setVisibility(View.INVISIBLE);
 			mC.mButtonRelevant.startAnimation(mFadeOut);

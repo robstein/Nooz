@@ -16,12 +16,6 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
 
-    <View
-        android:id="@+id/story_item_shader"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#C0000000" />
-
     <!-- Image view for camera icon/microphone icon -->
 
     <ImageView
@@ -68,5 +62,11 @@
         android:textColor="#FFFFFF"
         android:textSize="14dp"
         android:textStyle="bold" />
+
+    <View
+        android:id="@+id/story_item_shader"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/selector_footer_story_item_unhighlighted" />
 
 </RelativeLayout>
