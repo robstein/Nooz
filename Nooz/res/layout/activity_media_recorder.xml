@@ -20,14 +20,14 @@
             android:layout_marginLeft="20dp"
             android:clickable="true"
             android:contentDescription="Cancel"
-            android:src="@drawable/cancel_new_media_white" />
+            android:src="@drawable/selector_button_cancel_new_media_white" />
     </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/camera_layout_camera"
-        android:layout_below="@id/camera_layout_top_bar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/camera_layout_top_bar" >
 
         <fragment
             android:id="@+id/camera_preview"
@@ -62,7 +62,8 @@
                 android:clickable="true"
                 android:contentDescription="Record Audio"
                 android:padding="6dp"
-                android:src="@drawable/mic_grey" />
+                android:src="@drawable/selector_button_mic_grey"
+                android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/btn_snap_picture"
@@ -73,7 +74,7 @@
                 android:clickable="true"
                 android:contentDescription="Snap Picture"
                 android:padding="6dp"
-                android:src="@drawable/camera_active" />
+                android:src="@drawable/selector_button_camera_active" />
 
             <ImageView
                 android:id="@+id/btn_record_video"
@@ -84,7 +85,7 @@
                 android:clickable="true"
                 android:contentDescription="Record Video"
                 android:padding="6dp"
-                android:src="@drawable/recorder_grey"
+                android:src="@drawable/selector_button_recorder_grey"
                 android:visibility="invisible" />
         </LinearLayout>
     </LinearLayout>

@@ -40,7 +40,7 @@ import com.nooz.nooz.util.MediaMode;
  * @author Rob Stein
  * 
  */
-public class MediaRecorderActivity extends BaseLocationFragmentActivity {
+public class MediaRecorderActivity extends BaseLocationFragmentActivity implements OnClickListener {
 
 	private static final String TAG = "MediaRecorderActivity";
 	public static final int MEDIA_TYPE_AUDIO = 0;
@@ -92,16 +92,11 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 
 	private void initViewListeners() {
 		// Add a listener to the cancel button
-		mButtonCancelNewMedia.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				finish();
-			}
-		});
+		mButtonCancelNewMedia.setOnClickListener(this);
 		// Add listeners to the control buttons
-		mButtonRecordAudio.setOnTouchListener(new AudioButtonTouchListner());
-		mButtonCapturePicture.setOnTouchListener(new CameraButtonTouchListner());
-		mButtonRecordVideo.setOnTouchListener(new VideoButtonTouchListner());
+		mButtonRecordAudio.setOnClickListener(this);
+		mButtonCapturePicture.setOnClickListener(this);
+		mButtonRecordVideo.setOnClickListener(this);
 	}
 
 	private void initScreenMeasurements() {
@@ -249,266 +244,183 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity {
 
 	/* ***** PICTURE CAPTURING END ***** */
 
-	/* ***** CONTROL BUTTON ONTOUCHLISTENERS BEGIN ***** */
-
-	private class AudioButtonTouchListner implements OnTouchListener {
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			// Disable if using another mode
-			if (!mIsCapturingPicture && !mIsRecordingVideo) {
-				// If not disabled:
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					if (mMode != MediaMode.AUDIO) {
-						// If we aren't in audio record mode
-						// Do nothing until release
-					} else {
-						// If we are in audio record mode
-						if (!mIsRecordingAudio) {
-							// If we aren't recording, but we just clicked to do
-							// so
-						} else {
-							// If we were just recording, but just clicked to
-							// stop
-						}
-					}
-					return true;
-				}
-
-				if (event.getAction() == MotionEvent.ACTION_UP) {
-
-					if (mMode != MediaMode.AUDIO) {
-						// If we aren't in audio record mode
-						// Change highlight circle
-						switch (mMode) {
-						case PICTURE:
-							// Un-highlight camera
-							mButtonCapturePicture.setImageResource(R.drawable.camera_grey);
-							break;
-						case VIDEO:
-							// Un-highlight video recorder
-							mButtonRecordVideo.setImageResource(R.drawable.recorder_grey);
-							break;
-						default:
-							break;
-						}
-						// Highlight Mic
-						mButtonRecordAudio.setImageResource(R.drawable.mic_active);
-						// then put us in audio record mode
-						mMode = MediaMode.AUDIO;
-
-					} else {
-						// If we are in audio record mode
-
-						// Check to make sure location is not null
-						if (mCurrentLocation == null) {
-							Alert.createAndShowDialog("Please turn on Locations Services", "Location not found",
-									mContext);
-							return false;
-						} else {
-
-							if (!mIsRecordingAudio) {
-								// If we literally just clicked to record
-								Drawable button = getResources().getDrawable(R.drawable.mic_active);
-								button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
-								((ImageView) v).setImageDrawable(button);
-
-								// start doing recording stuff
-								startRecording();
-
-								// Set recording flag
-								mIsRecordingAudio = true;
-							} else {
-								// If we literally just clicked to stop
-								Drawable button = getResources().getDrawable(R.drawable.mic_active);
-								button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
-								((ImageView) v).setImageDrawable(button);
-
-								// start saving it and moving on
-								stopRecording();
-
-								// Clear recording flag
-								mIsRecordingAudio = false;
-
-								// Go to NewArticleActivity
-								Bundle args = new Bundle();
-								args.putParcelable("location", mCurrentLocation);
-								args.putCharSequence("medium", mMode.toString());
-								Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
-								newStoryIntent.putExtra("bundle", args);
-								startActivity(newStoryIntent);
-								finish();
-							}
-						}
-					}
-					return true;
-				}
-			}
-			return false;
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btn_cancel_new_media:
+			finish();
+			break;
+		case R.id.btn_record_audio:
+			handleAudioClick();
+			break;
+		case R.id.btn_snap_picture:
+			handlePictureClick();
+			break;
+		case R.id.btn_record_video:
+			handleVideoClick();
+			break;
 		}
 	}
 
-	private class CameraButtonTouchListner implements OnTouchListener {
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			// Disable if using another mode
-			if (!mIsRecordingAudio && !mIsRecordingVideo) {
-				// If not disabled:
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					if (mMode != MediaMode.PICTURE) {
-						// If we aren't in cameara mode
-						// Do nothing until release
-					} else {
-						// If we are in camera mode
+	private void handleAudioClick() {
+		// Disable if using another mode
+		if (!mIsCapturingPicture && !mIsRecordingVideo) {
+			if (mMode != MediaMode.AUDIO) {
+				// If we aren't in audio record mode
 
-						// Check to make sure location is not null
-						if (mCurrentLocation == null) {
-							Alert.createAndShowDialog("Please turn on Locations Services", "Location not found",
-									mContext);
-							return false;
-						} else {
-
-							// We just clicked so make it show that
-							Drawable button = getResources().getDrawable(R.drawable.camera_active);
-							button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
-							((ImageView) v).setImageDrawable(button);
-							// Set capturing picture flag
-							mIsCapturingPicture = true;
-
-							// take the picture
-							// picturecallback will save the picture
-							// picturecallback also launches new intent
-							mCameraFragment.takePicture();
-						}
-					}
-					return true;
+				// Change highlight circle
+				switch (mMode) {
+				case PICTURE:
+					// Un-highlight camera
+					mButtonCapturePicture.setImageResource(R.drawable.selector_button_camera_grey);
+					break;
+				case VIDEO:
+					// Un-highlight video recorder
+					mButtonRecordVideo.setImageResource(R.drawable.selector_button_recorder_grey);
+					break;
+				default:
+					break;
 				}
+				// Highlight Mic
+				mButtonRecordAudio.setImageResource(R.drawable.selector_button_mic_active);
+				// then put us in audio record mode
+				mMode = MediaMode.AUDIO;
 
-				if (event.getAction() == MotionEvent.ACTION_UP) {
+			} else {
+				// If we are in audio record mode
 
-					if (mMode != MediaMode.PICTURE) {
-						// If we aren't in picture mode
-						// Change highlight circle
+				// Check to make sure location is not null
+				if (mCurrentLocation == null) {
+					Alert.createAndShowDialog("Please turn on Locations Services", "Location not found", mContext);
+					return;
+				} else {
+					if (!mIsRecordingAudio) {
+						// If we literally just clicked to record
+						mButtonRecordAudio.setImageResource(R.drawable.selector_button_mic_active_recording);
 
-						switch (mMode) {
-						case AUDIO:
-							// Un-highlight mic
-							mButtonRecordAudio.setImageResource(R.drawable.mic_grey);
-							break;
-						case VIDEO:
-							// Un-highlight video recorder
-							mButtonRecordVideo.setImageResource(R.drawable.recorder_grey);
-							break;
-						default:
-							break;
-						}
-						// Highlight camera
-						mButtonCapturePicture.setImageResource(R.drawable.camera_active);
-						// then put us in picture mode
-						mMode = MediaMode.PICTURE;
+						// start doing recording stuff
+						startRecording();
 
+						// Set recording flag
+						mIsRecordingAudio = true;
 					} else {
-						// If we are in picture mode:
+						// If we literally just clicked to stop
+						mButtonRecordAudio.setImageResource(R.drawable.selector_button_mic_active);
 
-						// Check to make sure location is not null
-						if (mCurrentLocation == null) {
-							return false;
-						} else {
+						// start saving it and moving on
+						stopRecording();
 
-							// Draw the button back
-							Drawable button = getResources().getDrawable(R.drawable.camera_active);
-							button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
-							((ImageView) v).setImageDrawable(button);
-							// Clear capturing picture flag
-							mIsCapturingPicture = false;
-						}
+						// Clear recording flag
+						mIsRecordingAudio = false;
+
+						// Go to NewArticleActivity
+						Bundle args = new Bundle();
+						args.putParcelable("location", mCurrentLocation);
+						args.putCharSequence("medium", mMode.toString());
+						Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
+						newStoryIntent.putExtra("bundle", args);
+						startActivity(newStoryIntent);
+						finish();
 					}
-					return true;
-
 				}
 			}
-			return false;
 		}
 	}
 
-	private class VideoButtonTouchListner implements OnTouchListener {
-		@Override
-		public boolean onTouch(View v, MotionEvent event) {
-			// Disable if using another mode
-			if (!mIsRecordingAudio && !mIsCapturingPicture) {
-				// If not disabled:
-				if (event.getAction() == MotionEvent.ACTION_DOWN) {
-					if (mMode != MediaMode.VIDEO) {
-						// If we aren't in video record mode
-						// Do nothing until release
-					} else {
-						// If we are in video record mode
-						if (!mIsRecordingVideo) {
-							// If we aren't recording, but we just clicked to do
-							// so
-						} else {
-							// If we were just recording, but just clicked to
-							// stop
-						}
-					}
-					return true;
+	private void handlePictureClick() {
+		// Disable if using another mode
+		if (!mIsRecordingAudio && !mIsRecordingVideo) {
+			// If not disabled:
+			if (mMode != MediaMode.PICTURE) {
+				// If we aren't in camera mode
+
+				// Change highlight circle
+				switch (mMode) {
+				case AUDIO:
+					// Un-highlight mic
+					mButtonRecordAudio.setImageResource(R.drawable.selector_button_mic_grey);
+					break;
+				case VIDEO:
+					// Un-highlight video recorder
+					mButtonRecordVideo.setImageResource(R.drawable.selector_button_recorder_grey);
+					break;
+				default:
+					break;
 				}
 
-				if (event.getAction() == MotionEvent.ACTION_UP) {
+				// Highlight camera
+				mButtonCapturePicture.setImageResource(R.drawable.selector_button_camera_active);
+				// then put us in picture mode
+				mMode = MediaMode.PICTURE;
+			} else {
+				// Check to make sure location is not null
+				if (mCurrentLocation == null) {
+					Alert.createAndShowDialog("Please turn on Locations Services", "Location not found", mContext);
+					return;
+				} else {
+					// Set capturing picture flag
+					mIsCapturingPicture = true;
 
-					if (mMode != MediaMode.VIDEO) {
-						// If we aren't in video record mode
-						// Change highlight circle
-						switch (mMode) {
-						case AUDIO:
-							// Un-highlight mic
-							mButtonRecordAudio.setImageResource(R.drawable.mic_grey);
-							break;
-						case PICTURE:
-							// Un-highlight camera
-							mButtonCapturePicture.setImageResource(R.drawable.camera_grey);
-							break;
-						default:
-							break;
-						}
-						// Highlight Video recorder
-						mButtonRecordVideo.setImageResource(R.drawable.recorder_active);
-						// then put us in video record mode
-						mMode = MediaMode.VIDEO;
+					// take the picture/save the picture
+					mCameraFragment.takePicture();
 
-					} else {
-						// Check to make sure location is not null
-						if (mCurrentLocation == null) {
-							Alert.createAndShowDialog("Please turn on Locations Services", "Location not found",
-									mContext);
-							return false;
-						} else {
-							// If we are in video record mode
-							if (!mIsRecordingVideo) {
-								// If we literally just clicked to record
-								Drawable button = getResources().getDrawable(R.drawable.recorder_active);
-								button.setColorFilter(COLOR_RED, Mode.MULTIPLY);
-								((ImageView) v).setImageDrawable(button);
-								mIsRecordingVideo = true;
-
-								// start doing recording stuff
-							} else {
-								// If we literally just clicked to stop
-								Drawable button = getResources().getDrawable(R.drawable.recorder_active);
-								button.setColorFilter(COLOR_WHITE, Mode.SRC_ATOP);
-								((ImageView) v).setImageDrawable(button);
-								mIsRecordingVideo = false;
-
-								// start saving it and moving on
-							}
-						}
-					}
-					return true;
+					// launch new intent
+					
+					mIsCapturingPicture = false;
 				}
 			}
-			return false;
 		}
 	}
 
-	/* ***** CONTROL BUTTON ONTOUCHLISTENERS END ***** */
+	private void handleVideoClick() {
+		// Disable if using another mode
+		if (!mIsRecordingAudio && !mIsCapturingPicture) {
+			if (mMode != MediaMode.VIDEO) {
+				// If we aren't in video record mode
+				// Change highlight circle
+				switch (mMode) {
+				case AUDIO:
+					// Un-highlight mic
+					mButtonRecordAudio.setImageResource(R.drawable.selector_button_mic_grey);
+					break;
+				case PICTURE:
+					// Un-highlight camera
+					mButtonCapturePicture.setImageResource(R.drawable.selector_button_camera_grey);
+					break;
+				default:
+					break;
+				}
+				// Highlight Video recorder
+				mButtonRecordVideo.setImageResource(R.drawable.selector_button_recorder_active);
+				// then put us in video record mode
+				mMode = MediaMode.VIDEO;
 
+			} else {
+				// If we are in audio record mode
+
+				// Check to make sure location is not null
+				if (mCurrentLocation == null) {
+					Alert.createAndShowDialog("Please turn on Locations Services", "Location not found", mContext);
+					return;
+				} else {
+					// If we are in video record mode
+					if (!mIsRecordingVideo) {
+						// If we literally just clicked to record
+						mButtonRecordVideo.setImageResource(R.drawable.selector_button_recorder_active_recording);
+
+						mIsRecordingVideo = true;
+
+						// start doing recording stuff
+					} else {
+						// If we literally just clicked to stop
+						mButtonRecordVideo.setImageResource(R.drawable.selector_button_recorder_active);
+
+						mIsRecordingVideo = false;
+
+						// start saving it and moving on
+					}
+				}
+			}
+		}
+	}
 }
