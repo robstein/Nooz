@@ -479,17 +479,30 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	void drawCirlesOnMap() {
 		int i = 0;
 		for (Story s : mStories) {
-			// double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(),
-			// mMapWidthInMeters);
+			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
+
 			// Force bubble size at zoom 13
-			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(),
-					GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, 13));
+			// double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(),
+			// GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, 13));
+
 			s.setRadius(newRadius);
 			mStories.get(i).setRadius(newRadius);
 			drawBubble(s.lat, s.lng, s.radius, s.category);
 			i++;
 		}
 		moveBubblesToPreventOverlap();
+	}
+
+	private void updateBubbleSizes() {
+		int i = 0;
+		for (Story s : mStories) {
+			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
+
+			mStories.get(i).setRadius(newRadius);
+			mCircles.get(i).setRadius(newRadius);
+			mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int) (newRadius * 3 / 4));
+			i++;
+		}
 	}
 
 	private void moveBubblesToPreventOverlap() {
@@ -599,17 +612,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		mGroundOverlays.add(icon);
 	}
 
-	/*
-	 * private void updateBubbleSizes() { int i = 0; for (Story s : mStories) {
-	 * double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(),
-	 * mMapWidthInMeters);
-	 * 
-	 * mStories.get(i).setRadius(newRadius);
-	 * mCircles.get(i).setRadius(newRadius);
-	 * mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int)
-	 * (newRadius * 3 / 4)); i++; } }
-	 */
-
 	/* ***** BUBBLES END ***** */
 
 	/* ***** LISTENERS BEGIN ***** */
@@ -649,7 +651,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		// Update Bubbles
 		if (mPreviousZoomLevel != position.zoom) {
 			mMapWidthInMeters = GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, position.zoom);
-			// updateBubbleSizes();
+			updateBubbleSizes();
 		}
 		mPreviousZoomLevel = position.zoom;
 
