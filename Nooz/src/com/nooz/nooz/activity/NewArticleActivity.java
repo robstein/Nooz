@@ -16,8 +16,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -43,6 +43,7 @@ import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.GlobalConstant;
+import com.nooz.nooz.widget.SquareImageView;
 
 /**
  * 
@@ -54,7 +55,7 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 	private static final String TAG = "NewArticleActivity";
 
 	private LinearLayout mLayoutStoryDetails;
-	private ImageView mNewArticleImage;
+	private SquareImageView mNewArticleImage;
 	private Spinner mCategorySpinner;
 	private TextView mTextButtonBreak;
 	private TextView mSpinnerCustom;
@@ -99,13 +100,16 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 		mSpinnerCustom = (TextView) findViewById(R.id.customSpinnerItemTextView);
 
 		// display the image
-		mNewArticleImage = (ImageView) findViewById(R.id.new_article_image);
+		mNewArticleImage = (SquareImageView) findViewById(R.id.new_article_image);
 		if ("AUDIO".equals(mMedium)) {
 			mNewArticleImage.setImageDrawable(getResources().getDrawable(R.drawable.micbig));
 		}
 		if ("PICTURE".equals(mMedium)) {
-			mNewArticleImage
-					.setImageDrawable(Drawable.createFromPath(getFilesDir().getAbsolutePath() + "/picture.jpg"));
+			File imgFile = new File(getFilesDir().getAbsolutePath() + "/picture.jpg");
+			if (imgFile.exists()) {
+				Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+				mNewArticleImage.setImageBitmap(myBitmap);
+			}
 		}
 		if ("VIDEO".equals(mMedium)) {
 

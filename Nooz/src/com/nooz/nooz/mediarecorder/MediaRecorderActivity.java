@@ -12,8 +12,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.media.MediaRecorder;
@@ -21,14 +19,12 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.commonsware.cwac.camera.CameraFragment;
+import com.commonsware.cwac.camera.PictureTransaction;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.NewArticleActivity;
@@ -51,12 +47,12 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 
 	private ImageView mButtonCancelNewMedia;
 	private RelativeLayout mRelativeLayoutCamera;
-	CameraFragment mCameraFragment;
+	NoozCameraFragment mCameraFragment;
 	private ImageView mButtonRecordAudio;
 	ImageView mButtonCapturePicture;
 	private ImageView mButtonRecordVideo;
 
-	private int mScreenWidthInPixels;
+	int mScreenWidthInPixels;
 	protected MediaMode mMode;
 	protected boolean mIsRecordingAudio;
 	protected boolean mIsCapturingPicture;
@@ -68,6 +64,7 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 		super.onCreate(savedInstanceState);
 		initFields();
 		initViews();
+		initNoozCameraFragment();
 		initViewListeners();
 		initScreenMeasurements();
 		initSquareCameraParameters();
@@ -84,10 +81,14 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 		setContentView(R.layout.activity_media_recorder);
 		mButtonCancelNewMedia = (ImageView) findViewById(R.id.btn_cancel_new_media);
 		mRelativeLayoutCamera = (RelativeLayout) findViewById(R.id.camera_layout_camera);
-		mCameraFragment = (CameraFragment) getFragmentManager().findFragmentById(R.id.camera_preview);
 		mButtonRecordAudio = (ImageView) findViewById(R.id.btn_record_audio);
 		mButtonCapturePicture = (ImageView) findViewById(R.id.btn_snap_picture);
 		mButtonRecordVideo = (ImageView) findViewById(R.id.btn_record_video);
+	}
+
+	private void initNoozCameraFragment() {
+		mCameraFragment = NoozCameraFragment.newInstance();
+		getSupportFragmentManager().beginTransaction().replace(R.id.container, mCameraFragment).commit();
 	}
 
 	private void initViewListeners() {
@@ -97,6 +98,8 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 		mButtonRecordAudio.setOnClickListener(this);
 		mButtonCapturePicture.setOnClickListener(this);
 		mButtonRecordVideo.setOnClickListener(this);
+		// Set auto focus click listener
+		mRelativeLayoutCamera.setOnClickListener(this);
 	}
 
 	private void initScreenMeasurements() {
@@ -259,6 +262,9 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 		case R.id.btn_record_video:
 			handleVideoClick();
 			break;
+		case R.id.camera_layout_camera:
+			mCameraFragment.autoFocus();
+			break;
 		}
 	}
 
@@ -362,10 +368,9 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 					mIsCapturingPicture = true;
 
 					// take the picture/save the picture
-					mCameraFragment.takePicture();
+					mCameraFragment.takePicture(new PictureTransaction(mCameraFragment.getHost()));
 
-					// launch new intent
-					
+					// Clear capturing picture flag
 					mIsCapturingPicture = false;
 				}
 			}
@@ -423,4 +428,15 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 			}
 		}
 	}
+
+	void launchNewArticleActivity() {
+		Bundle args = new Bundle();
+		args.putParcelable("location", mCurrentLocation);
+		args.putCharSequence("medium", mMode.toString());
+		Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
+		newStoryIntent.putExtra("bundle", args);
+		startActivity(newStoryIntent);
+		finish();
+	}
+
 }

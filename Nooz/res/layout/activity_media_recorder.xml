@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -27,13 +28,14 @@
         android:id="@+id/camera_layout_camera"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/camera_layout_top_bar" >
+        android:layout_below="@id/camera_layout_top_bar"
+        android:clickable="true" >
 
-        <fragment
-            android:id="@+id/camera_preview"
-            android:name="com.commonsware.cwac.camera.CameraFragment"
+        <FrameLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            tools:context="com.nooz.nooz.activity.mediarecorder.MediaRecorderActivity" />
     </RelativeLayout>
 
     <LinearLayout

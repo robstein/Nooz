@@ -10,7 +10,7 @@
         style="@style/GenericProgressIndicator"
         android:layout_centerInParent="true" />
 
-    <com.nooz.nooz.widget.SquareImageView
+    <com.nooz.nooz.widget.SquareNetworkImageView
         android:id="@+id/story_item_article_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
