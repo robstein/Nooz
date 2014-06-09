@@ -1,7 +1,6 @@
 package com.nooz.nooz.util;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
@@ -12,13 +11,15 @@ import android.util.TypedValue;
  * 
  */
 public class Tools {
-	
+
 	/**
 	 * Turns dips to pixels.
 	 * 
-	 * @param context	current user's context
-	 * @param dipValue	the input dips
-	 * @return	the output pixels
+	 * @param context
+	 *            current user's context
+	 * @param dipValue
+	 *            the input dips
+	 * @return the output pixels
 	 */
 	public static float dipToPixels(Context context, float dipValue) {
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();

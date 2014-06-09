@@ -52,7 +52,6 @@ public class NoozSingleton {
 
 	private RequestQueue mRequestQueue;
 	private ImageLoader mImageLoader;
-	private BitmapLruCache mCache;
 
 	/**
 	 * 

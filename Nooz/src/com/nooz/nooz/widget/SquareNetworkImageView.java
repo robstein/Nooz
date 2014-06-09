@@ -1,10 +1,9 @@
 package com.nooz.nooz.widget;
 
-import com.android.volley.toolbox.NetworkImageView;
-
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ImageView;
+
+import com.android.volley.toolbox.NetworkImageView;
 
 /**
  * Simple Square ImageView

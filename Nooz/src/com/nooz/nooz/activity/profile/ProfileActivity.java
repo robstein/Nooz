@@ -30,9 +30,6 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	private static final String TAG = "ProfileActivity";
 	static final int RESULT_LOAD_IMAGE = 1111;
 
-	// Animations
-	private Animation mFadeIn;
-
 	// Profile Views
 	private ImageView mButtonBack;
 	TextView mProfileName;
@@ -79,7 +76,6 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		mReceiver = new ProfileBroadcastReceiver();
 		mUserDataController = new UserDataController(this);
 		mProfilePictureController = new ProfilePictureController(this);
-		mFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 	}
 
 	private void initViews() {
@@ -183,7 +179,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 							}
 						}).setIcon(android.R.drawable.ic_dialog_alert).show();
 			} else {
-				
+
 			}
 			break;
 		case R.id.profile_picture_full:

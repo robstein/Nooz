@@ -17,10 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
-import com.android.volley.toolbox.Volley;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
@@ -29,7 +26,6 @@ import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.profile.ProfileLauncher;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
-import com.nooz.nooz.util.BitmapLruCache;
 import com.nooz.nooz.util.CategoryResourceHelper;
 import com.nooz.nooz.util.GlobalConstant;
 

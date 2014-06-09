@@ -1,7 +1,6 @@
 package com.nooz.nooz.activity;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,7 +22,7 @@ import com.nooz.nooz.util.Alert;
 /**
  * 
  * @author Rob Stein
- *
+ * 
  */
 public class LoginActivity extends BaseFragmentActivity implements OnClickListener {
 
@@ -48,10 +47,9 @@ public class LoginActivity extends BaseFragmentActivity implements OnClickListen
 
 	private Animation mSlideInBottom;
 	private Animation mSlideOutBottom;
-	
+
 	private Boolean mSignupFormsUp = false;
 	private Boolean mLoginFormsUp = false;
-	
 
 	ProgressDialog progress;
 
@@ -234,7 +232,7 @@ public class LoginActivity extends BaseFragmentActivity implements OnClickListen
 
 		}
 	}
-	
+
 	@Override
 	public void onBackPressed() {
 		if (mSignupFormsUp) {

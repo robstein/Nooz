@@ -2,13 +2,10 @@ package com.nooz.nooz;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.Volley;
-import com.nooz.nooz.util.BitmapLruCache;
 import com.nooz.nooz.util.NoozService;
 
 /**
@@ -61,7 +58,7 @@ public class NoozApplication extends Application {
 	public RequestQueue getRequestQueue() {
 		return NoozSingleton.getInstance().getRequestQueue();
 	}
-	
+
 	public ImageLoader getImageLoader() {
 		return NoozSingleton.getInstance().getImageLoader();
 	}

@@ -6,7 +6,6 @@ import android.support.v4.util.LruCache;
 import android.util.DisplayMetrics;
 
 import com.android.volley.toolbox.ImageLoader.ImageCache;
-import com.google.android.gms.internal.in;
 
 public class BitmapLruCache extends LruCache<String, Bitmap> implements ImageCache {
 

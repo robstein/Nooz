@@ -50,8 +50,8 @@ public class ScaleImageView extends ImageView {
 		// Set up the paint for the circle
 		mPaint = new Paint(0);
 		mPaint.setColor(0x80ffffff);
-		//mPaint.setStyle(Paint.Style.STROKE);
-		//mPaint.setStrokeWidth(1);
+		// mPaint.setStyle(Paint.Style.STROKE);
+		// mPaint.setStrokeWidth(1);
 
 	}
 
@@ -60,14 +60,11 @@ public class ScaleImageView extends ImageView {
 		super.draw(canvas);
 
 		/*
-		int r = mRadius + 1;
-		while (((mX - r >= mStartX) || (mX + r <= mEndX))
-				|| ((mY - r >= mStartY) || (mY + r <= mEndY))) {
-			canvas.drawCircle(mX, mY, r, mPaint);
-			r++;
-		}
-		*/
-		
+		 * int r = mRadius + 1; while (((mX - r >= mStartX) || (mX + r <=
+		 * mEndX)) || ((mY - r >= mStartY) || (mY + r <= mEndY))) {
+		 * canvas.drawCircle(mX, mY, r, mPaint); r++; }
+		 */
+
 		canvas.drawCircle(mX, mY, mRadius, mPaint);
 	}
 
@@ -94,7 +91,7 @@ public class ScaleImageView extends ImageView {
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		mStartX = 0;
 		mEndX = MeasureSpec.getSize(widthMeasureSpec);
-		mStartY = 0;//getRelativeTop(this);
+		mStartY = 0;// getRelativeTop(this);
 		mEndY = MeasureSpec.getSize(heightMeasureSpec);
 
 		try {

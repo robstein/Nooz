@@ -42,7 +42,6 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
 import com.nooz.nooz.util.Alert;
-import com.nooz.nooz.util.FileUploader;
 import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.widget.SquareImageView;
 
@@ -476,7 +475,7 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 				Log.d(TAG, "Blob uploaded");
 				finish();
 			} else {
-				
+
 			}
 		}
 	}

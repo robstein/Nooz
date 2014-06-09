@@ -1,7 +1,6 @@
 package com.nooz.nooz.widget;
 
 import java.io.IOException;
-import java.util.List;
 
 import android.content.Context;
 import android.hardware.Camera;

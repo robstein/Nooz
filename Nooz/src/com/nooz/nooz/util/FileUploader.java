@@ -12,8 +12,6 @@ import java.net.ProtocolException;
 import java.net.URL;
 
 import android.os.AsyncTask;
-import android.util.Log;
-import android.widget.SearchView.OnSuggestionListener;
 
 public abstract class FileUploader {
 

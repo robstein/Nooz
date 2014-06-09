@@ -98,7 +98,6 @@ public class ProfileImageView extends NetworkImageView {
 		Bitmap output = Bitmap.createBitmap(sbmp.getWidth(), sbmp.getHeight(), Config.ARGB_8888);
 		Canvas canvas = new Canvas(output);
 
-		final int color = 0xffa19774;
 		final Paint paint = new Paint();
 		final Rect rect = new Rect(0, 0, sbmp.getWidth(), sbmp.getHeight());
 

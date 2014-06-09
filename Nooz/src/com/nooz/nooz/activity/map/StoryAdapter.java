@@ -1,20 +1,20 @@
 package com.nooz.nooz.activity.map;
 
-import com.android.volley.toolbox.NetworkImageView;
-import com.nooz.nooz.R;
-import com.nooz.nooz.util.CategoryResourceHelper;
-import com.nooz.nooz.util.GlobalConstant;
-
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.android.volley.toolbox.NetworkImageView;
+import com.nooz.nooz.R;
+import com.nooz.nooz.util.CategoryResourceHelper;
+import com.nooz.nooz.util.GlobalConstant;
 
 public class StoryAdapter extends PagerAdapter {
 
@@ -54,7 +54,8 @@ public class StoryAdapter extends PagerAdapter {
 				mC.HIGHLIGHT));
 		if (position == mC.mResumeStory) {
 			storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
-			storyItemShader.setBackgroundDrawable((mC.getResources().getDrawable(R.drawable.selector_footer_story_item_highlighted)));
+			storyItemShader.setBackgroundDrawable((mC.getResources()
+					.getDrawable(R.drawable.selector_footer_story_item_highlighted)));
 		}
 
 		layout.setTag(position);

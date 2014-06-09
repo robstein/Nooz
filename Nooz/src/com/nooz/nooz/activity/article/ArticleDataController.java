@@ -8,13 +8,11 @@ import java.net.URL;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
-import com.nooz.nooz.R;
 import com.nooz.nooz.util.GlobalConstant;
 
 public class ArticleDataController {
@@ -124,14 +122,14 @@ public class ArticleDataController {
 			if (!retval) {
 				cancel(FORCE_STOP);
 			}
-			
-			if(ex instanceof MalformedURLException) {
+
+			if (ex instanceof MalformedURLException) {
 				Log.e(TAG, "MalformedURLException - Bad blob url: " + ex.getCause().getMessage());
 			}
-			if(ex instanceof FileNotFoundException) {
+			if (ex instanceof FileNotFoundException) {
 				Log.e(TAG, "FileNotFoundException - No blob at url: " + ex.getCause().getMessage());
 			}
-			if(ex instanceof IOException) {
+			if (ex instanceof IOException) {
 				Log.e(TAG, "IOException - There was an error decoding bitmap from URL: " + ex.getCause().getMessage());
 			}
 

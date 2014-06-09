@@ -1,6 +1,5 @@
 package com.nooz.nooz.activity.article;
 
-import android.media.MediaPlayer;
 import android.net.Uri;
 
 public class PictureModule implements ArticleModule {
@@ -10,7 +9,7 @@ public class PictureModule implements ArticleModule {
 	public PictureModule(ArticleActivity articleActivity) {
 		this.mC = articleActivity;
 	}
-	
+
 	@Override
 	public void init() {
 		// TODO Auto-generated method stub

@@ -34,7 +34,7 @@ public class VideoModule implements ArticleModule {
 	@Override
 	public void onPlay() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
