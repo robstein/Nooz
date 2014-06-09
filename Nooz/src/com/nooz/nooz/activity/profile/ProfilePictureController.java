@@ -59,9 +59,6 @@ public class ProfilePictureController {
 	public void uploadProfilePicture(String sasUrl) {
 		// Upload picture
 		(new ImageUploaderTask(sasUrl)).execute();
-		// Invalidate and remove Url from cache
-		mC.getRequestQueue().getCache().invalidate(GlobalConstant.PROFILE_URL + mC.mUserId, true);
-		mC.getRequestQueue().getCache().remove(GlobalConstant.PROFILE_URL + mC.mUserId);
 	}
 
 	/***
@@ -113,6 +110,9 @@ public class ProfilePictureController {
 		protected void onPostExecute(Boolean uploaded) {
 			if (uploaded) {
 				Log.d(TAG, "Blob uploaded");
+				// Invalidate and remove Url from cache
+				mC.getRequestQueue().getCache().invalidate(GlobalConstant.PROFILE_URL + mC.mUserId, true);
+				mC.getRequestQueue().getCache().remove(GlobalConstant.PROFILE_URL + mC.mUserId);
 			}
 		}
 	}

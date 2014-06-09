@@ -82,7 +82,7 @@ public class ProfileImageView extends NetworkImageView {
 
 		// Draw border
 		if (mLarge) {
-			canvas.drawCircle(w / 2, h / 2, (w + 1) / 2 - Tools.dipToPixels(mContext, 5f) / 2, mBorderPaint);
+			canvas.drawCircle(w / 2 + 1, h / 2, (w + 1) / 2 - Tools.dipToPixels(mContext, 5f) / 2, mBorderPaint);
 		} else {
 
 		}

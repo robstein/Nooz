@@ -70,13 +70,27 @@ public class NoozCameraFragment extends CameraFragment {
 
 		@Override
 		public void saveImage(PictureTransaction xact, byte[] image) {
+			// Wait for image to finish saving
 			super.saveImage(xact, image);
+
+			// Clear capturing picture flag
+			((MediaRecorderActivity) getActivity()).mIsCapturingPicture = false;
+
+			// Launch new activity
 			((MediaRecorderActivity) getActivity()).launchNewArticleActivity();
 		}
 
 		@Override
 		public Size getPreviewSize(int displayOrientation, int width, int height, Parameters parameters) {
 			return super.getPreviewSize(displayOrientation, mScreenWidthInPixels, mScreenWidthInPixels, parameters);
+		}
+
+		/**
+		 * So that the preview doesn't keep going.
+		 */
+		@Override
+		public boolean useSingleShotMode() {
+			return true;
 		}
 
 	}

@@ -366,12 +366,12 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 				} else {
 					// Set capturing picture flag
 					mIsCapturingPicture = true;
-
+					
+					// Disable Control buttons
+					mButtonCapturePicture.setEnabled(false);
+					
 					// take the picture/save the picture
 					mCameraFragment.takePicture(new PictureTransaction(mCameraFragment.getHost()));
-
-					// Clear capturing picture flag
-					mIsCapturingPicture = false;
 				}
 			}
 		}
