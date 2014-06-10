@@ -46,5 +46,4 @@ public class BaseFragmentActivity extends FragmentActivity {
 	public ImageLoader getImageLoader() {
 		return mImageLoader;
 	}
-
 }

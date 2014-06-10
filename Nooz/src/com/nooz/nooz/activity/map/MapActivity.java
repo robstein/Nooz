@@ -20,10 +20,13 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.View.OnTouchListener;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -31,6 +34,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -50,6 +54,7 @@ import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.nooz.nooz.R;
+import com.nooz.nooz.activity.ActivityGestureDetector;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.LoginActivity;
 import com.nooz.nooz.model.Story;
@@ -89,7 +94,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	private ImageView mButtonNewStory;
 
 	// Settings menu views
-	RelativeLayout mMenuSettings;
+	ScrollView mMenuSettings;
 	private NetworkImageView mIconProfile;
 	private TextView mButtonProfile;
 	private TextView mButtonMapFilters;
@@ -189,6 +194,9 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	 */
 	MapMenusController mMenuController;
 
+	private GestureDetector mGestureDetector;
+	private OnTouchListener mGestureListener;
+
 	/* ***** ACTIVITY LIFECYCLE BEGIN ***** */
 
 	@Override
@@ -248,7 +256,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		mButtonNewStory = (ImageView) findViewById(R.id.button_new_story);
 
 		// Settings menu views
-		mMenuSettings = (RelativeLayout) findViewById(R.id.menu_settings);
+		mMenuSettings = (ScrollView) findViewById(R.id.menu_settings);
 		mIconProfile = (NetworkImageView) findViewById(R.id.icon_profile);
 		mButtonProfile = (TextView) findViewById(R.id.button_profile);
 		mButtonMapFilters = (TextView) findViewById(R.id.button_map_filters);
@@ -282,6 +290,8 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		mButtonMapFilters.setOnClickListener(mActivityOnClickListener);
 
 		// Filter menu view listeners
+		initGestureDetectionListeners();
+		mLayoutFilters.setOnTouchListener(mGestureListener);
 		mButtonMapFiltersBack.setOnClickListener(mActivityOnClickListener);
 		mTogglerFilterAudio.setOnClickListener(mFilterSettingsToggler);
 		mTogglerFilterPicture.setOnClickListener(mFilterSettingsToggler);
@@ -292,6 +302,20 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		mTogglerFilterFood.setOnClickListener(mFilterSettingsToggler);
 		mTogglerFilterPublicSafety.setOnClickListener(mFilterSettingsToggler);
 		mTogglerFilterArtsAndLife.setOnClickListener(mFilterSettingsToggler);
+	}
+
+	private void initGestureDetectionListeners() {
+		mGestureDetector = new GestureDetector(this, new ActivityGestureDetector() {
+			@Override
+			public void onSwipeLeft() {
+				mMenuController.hideFiltersLayout();
+			}
+		});
+		mGestureListener = new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				return mGestureDetector.onTouchEvent(event);
+			}
+		};
 	}
 
 	private void initScreenMeasurements() {

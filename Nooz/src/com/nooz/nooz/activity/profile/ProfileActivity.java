@@ -5,16 +5,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.nooz.nooz.R;
+import com.nooz.nooz.activity.ActivityGestureDetector;
 import com.nooz.nooz.activity.BaseFragmentActivity;
 import com.nooz.nooz.model.ProfileInfo;
 import com.nooz.nooz.util.GlobalConstant;
@@ -56,6 +58,9 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	public RelativeLayout mProfileLayout;
 	public RelativeLayout mCropPictureLayout;
 	Boolean mIsMyProfile;
+
+	private GestureDetector mGestureDetector;
+	private OnTouchListener mGestureListener;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +106,10 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	}
 
 	private void initViewListeners() {
+		// Gesture detection
+		initGestureDetectionListeners();
+		mProfileLayout.setOnTouchListener(mGestureListener);
+
 		// Profile listeners
 		mButtonBack.setOnClickListener(this);
 		mProfileName.setOnClickListener(this);
@@ -111,6 +120,20 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		mButtonProfileNumbers.setOnClickListener(this);
 		mButtonProfilePersons.setOnClickListener(this);
 		mButtonProfileSettingsOrPm.setOnClickListener(this);
+	}
+
+	private void initGestureDetectionListeners() {
+		mGestureDetector = new GestureDetector(this, new ActivityGestureDetector() {
+			@Override
+			public void onSwipeLeft() {
+				finishWithAnimation();
+			}
+		});
+		mGestureListener = new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				return mGestureDetector.onTouchEvent(event);
+			}
+		};
 	}
 
 	@Override
@@ -192,4 +215,5 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		finish();
 		this.overridePendingTransition(R.anim.fade_in, R.anim.slide_out_left);
 	}
+
 }
