@@ -25,7 +25,7 @@
             android:clickable="true"
             android:contentDescription="Back" />
 
-        <TextView
+        <com.nooz.nooz.widget.TextView
             android:id="@+id/profile_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,9 +34,10 @@
             android:text="-- --"
             android:textColor="#222222"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            custom:typeface="Bariol_Regular.otf" />
 
-        <TextView
+        <com.nooz.nooz.widget.TextView
             android:id="@+id/profile_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -46,7 +47,8 @@
             android:paddingBottom="16dp"
             android:text="--"
             android:textColor="#656565"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            custom:typeface="Bariol_Regular.otf" />
 
         <com.nooz.nooz.widget.ProfileImageView
             android:id="@+id/profile_picture_full"
@@ -82,7 +84,7 @@
             android:contentDescription=""
             android:src="@drawable/profile_cup" />
 
-        <TextView
+        <com.nooz.nooz.widget.TextView
             android:id="@+id/button_profile_numbers"
             android:layout_width="41dp"
             android:layout_height="41dp"
@@ -97,7 +99,8 @@
             android:text="-"
             android:textColor="#FFF"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            custom:typeface="Bariol_Regular.otf" />
 
         <ImageView
             android:id="@+id/button_profile_persons"

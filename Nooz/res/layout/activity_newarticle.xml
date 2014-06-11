@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.nooz.nooz"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -49,7 +50,7 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/example_article_picture" />
 
-            <EditText
+            <com.nooz.nooz.widget.EditText
                 android:id="@+id/input_headline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -67,7 +68,8 @@
                 android:textColor="#FEFEFE"
                 android:textColorHint="#FEFEFE"
                 android:textSize="28dp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                custom:typeface="Bariol_Regular.otf" />
 
             <LinearLayout
                 android:id="@+id/layout_story_details"
@@ -81,7 +83,7 @@
                 android:paddingBottom="5dp"
                 android:paddingTop="5dp" >
 
-                <EditText
+                <com.nooz.nooz.widget.EditText
                     android:id="@+id/input_caption"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -93,9 +95,10 @@
                     android:hint="Enter a caption..."
                     android:inputType="textCapSentences"
                     android:padding="10dp"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    custom:typeface="Bariol_Regular.otf" />
 
-                <EditText
+                <com.nooz.nooz.widget.EditText
                     android:id="@+id/input_keywords"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -106,7 +109,8 @@
                     android:background="@drawable/edittext_rounded_border"
                     android:hint="Enter keywords..."
                     android:padding="10dp"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    custom:typeface="Bariol_Regular.otf" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -157,7 +161,7 @@
                         android:padding="3dp"
                         android:src="@drawable/share_tumblr" />
 
-                    <TextView
+                    <com.nooz.nooz.widget.TextView
                         android:id="@+id/btn_break_post"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -176,7 +180,8 @@
                         android:textAllCaps="true"
                         android:textColor="#222222"
                         android:textSize="20dp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        custom:typeface="Bariol_Regular.otf" />
                 </LinearLayout>
             </LinearLayout>
         </RelativeLayout>

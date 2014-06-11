@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.nooz.nooz"
     android:id="@+id/filters_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,7 +29,7 @@
             android:clickable="true"
             android:contentDescription="Category Logo" />
 
-        <TextView
+        <com.nooz.nooz.widget.TextView
             android:id="@+id/filters_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -38,7 +39,8 @@
             android:gravity="center"
             android:padding="4dp"
             android:text="@string/map_filters_title"
-            android:textSize="23sp" />
+            android:textSize="23sp"
+            custom:typeface="Bariol_Regular.otf" />
 
         <ImageView
             android:id="@+id/filters_search"
@@ -51,7 +53,7 @@
             android:src="@drawable/filters_search" />
     </RelativeLayout>
 
-    <TextView
+    <com.nooz.nooz.widget.TextView
         android:layout_width="match_parent"
         android:layout_height="34dp"
         android:background="@drawable/filter_category"
@@ -60,7 +62,8 @@
         android:text="@string/time"
         android:textColor="#212121"
         android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        custom:typeface="Bariol_Regular.otf" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -71,14 +74,15 @@
         android:layout_marginTop="20dp"
         android:background="#FFF" >
 
-        <TextView
+        <com.nooz.nooz.widget.TextView
             android:id="@+id/seek_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:text="1 year"
             android:textColor="#212121"
-            android:textSize="13sp" />
+            android:textSize="13sp"
+            custom:typeface="Bariol_Regular.otf" />
 
         <SeekBar
             android:id="@+id/seekbar"
@@ -88,7 +92,7 @@
             android:layout_marginTop="3dp" />
     </RelativeLayout>
 
-    <TextView
+    <com.nooz.nooz.widget.TextView
         android:layout_width="match_parent"
         android:layout_height="34dp"
         android:background="@drawable/filter_category"
@@ -97,7 +101,8 @@
         android:text="@string/medium"
         android:textColor="#212121"
         android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        custom:typeface="Bariol_Regular.otf" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -139,7 +144,7 @@
             android:src="@drawable/selector_button_filter_video" />
     </RelativeLayout>
 
-    <TextView
+    <com.nooz.nooz.widget.TextView
         android:layout_width="match_parent"
         android:layout_height="34dp"
         android:background="@drawable/filter_category"
@@ -148,7 +153,8 @@
         android:text="@string/category"
         android:textColor="#212121"
         android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        custom:typeface="Bariol_Regular.otf" />
 
     <RelativeLayout
         android:layout_width="match_parent"

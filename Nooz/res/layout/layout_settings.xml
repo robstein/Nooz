@@ -49,7 +49,7 @@
             android:background="#00FFFFFF"
             android:orientation="vertical" >
 
-            <TextView
+            <com.nooz.nooz.widget.TextView
                 android:id="@+id/button_profile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -62,7 +62,8 @@
                 android:paddingTop="20dp"
                 android:text="@string/default_name"
                 android:textColor="#202020"
-                android:textSize="13sp" />
+                android:textSize="13sp"
+                custom:typeface="Bariol_Regular.otf" />
 
             <View
                 android:layout_width="match_parent"
@@ -71,7 +72,7 @@
                 android:layout_marginRight="10dp"
                 android:background="#BABABA" />
 
-            <TextView
+            <com.nooz.nooz.widget.TextView
                 android:id="@+id/button_map_filters"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -84,7 +85,8 @@
                 android:paddingTop="20dp"
                 android:text="@string/map_filters_button"
                 android:textColor="#202020"
-                android:textSize="13sp" />
+                android:textSize="13sp"
+                custom:typeface="Bariol_Regular.otf" />
 
             <View
                 android:layout_width="match_parent"
@@ -93,7 +95,7 @@
                 android:layout_marginRight="10dp"
                 android:background="#BABABA" />
 
-            <TextView
+            <com.nooz.nooz.widget.TextView
                 android:id="@+id/button_top_nooz"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -106,7 +108,8 @@
                 android:paddingTop="20dp"
                 android:text="@string/top_nooz"
                 android:textColor="#202020"
-                android:textSize="13sp" />
+                android:textSize="13sp"
+                custom:typeface="Bariol_Regular.otf" />
         </LinearLayout>
     </RelativeLayout>
 

@@ -279,6 +279,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		// Main map view listeners
 		mRegion.setOnEditorActionListener(mRegionEditorDoneListener);
 		mRegion.setOnFocusChangeListener(mRegionFocusDoneListener);
+		mRegion.setOnClickListener(mActivityOnClickListener);
 		mButtonRelevant.setOnClickListener(mActivityOnClickListener);
 		mButtonSettingsAndFilters.setOnClickListener(mActivityOnClickListener);
 		mButtonBreaking.setOnClickListener(mActivityOnClickListener);
