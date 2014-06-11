@@ -145,8 +145,6 @@ public class Story implements Parcelable {
 		dest.writeInt(scoreIrrelevance);
 		dest.writeString(medium);
 		dest.writeString(authorId);
-
-		dest.writeDouble(radius);
 	}
 
 	/**
@@ -174,8 +172,6 @@ public class Story implements Parcelable {
 		scoreIrrelevance = pc.readInt();
 		medium = pc.readString();
 		authorId = pc.readString();
-
-		radius = pc.readDouble();
 	}
 
 	public static final Parcelable.Creator<Story> CREATOR = new Parcelable.Creator<Story>() {

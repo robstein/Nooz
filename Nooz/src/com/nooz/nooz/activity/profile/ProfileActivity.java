@@ -10,6 +10,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -18,6 +21,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.ActivityGestureDetector;
 import com.nooz.nooz.activity.BaseFragmentActivity;
+import com.nooz.nooz.activity.article.ArticleLauncher;
 import com.nooz.nooz.model.ProfileInfo;
 import com.nooz.nooz.util.GlobalConstant;
 import com.soundcloud.android.crop.Crop;
@@ -31,6 +35,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 
 	private static final String TAG = "ProfileActivity";
 	static final int RESULT_LOAD_IMAGE = 1111;
+	static final boolean HIGHLIGHT = true;
 
 	// Profile Views
 	private ImageView mButtonBack;
@@ -41,6 +46,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	TextView mButtonProfileNumbers;
 	private ImageView mButtonProfilePersons;
 	private ImageView mButtonProfileSettingsOrPm;
+	GridView mUserStoryGridView;
 
 	// Crop Image Views
 	ImageView mButtonBackFromCrop;
@@ -62,12 +68,18 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	private GestureDetector mGestureDetector;
 	private OnTouchListener mGestureListener;
 
+	ProfileStoriesController mProfileStoriesController;
+	private ProfileAwardsController mProfileAwardsController;
+	private ProfilePeopleController mProfilePeopleController;
+	ProfileStoryAdapter mProfileStoriesAdapter;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		initBundleParameters();
 		initFields();
 		initViews();
+		initGridAdapter();
 		initViewListeners();
 	}
 
@@ -81,6 +93,9 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		mReceiver = new ProfileBroadcastReceiver();
 		mUserDataController = new UserDataController(this);
 		mProfilePictureController = new ProfilePictureController(this);
+		mProfileStoriesController = new ProfileStoriesController(this);
+		mProfileAwardsController = new ProfileAwardsController(this);
+		mProfilePeopleController = new ProfilePeopleController(this);
 	}
 
 	private void initViews() {
@@ -100,9 +115,15 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		if (!mIsMyProfile) {
 			mButtonProfileSettingsOrPm.setImageDrawable(getResources().getDrawable(R.drawable.profile_pm));
 		}
+		mUserStoryGridView = (GridView) findViewById(R.id.gridview);
 
 		// Crop image views
 		mCropPictureLayout = (RelativeLayout) findViewById(R.id.profile_crop_picture);
+	}
+
+	private void initGridAdapter() {
+		mProfileStoriesAdapter = new ProfileStoryAdapter(this);
+		mUserStoryGridView.setAdapter(mProfileStoriesAdapter);
 	}
 
 	private void initViewListeners() {
@@ -139,25 +160,23 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	@Override
 	protected void onResume() {
 		super.onResume();
-
 		registerReceivers();
 		mUserDataController.populateProfile();
-
-		// If you are using normal ImageView
 		mProfilePictureFull.setImageUrl(GlobalConstant.PROFILE_URL + mUserId, mImageLoader);
+		mProfileStoriesController.populateProfileStories();
 	}
 
 	private void registerReceivers() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(GlobalConstant.PROFILE_INFO_LOADED_ACTION);
 		filter.addAction(GlobalConstant.BLOB_CREATED_ACTION);
+		filter.addAction(GlobalConstant.STORIES_LOADED_ACTION);
 		registerReceiver(mReceiver, filter);
 	}
 
 	@Override
 	protected void onPause() {
 		unRegisterReceivers();
-
 		super.onPause();
 	}
 
@@ -181,6 +200,11 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	@Override
 	public void onBackPressed() {
 		finishWithAnimation();
+	}
+
+	private void finishWithAnimation() {
+		finish();
+		this.overridePendingTransition(R.anim.fade_in, R.anim.slide_out_left);
 	}
 
 	@Override
@@ -209,11 +233,6 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 			mProfilePictureController.selectImage();
 			break;
 		}
-	}
-
-	private void finishWithAnimation() {
-		finish();
-		this.overridePendingTransition(R.anim.fade_in, R.anim.slide_out_left);
 	}
 
 }

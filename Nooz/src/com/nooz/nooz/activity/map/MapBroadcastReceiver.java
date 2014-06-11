@@ -1,5 +1,7 @@
 package com.nooz.nooz.activity.map;
 
+import com.nooz.nooz.util.GlobalConstant;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +14,7 @@ public class MapBroadcastReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		String intentAction = intent.getAction();
-		if (intentAction.equals("stories.loaded")) {
+		if (GlobalConstant.STORIES_LOADED_ACTION.equals(intentAction)) {
 			try {
 				((MapActivity) context).mStoryDataController.getStoriesCallBack();
 			} catch (Exception e) {

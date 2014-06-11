@@ -205,7 +205,7 @@ public class NoozService {
 		preferencesEditor.putString("user_name", firstName + " " + lastName);
 		preferencesEditor.commit();
 	}
-	
+
 	/**
 	 * 
 	 * @return userId of the current authenticated user
@@ -353,28 +353,33 @@ public class NoozService {
 	 * @param filterSettings
 	 *            filter settings
 	 * @param currentSearchType
-	 *            relevant or breaking
+	 *            relevant, breaking, or profile
+	 * @param authorUserId 
 	 * @see #getLoadedStories()
 	 */
-	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings, SearchType currentSearchType) {
+	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings, SearchType currentSearchType, String authorUserId) {
 		JsonObject body = new JsonObject();
-		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
-		body.addProperty("northeastLat", bounds.northeast.latitude);
-		body.addProperty("northeastLng", bounds.northeast.longitude);
-		body.addProperty("southwestLat", bounds.southwest.latitude);
-		body.addProperty("southwestLng", bounds.southwest.longitude);
-		body.addProperty("defaultMedium", filterSettings.DefaultMedium);
-		body.addProperty("audio", filterSettings.Audio);
-		body.addProperty("picture", filterSettings.Picture);
-		body.addProperty("video", filterSettings.Video);
-		body.addProperty("defaultCategory", filterSettings.DefaultCategory);
-		body.addProperty("people", filterSettings.People);
-		body.addProperty("community", filterSettings.Community);
-		body.addProperty("sports", filterSettings.Sports);
-		body.addProperty("food", filterSettings.Food);
-		body.addProperty("publicSaftey", filterSettings.PublicSafety);
-		body.addProperty("artsAndLife", filterSettings.ArtsAndLife);
 		body.addProperty("searchType", currentSearchType.toString());
+		if (SearchType.PROFILE.equals(currentSearchType)) {
+			body.addProperty("user_id", authorUserId);
+		} else {
+			body.addProperty("user_id", mClient.getCurrentUser().getUserId());
+			body.addProperty("northeastLat", bounds.northeast.latitude);
+			body.addProperty("northeastLng", bounds.northeast.longitude);
+			body.addProperty("southwestLat", bounds.southwest.latitude);
+			body.addProperty("southwestLng", bounds.southwest.longitude);
+			body.addProperty("defaultMedium", filterSettings.DefaultMedium);
+			body.addProperty("audio", filterSettings.Audio);
+			body.addProperty("picture", filterSettings.Picture);
+			body.addProperty("video", filterSettings.Video);
+			body.addProperty("defaultCategory", filterSettings.DefaultCategory);
+			body.addProperty("people", filterSettings.People);
+			body.addProperty("community", filterSettings.Community);
+			body.addProperty("sports", filterSettings.Sports);
+			body.addProperty("food", filterSettings.Food);
+			body.addProperty("publicSaftey", filterSettings.PublicSafety);
+			body.addProperty("artsAndLife", filterSettings.ArtsAndLife);
+		}
 		mClient.invokeApi("getnooz", body, new ApiJsonOperationCallback() {
 
 			@Override
@@ -393,7 +398,7 @@ public class NoozService {
 					mLoadedStories = stories;
 
 					Intent broadcast = new Intent();
-					broadcast.setAction("stories.loaded");
+					broadcast.setAction(GlobalConstant.STORIES_LOADED_ACTION);
 					mContext.sendBroadcast(broadcast);
 
 				} else {
@@ -528,17 +533,10 @@ public class NoozService {
 	}
 
 	/**
-	 * Queries Azure for stories. A list of Story objects will be loaded into
-	 * the NoozService and will be available from getLoadedStories() after a
-	 * broadcast intent is sent out.
+	 * Queries Azure for profile info which will be loaded into
+	 * mLoadedProfileInfo.
 	 * 
-	 * @param bounds
-	 *            boundaries of the map
-	 * @param filterSettings
-	 *            filter settings
-	 * @param currentSearchType
-	 *            relevant or breaking
-	 * @see #getLoadedStories()
+	 * @param userId
 	 */
 	public void getProfileInfo(String userId) {
 		JsonObject body = new JsonObject();

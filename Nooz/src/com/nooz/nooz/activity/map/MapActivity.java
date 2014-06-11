@@ -57,6 +57,7 @@ import com.nooz.nooz.R;
 import com.nooz.nooz.activity.ActivityGestureDetector;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.LoginActivity;
+import com.nooz.nooz.activity.article.ArticleLauncher;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.CategoryResourceHelper;
 import com.nooz.nooz.util.GlobalConstant;
@@ -662,7 +663,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	public void onMapClick(LatLng point) {
 		for (Story s : mStories) {
 			if (GlobeTrigonometry.distBetween(s.lat, s.lng, point.latitude, point.longitude) < s.radius) {
-				mStoryDataController.openStory(s);
+				ArticleLauncher.openStory(this, s);
 			}
 		}
 	}

@@ -21,7 +21,7 @@ public class StoryDataController {
 
 	void clearAndPopulateStories() {
 		LatLngBounds bounds = mC.mMap.getProjection().getVisibleRegion().latLngBounds;
-		mC.getNoozService().getAllStories(bounds, mC.mFilterSettings, mC.mMenuController.mCurrentSearchType);
+		mC.getNoozService().getAllStories(bounds, mC.mFilterSettings, mC.mMenuController.mCurrentSearchType, null);
 	}
 
 	void getStoriesCallBack() {
@@ -34,20 +34,6 @@ public class StoryDataController {
 			mC.drawCirlesOnMap();
 			mC.mPager.setCurrentItem(mC.mResumeStory);
 		}
-	}
-
-	/**
-	 * Starts an activity to view the provided story
-	 * 
-	 * @param s
-	 *            Story to open
-	 */
-	void openStory(Story s) {
-		Bundle args = new Bundle();
-		args.putParcelable("story", s);
-		Intent readStoryIntent = new Intent(mC.getApplicationContext(), ArticleActivity.class);
-		readStoryIntent.putExtra("bundle", args);
-		mC.startActivity(readStoryIntent);
 	}
 
 	/**

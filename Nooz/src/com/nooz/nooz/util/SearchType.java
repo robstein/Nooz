@@ -8,7 +8,7 @@ package com.nooz.nooz.util;
  * 
  */
 public enum SearchType {
-	RELEVANT("RELEVANT"), BREAKING("BREAKING");
+	RELEVANT("RELEVANT"), BREAKING("BREAKING"), PROFILE("PROFILE");
 
 	private final String name;
 

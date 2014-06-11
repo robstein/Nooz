@@ -1,5 +1,11 @@
 package com.nooz.nooz.activity.article;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 import android.annotation.SuppressLint;
 import android.content.IntentFilter;
 import android.graphics.Point;
@@ -39,6 +45,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 
 	private ImageView mArticleCategoryLogo;
 	private TextView mArticleCategory;
+	private TextView mArticleDate;
 	private ImageView mArticleInfo;
 	NetworkImageView mArticleImage;
 	private RelativeLayout mArticleHeader;
@@ -101,6 +108,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		setContentView(R.layout.activity_article);
 		mArticleCategoryLogo = (ImageView) findViewById(R.id.article_category_logo);
 		mArticleCategory = (TextView) findViewById(R.id.article_category);
+		mArticleDate = (TextView) findViewById(R.id.article_date);
 		mArticleInfo = (ImageView) findViewById(R.id.article_info);
 		mArticleImage = (NetworkImageView) findViewById(R.id.article_image);
 		mArticleHeader = (RelativeLayout) findViewById(R.id.article_header);
@@ -165,7 +173,24 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mArticleCategoryLogo.setImageResource(CategoryResourceHelper.getLogoByCategory(mStory.category));
 		mArticleCategory.setText(mStory.category);
 		mArticleCategory.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
-		mArticleInfo.setImageResource(CategoryResourceHelper.getInfoByCategory(mStory.category));
+		mArticleDate.setText(getDate(mStory.__createdAt));
+		mArticleDate.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
+		// mArticleInfo.setImageResource(CategoryResourceHelper.getInfoByCategory(mStory.category));
+	}
+
+	private String getDate(String __createdAt) {
+		SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss", Locale.US);
+		inputFormat.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
+		SimpleDateFormat outputFormat = new SimpleDateFormat("MMM. dd, yyyy", java.util.Locale.getDefault());
+
+		// Adjust locale and zone appropriately
+		try {
+			Date date = inputFormat.parse(__createdAt);
+			return outputFormat.format(date);
+		} catch (ParseException e) {
+			Log.e(TAG, "Error parsing date: " + e.getCause().getMessage());
+			return "";
+		}
 	}
 
 	private void drawArticleHeadlineAuthorAndText() {
