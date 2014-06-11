@@ -49,7 +49,7 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name="com.nooz.nooz.activity.NewArticleActivity"
+            android:name="com.nooz.nooz.activity.newarticle.NewArticleActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" >

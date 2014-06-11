@@ -1,4 +1,4 @@
-package com.nooz.nooz.activity;
+package com.nooz.nooz.activity.newarticle;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -19,6 +19,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.Location;
+import android.media.MediaCodec;
+import android.media.MediaFormat;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +33,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -41,6 +42,7 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
+import com.nooz.nooz.activity.BaseFragmentActivity;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.widget.SquareImageView;
@@ -54,53 +56,109 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 
 	private static final String TAG = "NewArticleActivity";
 
-	private LinearLayout mLayoutStoryDetails;
-	private SquareImageView mNewArticleImage;
-	private Spinner mCategorySpinner;
-	private TextView mTextButtonBreak;
-	private TextView mSpinnerCustom;
 	private ImageView mNewArticleLogo;
+	private Spinner mCategorySpinner;
+	private SquareImageView mNewArticleImage;
+	private TextView mTextButtonBreak;
 	private ImageView mTogglerShareFacebook;
 	private ImageView mTogglerShareTwitter;
 	private ImageView mTogglerShareTumblr;
 
 	private int mScreenWidthInPixels;
-
 	protected String mSpinnerCategorySelection;
 	private EditText mInputTextHeadline;
 	private EditText mInputTextCaption;
 	private EditText mInputTextKeywords;
 	private Location mLocation;
-	private boolean mShareOnFacebook = false;
-	private boolean mShareOnTwitter = false;
-	private boolean mShareOnTumblr = false;
-
+	private boolean mShareOnFacebook;
+	private boolean mShareOnTwitter;
+	private boolean mShareOnTumblr;
 	ProgressDialog progress;
-
 	byte[] mImageData;
 	Bitmap mBitmap;
-
 	private String mMedium;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_newarticle);
-		Bundle bundle = getIntent().getParcelableExtra("bundle");
-		mLocation = bundle.getParcelable("location");
-		mMedium = (String) bundle.getCharSequence("medium");
+		initFields();
+		initViews();
+		initCategorySpinner();
+		initViewListeners();
+		initScreenMeasurements();
+		initPictureParameters();
+		initBundleParameters();
+		initMedia();
+	}
 
-		// create spinner
+	private void initFields() {
+		mShareOnFacebook = false;
+		mShareOnTwitter = false;
+		mShareOnTumblr = false;
+	}
+
+	private void initViews() {
+		setContentView(R.layout.activity_newarticle);
+		mNewArticleLogo = (ImageView) findViewById(R.id.btn_new_article_logo);
 		mCategorySpinner = (Spinner) findViewById(R.id.spinner_choose_category);
+		mNewArticleImage = (SquareImageView) findViewById(R.id.new_article_image);
+		mInputTextHeadline = (EditText) findViewById(R.id.input_headline);
+		mInputTextCaption = (EditText) findViewById(R.id.input_caption);
+		mInputTextKeywords = (EditText) findViewById(R.id.input_keywords);
+		mTogglerShareFacebook = (ImageView) findViewById(R.id.btn_share_facebook);
+		mTogglerShareTwitter = (ImageView) findViewById(R.id.btn_share_twitter);
+		mTogglerShareTumblr = (ImageView) findViewById(R.id.btn_share_tumblr);
+		mTextButtonBreak = (TextView) findViewById(R.id.btn_break_post);
+	}
+
+	private void initCategorySpinner() {
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_custom, getResources()
 				.getStringArray(R.array.category_array));
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		((Spinner) mCategorySpinner).setAdapter(adapter);
-		mCategorySpinner.setOnItemSelectedListener(selectCategoryListener);
-		mSpinnerCustom = (TextView) findViewById(R.id.customSpinnerItemTextView);
+	}
 
-		// display the image
-		mNewArticleImage = (SquareImageView) findViewById(R.id.new_article_image);
+	private void initViewListeners() {
+		mNewArticleLogo.setOnClickListener(this);
+		mCategorySpinner.setOnItemSelectedListener(selectCategoryListener);
+		mInputTextHeadline.setOnFocusChangeListener(new OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (mInputTextHeadline.getText().toString().length() > 0) {
+					mInputTextHeadline.setSelection(0);
+				}
+			}
+		});
+		mTogglerShareFacebook.setOnClickListener(this);
+		mTogglerShareTwitter.setOnClickListener(this);
+		mTogglerShareTumblr.setOnClickListener(this);
+		mTextButtonBreak.setOnClickListener(this);
+	}
+
+	private void initScreenMeasurements() {
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		mScreenWidthInPixels = size.x;
+	}
+
+	private void initPictureParameters() {
+		// Make the square image fill the width of the screen
+		RelativeLayout.LayoutParams imageLayoutParams = (RelativeLayout.LayoutParams) mNewArticleImage
+				.getLayoutParams();
+		imageLayoutParams.height = mScreenWidthInPixels;
+		imageLayoutParams.width = mScreenWidthInPixels;
+		mNewArticleImage.setLayoutParams(imageLayoutParams);
+	}
+
+	private void initBundleParameters() {
+		Bundle bundle = getIntent().getParcelableExtra("bundle");
+		mLocation = bundle.getParcelable("location");
+		mMedium = (String) bundle.getCharSequence("medium");
+	}
+
+	@SuppressLint("NewApi")
+	private void initMedia() {
 		if ("AUDIO".equals(mMedium)) {
 			mNewArticleImage.setImageDrawable(getResources().getDrawable(R.drawable.micbig));
 		}
@@ -114,50 +172,28 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 		if ("VIDEO".equals(mMedium)) {
 
 		}
-
-		// Make the square image fill the width of the screen
-		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		mScreenWidthInPixels = size.x;
-		RelativeLayout.LayoutParams imageLayoutParams = (RelativeLayout.LayoutParams) mNewArticleImage
-				.getLayoutParams();
-		imageLayoutParams.height = mScreenWidthInPixels;
-		imageLayoutParams.width = mScreenWidthInPixels;
-		mNewArticleImage.setLayoutParams(imageLayoutParams);
-
-		//
-		mTextButtonBreak = (TextView) findViewById(R.id.btn_break_post);
-		mNewArticleLogo = (ImageView) findViewById(R.id.btn_new_article_logo);
-		mTogglerShareFacebook = (ImageView) findViewById(R.id.btn_share_facebook);
-		mTogglerShareTwitter = (ImageView) findViewById(R.id.btn_share_twitter);
-		mTogglerShareTumblr = (ImageView) findViewById(R.id.btn_share_tumblr);
-
-		mTextButtonBreak.setOnClickListener(this);
-		mNewArticleLogo.setOnClickListener(this);
-		mTogglerShareFacebook.setOnClickListener(this);
-		mTogglerShareTwitter.setOnClickListener(this);
-		mTogglerShareTumblr.setOnClickListener(this);
-
-		mInputTextHeadline = (EditText) findViewById(R.id.input_headline);
-		mInputTextHeadline.setOnFocusChangeListener(new OnFocusChangeListener() {
-			@Override
-			public void onFocusChange(View v, boolean hasFocus) {
-				if (mInputTextHeadline.getText().toString().length() > 0) {
-					mInputTextHeadline.setSelection(0);
-				}
-			}
-		});
-		mInputTextCaption = (EditText) findViewById(R.id.input_caption);
-		mInputTextKeywords = (EditText) findViewById(R.id.input_keywords);
 	}
 
-	private void splashLoadingScreen() {
-		progress = ProgressDialog.show(this, "Submitting to Nooz", "Please wait", true);
+	@Override
+	protected void onResume() {
+		super.onResume();
+		registerReceivers();
 	}
 
-	private void removeSplashLoadingScreen() {
-		progress.dismiss();
+	private void registerReceivers() {
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(GlobalConstant.BLOB_CREATED_ACTION);
+		registerReceiver(mReceiver, filter);
+	}
+
+	@Override
+	protected void onPause() {
+		unRegisterReceivers();
+		super.onPause();
+	}
+
+	private void unRegisterReceivers() {
+		unregisterReceiver(mReceiver);
 	}
 
 	@Override
@@ -320,29 +356,9 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 	/* ***** Blob uploading ***** */
 
 	/***
-	 * Register for broadcasts
+	 * Broadcast mReceiver handles a new blob being created
 	 */
-	@Override
-	protected void onResume() {
-		IntentFilter filter = new IntentFilter();
-		filter.addAction("blob.created");
-		registerReceiver(receiver, filter);
-		super.onResume();
-	}
-
-	/***
-	 * Unregister for broadcasts
-	 */
-	@Override
-	protected void onPause() {
-		unregisterReceiver(receiver);
-		super.onPause();
-	}
-
-	/***
-	 * Broadcast receiver handles a new blob being created
-	 */
-	private BroadcastReceiver receiver = new BroadcastReceiver() {
+	private BroadcastReceiver mReceiver = new BroadcastReceiver() {
 		public void onReceive(Context context, android.content.Intent intent) {
 			String intentAction = intent.getAction();
 			if (GlobalConstant.BLOB_CREATED_ACTION.equals(intentAction)) {
@@ -478,6 +494,14 @@ public class NewArticleActivity extends BaseFragmentActivity implements OnClickL
 
 			}
 		}
+	}
+
+	private void splashLoadingScreen() {
+		progress = ProgressDialog.show(this, "Submitting to Nooz", "Please wait", true);
+	}
+
+	private void removeSplashLoadingScreen() {
+		progress.dismiss();
 	}
 
 }

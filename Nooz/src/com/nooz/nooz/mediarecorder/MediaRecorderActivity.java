@@ -27,7 +27,7 @@ import android.widget.RelativeLayout;
 import com.commonsware.cwac.camera.PictureTransaction;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
-import com.nooz.nooz.activity.NewArticleActivity;
+import com.nooz.nooz.activity.newarticle.NewArticleActivity;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.MediaMode;
 
