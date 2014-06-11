@@ -48,6 +48,7 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 	private ImageView mButtonCancelNewMedia;
 	private RelativeLayout mRelativeLayoutCamera;
 	NoozCameraFragment mCameraFragment;
+	NoozAudioFragment mAudioFragment;
 	private ImageView mButtonRecordAudio;
 	ImageView mButtonCapturePicture;
 	private ImageView mButtonRecordVideo;
@@ -64,7 +65,7 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 		super.onCreate(savedInstanceState);
 		initFields();
 		initViews();
-		initNoozCameraFragment();
+		initNoozMediaFragments();
 		initViewListeners();
 		initScreenMeasurements();
 		initSquareCameraParameters();
@@ -86,9 +87,13 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 		mButtonRecordVideo = (ImageView) findViewById(R.id.btn_record_video);
 	}
 
-	private void initNoozCameraFragment() {
+	private void initNoozMediaFragments() {
+		// Camera fragment
 		mCameraFragment = NoozCameraFragment.newInstance();
 		getSupportFragmentManager().beginTransaction().replace(R.id.container, mCameraFragment).commit();
+
+		// Audio fragment
+		mAudioFragment = NoozAudioFragment.newInstance();
 	}
 
 	private void initViewListeners() {
@@ -164,6 +169,32 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 			Log.e(TAG, "prepare() failed");
 		}
 		mRecorder.start();
+
+		Runnable mAudioIntensityRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+
+				while (true) {
+
+					try {
+						Thread.sleep(250);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+
+					if (mRecorder != null) {
+						int amplitude = mRecorder.getMaxAmplitude();
+						mAudioFragment.reportAmplitude(amplitude);
+						// Here you can put condition (low/high)
+						Log.i("AMPLITUDE", "" + amplitude);
+
+					}
+
+				}
+			}
+		};
+		new Thread(mAudioIntensityRunnable).start();
 	}
 
 	private void stopRecording() {
@@ -173,79 +204,6 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 	}
 
 	/* ***** AUDIO RECORDING END ***** */
-
-	/* ***** PICTURE CAPTURING BEGIN ***** */
-
-	private PictureCallback mPictureCallback = new PictureCallback() {
-
-		@Override
-		public void onPictureTaken(byte[] data, Camera camera) {
-			// Save to file:
-			Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-			ByteArrayOutputStream stream = new ByteArrayOutputStream();
-			bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-			byte[] bytes = stream.toByteArray();
-			// convert array of bytes into file
-			try {
-				FileOutputStream fileOuputStream = new FileOutputStream(getFilesDir().getAbsolutePath()
-						+ "/picture.jpg");
-				fileOuputStream.write(bytes);
-				fileOuputStream.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			// Go to NewArticleActivity
-			Bundle args = new Bundle();
-			args.putParcelable("location", mCurrentLocation);
-			args.putCharSequence("medium", mMode.toString());
-			Intent newStoryIntent = new Intent(getApplicationContext(), NewArticleActivity.class);
-			newStoryIntent.putExtra("bundle", args);
-			startActivity(newStoryIntent);
-			finish();
-		}
-	};
-
-	private static Bitmap scaleDownBitmap(Bitmap photo, int newHeight, Context context) {
-		final float densityMultiplier = context.getResources().getDisplayMetrics().density;
-		int h = (int) (newHeight * densityMultiplier);
-		int w = (int) (h * photo.getWidth() / ((double) photo.getHeight()));
-		photo = Bitmap.createScaledBitmap(photo, w, h, true);
-		return photo;
-	}
-
-	/** Create a File for saving the image */
-	private static File getOutputMediaFile(int type) {
-		// To be safe, you should check that the SDCard is mounted
-		// using Environment.getExternalStorageState() before doing this.
-		File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"Nooz");
-		// This location works best if you want the created images to be shared
-		// between applications and persist after your app has been uninstalled.
-
-		// Create the storage directory if it does not exist
-		if (!mediaStorageDir.exists()) {
-			if (!mediaStorageDir.mkdirs()) {
-				Log.d("MyCameraApp", "failed to create directory");
-				return null;
-			}
-		}
-
-		// Create a media file name
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-		File mediaFile;
-		if (type == MEDIA_TYPE_IMAGE) {
-			mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
-		} else if (type == MEDIA_TYPE_VIDEO) {
-			mediaFile = new File(mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + ".mp4");
-		} else {
-			return null;
-		}
-		return mediaFile;
-	}
-
-	/* ***** PICTURE CAPTURING END ***** */
 
 	@Override
 	public void onClick(View v) {
@@ -287,8 +245,13 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 				default:
 					break;
 				}
+
 				// Highlight Mic
 				mButtonRecordAudio.setImageResource(R.drawable.selector_button_mic_active);
+
+				// Change camera to audio recorder fragment
+				getSupportFragmentManager().beginTransaction().replace(R.id.container, mAudioFragment).commit();
+
 				// then put us in audio record mode
 				mMode = MediaMode.AUDIO;
 
@@ -345,6 +308,8 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 				case AUDIO:
 					// Un-highlight mic
 					mButtonRecordAudio.setImageResource(R.drawable.selector_button_mic_grey);
+					// Switch fragments
+					getSupportFragmentManager().beginTransaction().replace(R.id.container, mCameraFragment).commit();
 					break;
 				case VIDEO:
 					// Un-highlight video recorder
@@ -387,6 +352,8 @@ public class MediaRecorderActivity extends BaseLocationFragmentActivity implemen
 				case AUDIO:
 					// Un-highlight mic
 					mButtonRecordAudio.setImageResource(R.drawable.selector_button_mic_grey);
+					// Switch fragments
+					getSupportFragmentManager().beginTransaction().replace(R.id.container, mCameraFragment).commit();
 					break;
 				case PICTURE:
 					// Un-highlight camera
