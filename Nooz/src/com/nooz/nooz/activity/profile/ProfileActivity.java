@@ -10,8 +10,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -21,9 +19,9 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.ActivityGestureDetector;
 import com.nooz.nooz.activity.BaseFragmentActivity;
-import com.nooz.nooz.activity.article.ArticleLauncher;
 import com.nooz.nooz.model.ProfileInfo;
 import com.nooz.nooz.util.GlobalConstant;
+import com.nooz.nooz.widget.ExpandableGridView;
 import com.soundcloud.android.crop.Crop;
 
 /**
@@ -46,7 +44,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 	TextView mButtonProfileNumbers;
 	private ImageView mButtonProfilePersons;
 	private ImageView mButtonProfileSettingsOrPm;
-	GridView mUserStoryGridView;
+	ExpandableGridView mUserStoryGridView;
 
 	// Crop Image Views
 	ImageView mButtonBackFromCrop;
@@ -115,7 +113,7 @@ public class ProfileActivity extends BaseFragmentActivity implements OnClickList
 		if (!mIsMyProfile) {
 			mButtonProfileSettingsOrPm.setImageDrawable(getResources().getDrawable(R.drawable.profile_pm));
 		}
-		mUserStoryGridView = (GridView) findViewById(R.id.gridview);
+		mUserStoryGridView = (ExpandableGridView) findViewById(R.id.gridview);
 
 		// Crop image views
 		mCropPictureLayout = (RelativeLayout) findViewById(R.id.profile_crop_picture);

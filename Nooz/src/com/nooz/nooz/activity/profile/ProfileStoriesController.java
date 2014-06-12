@@ -26,5 +26,6 @@ public class ProfileStoriesController {
 		List<Story> newStories = mC.getNoozService().getLoadedStories();
 		mStories = newStories;
 		mC.mProfileStoriesAdapter.notifyDataSetChanged();
+		mC.mUserStoryGridView.setExpanded(true);
 	}
 }

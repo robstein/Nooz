@@ -43,9 +43,15 @@ public class ProfileStoryAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
-		// TODO be efficient and use the convertView!
-		LayoutInflater inflater = (LayoutInflater) mC.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View layout = inflater.inflate(R.layout.story_item, null);
+		View layout;
+		// Recycle layout if possible
+		if (convertView == null) {
+			LayoutInflater inflater = (LayoutInflater) mC.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			layout = inflater.inflate(R.layout.story_item, null);
+		} else {
+			layout = convertView;
+		}
+
 		View storyItemShader = (View) layout.findViewById(R.id.story_item_shader);
 		storyItemShader.setBackgroundDrawable((mC.getResources()
 				.getDrawable(R.drawable.selector_footer_story_item_highlighted)));
