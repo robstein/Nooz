@@ -34,5 +34,6 @@ public class GlobalConstant {
 	
 	public static final String BLOB_CREATED_ACTION = "blob.created";
 	public static final String STORIES_LOADED_ACTION = "stories.loaded";
+	public static final String RELEVANCE_UPDATE_ACTION = "relevance update";
 
 }

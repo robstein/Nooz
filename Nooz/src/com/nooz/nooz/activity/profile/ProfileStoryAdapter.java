@@ -59,6 +59,7 @@ public class ProfileStoryAdapter extends BaseAdapter {
 			@Override
 			public void onClick(View v) {
 				ArticleLauncher.openStory(mC, mC.mProfileStoriesController.mStories.get(position));
+				mC.finish();
 			}
 		});
 

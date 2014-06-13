@@ -23,7 +23,7 @@ exports.post = function(request, response) {
   var queryParams;
   if ("PROFILE" == request.body.searchType) {
     sql = sql + "WHERE A.id = ? ";
-    queryParams = [request.body.user_id, request.body.user_id];
+    queryParams = [request.body.user_id, request.body.author_user_id];
   } else {
     sql = sql + "WHERE S.lat > ? AND s.lat < ? AND s.lng > ? AND s.lng < ? ";
     if (false == request.body.defaultMedium) {

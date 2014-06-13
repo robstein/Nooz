@@ -431,6 +431,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("stories.loaded");
 		filter.addAction("storyImage.loaded");
+		filter.addAction(GlobalConstant.RELEVANCE_UPDATE_ACTION);
 		registerReceiver(mReceiver, filter);
 	}
 
@@ -751,4 +752,62 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	}
 
 	/* ***** MAP SEARCH END ***** */
+
+	void handleUpdateRelevance(String storyId, int input) {
+
+		int openedStoryIndex = -1;
+		for (Story s : mStories) {
+			if (storyId.equals(s.id)) {
+				openedStoryIndex = mStories.indexOf(s);
+				break;
+			}
+		}
+		if (openedStoryIndex == -1) {
+			return;
+		}
+
+		int prevRelevance = mStories.get(openedStoryIndex).userRelevance;
+		switch (prevRelevance) {
+		case 1:
+			switch (input) {
+			case 1:
+				break;
+			case -1:
+				mStories.get(openedStoryIndex).scoreIrrelevance++;
+				mStories.get(openedStoryIndex).scoreRelevance--;
+				break;
+			case 0:
+				mStories.get(openedStoryIndex).scoreRelevance--;
+				break;
+			}
+			break;
+		case -1:
+			switch (input) {
+			case 1:
+				mStories.get(openedStoryIndex).scoreRelevance++;
+				mStories.get(openedStoryIndex).scoreIrrelevance--;
+				break;
+			case -1:
+				break;
+			case 0:
+				mStories.get(openedStoryIndex).scoreIrrelevance--;
+				break;
+			}
+			break;
+		case 0:
+			switch (input) {
+			case 1:
+				mStories.get(openedStoryIndex).scoreRelevance++;
+				break;
+			case -1:
+				mStories.get(openedStoryIndex).scoreIrrelevance++;
+				break;
+			case 0:
+				break;
+			}
+			break;
+		}
+
+		mStories.get(openedStoryIndex).userRelevance = input;
+	}
 }

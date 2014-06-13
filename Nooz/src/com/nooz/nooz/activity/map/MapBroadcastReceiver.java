@@ -21,6 +21,9 @@ public class MapBroadcastReceiver extends BroadcastReceiver {
 				Log.e(TAG, "There was a problem in getStoriesCallBack: " + e.getMessage());
 			}
 		}
+		if (GlobalConstant.RELEVANCE_UPDATE_ACTION.equals(intentAction)) {
+			((MapActivity) context).handleUpdateRelevance(intent.getStringExtra("id"), intent.getIntExtra("input", 0));
+		}
 	}
 
 }

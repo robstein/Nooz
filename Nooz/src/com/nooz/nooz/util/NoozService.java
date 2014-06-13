@@ -360,10 +360,10 @@ public class NoozService {
 	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings, SearchType currentSearchType, String authorUserId) {
 		JsonObject body = new JsonObject();
 		body.addProperty("searchType", currentSearchType.toString());
+		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
 		if (SearchType.PROFILE.equals(currentSearchType)) {
-			body.addProperty("user_id", authorUserId);
+			body.addProperty("author_user_id", authorUserId);
 		} else {
-			body.addProperty("user_id", mClient.getCurrentUser().getUserId());
 			body.addProperty("northeastLat", bounds.northeast.latitude);
 			body.addProperty("northeastLng", bounds.northeast.longitude);
 			body.addProperty("southwestLat", bounds.southwest.latitude);

@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
 import android.graphics.PorterDuff.Mode;
@@ -305,9 +306,11 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 			break;
 		case R.id.author_picture:
 			ProfileLauncher.openProfile(this, mStory.authorId);
+			finish();
 			break;
 		case R.id.author:
 			ProfileLauncher.openProfile(this, mStory.authorId);
+			finish();
 			break;
 		case R.id.button_relevant:
 			clickRelevant();
@@ -365,7 +368,16 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		} else if (mIrrelevant) {
 			input = -1;
 		}
+		updateRelevanceInMapActivity(input);
 		mNoozService.saveRelevanceInput(mStory.id, input, mCurrentLocation, onSaveRelevance);
+	}
+
+	private void updateRelevanceInMapActivity(Integer input) {
+		Intent broadcast = new Intent();
+		broadcast.setAction(GlobalConstant.RELEVANCE_UPDATE_ACTION);
+		broadcast.putExtra("id", mStory.id);
+		broadcast.putExtra("input", input);
+		mContext.sendBroadcast(broadcast);		
 	}
 
 	TableJsonOperationCallback onSaveRelevance = new TableJsonOperationCallback() {
