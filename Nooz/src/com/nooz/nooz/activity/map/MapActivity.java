@@ -504,18 +504,22 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	void drawCirlesOnMap() {
 		int i = 0;
 		for (Story s : mStories) {
+
 			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
 
 			// Force bubble size at zoom 13
-			// double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(),
-			// GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, 13));
+			// double newRadius = BubbleSizer.getBubbleSize(i,
+			// mStories.size(),
+			// GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels,
+			// 13));
 
 			s.setRadius(newRadius);
 			mStories.get(i).setRadius(newRadius);
 			drawBubble(s.lat, s.lng, s.radius, s.category);
 			i++;
+
 		}
-		moveBubblesToPreventOverlap();
+		//moveBubblesToPreventOverlap();
 	}
 
 	private void updateBubbleSizes() {
@@ -592,20 +596,15 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 				double lng = t * toPosition.longitude + (1 - t) * startLatLng.longitude;
 				double lat = t * toPosition.latitude + (1 - t) * startLatLng.latitude;
 				LatLng nextLocation = new LatLng(lat, lng);
-				mCircles.get(bubbleIndex).setCenter(nextLocation);
-				mGroundOverlays.get(bubbleIndex).setPosition(nextLocation);
-
+				try {
+					mCircles.get(bubbleIndex).setCenter(nextLocation);
+					mGroundOverlays.get(bubbleIndex).setPosition(nextLocation);
+				} catch (IndexOutOfBoundsException e) {
+					Log.e("nooz debug", "CAUGHT THE BUG! BOOYAH!");
+				}
 				if (t < 1.0) {
 					// Post again 16ms later.
 					handler.postDelayed(this, 16);
-				} else {
-					if (hideMarker) {
-						mCircles.get(bubbleIndex).setVisible(false);
-						mGroundOverlays.get(bubbleIndex).setVisible(false);
-					} else {
-						mCircles.get(bubbleIndex).setVisible(true);
-						mGroundOverlays.get(bubbleIndex).setVisible(true);
-					}
 				}
 			}
 		});
