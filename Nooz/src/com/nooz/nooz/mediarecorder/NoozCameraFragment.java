@@ -1,19 +1,25 @@
 package com.nooz.nooz.mediarecorder;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.Face;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
 import android.media.ExifInterface;
+import android.mediautil.image.jpeg.LLJTran;
+import android.mediautil.image.jpeg.LLJTranException;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -39,6 +45,7 @@ public class NoozCameraFragment extends CameraFragment {
 	class NoozCameraHost extends SimpleCameraHost implements Camera.FaceDetectionListener {
 
 		private static final int PHOTO_WIDTH = 720;
+		private static final int IMAGE_MAX_SIZE = 720;
 
 		boolean supportsFaces = false;
 		int mScreenWidthInPixels;
@@ -79,8 +86,69 @@ public class NoozCameraFragment extends CameraFragment {
 
 		@Override
 		public void saveImage(PictureTransaction xact, byte[] image) {
-			// Decode byte array
-			Bitmap original = BitmapFactory.decodeByteArray(image, 0, image.length);
+			// saveJpegViaLosslessTransformation(image);
+			saveJpegTheEasyWay(image);
+
+			// Clear capturing picture flag
+			((MediaRecorderActivity) getActivity()).mIsCapturingPicture = false;
+
+			// Launch new activity
+			((MediaRecorderActivity) getActivity()).launchNewArticleActivity();
+		}
+
+		private void saveJpegViaLosslessTransformation(byte[] imageByteArray) {
+			// 1. Initialize LLJTran and Read the entire Image including Appx
+			// markers
+			InputStream inputStream = new ByteArrayInputStream(imageByteArray);
+			LLJTran llj = new LLJTran(inputStream);
+			try {
+				llj.read(LLJTran.READ_ALL, true);
+			} catch (LLJTranException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				inputStream.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			// 2. Crop it to the specified Bounds
+			int width = llj.getWidth();
+			int height = llj.getHeight();
+			int min = Math.min(width, height);
+			int left = 0;
+			int top = 0;
+			if (width == min) {
+				left = 0;
+				top = (height - min) / 2;
+			} else if (height == min) {
+				top = 0;
+				left = (width - min) / 2;
+			}
+			Rect cropArea = new Rect();
+			cropArea.set(left, top, left + min, top + min);
+			llj.transform(LLJTran.CROP, LLJTran.OPT_DEFAULTS, cropArea);
+		}
+
+		private void saveJpegTheEasyWay(byte[] image) {
+			// Decode image size
+			BitmapFactory.Options opts = new BitmapFactory.Options();
+			opts.inJustDecodeBounds = true;
+			BitmapFactory.decodeByteArray(image, 0, image.length, opts);
+			int scale = 1;
+			if (opts.outHeight > IMAGE_MAX_SIZE || opts.outWidth > IMAGE_MAX_SIZE) {
+				scale = (int) Math.pow(
+						2,
+						(int) Math.ceil(Math.log(IMAGE_MAX_SIZE / (double) Math.max(opts.outHeight, opts.outWidth))
+								/ Math.log(0.5)));
+			}
+
+			// Decode byte array with inSampleSize
+			BitmapFactory.Options opts2 = new BitmapFactory.Options();
+			opts2.inSampleSize = scale;
+			Bitmap original = BitmapFactory.decodeByteArray(image, 0, image.length, opts2);
 
 			// Crop bitmap
 			int width = original.getWidth();
@@ -162,21 +230,14 @@ public class NoozCameraFragment extends CameraFragment {
 			} catch (java.io.IOException e) {
 				handleException(e);
 			}
-
-			// Clear capturing picture flag
-			((MediaRecorderActivity) getActivity()).mIsCapturingPicture = false;
-
-			// Launch new activity
-			((MediaRecorderActivity) getActivity()).launchNewArticleActivity();
 		}
 
 		private Bitmap rotateImage(Bitmap source, int rotation) {
-
-			// 2. rotate matrix by postconcatination
+			// 1. rotate matrix by postconcatination
 			Matrix matrix = new Matrix();
 			matrix.postRotate(rotation);
 
-			// 3. create Bitmap from rotated matrix
+			// 2. create Bitmap from rotated matrix
 			return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
 		}
 
