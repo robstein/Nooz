@@ -22,7 +22,7 @@ public class UserDataController {
 		mC.mProfileInfo = mC.getNoozService().getLoadedProfileInfo();
 		mC.mProfileName.setText(mC.mProfileInfo.firstName + " " + mC.mProfileInfo.lastName);
 		mC.mProfileLocation.setText(mC.mProfileInfo.homeLocation);
-		mC.mButtonProfileNumbers.setText(mC.mProfileInfo.userScore.toString());
+		//mC.mButtonProfileNumbers.setText(mC.mProfileInfo.userScore.toString());
 	}
 
 }

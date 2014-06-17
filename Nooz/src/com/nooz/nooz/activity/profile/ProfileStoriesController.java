@@ -24,6 +24,7 @@ public class ProfileStoriesController {
 
 	public void getStoriesCallBack() {
 		List<Story> newStories = mC.getNoozService().getLoadedStories();
+		mC.mButtonProfileNumbers.setText("" + newStories.size());
 		mStories = newStories;
 		mC.mProfileStoriesAdapter.notifyDataSetChanged();
 		mC.mUserStoryGridView.setExpanded(true);
