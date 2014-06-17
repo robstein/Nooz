@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.WeakHashMap;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +15,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -27,7 +27,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
-import android.view.animation.LinearInterpolator;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -42,34 +42,37 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
-import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.GroundOverlay;
-import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.ActivityGestureDetector;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.LoginActivity;
 import com.nooz.nooz.activity.article.ArticleLauncher;
 import com.nooz.nooz.model.Story;
-import com.nooz.nooz.util.CategoryResourceHelper;
 import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.PagerContainer;
+import com.twotoasters.clusterkraf.Clusterkraf;
+import com.twotoasters.clusterkraf.Clusterkraf.ProcessingListener;
+import com.twotoasters.clusterkraf.InputPoint;
+import com.twotoasters.clusterkraf.Options;
+import com.twotoasters.clusterkraf.Options.ClusterClickBehavior;
+import com.twotoasters.clusterkraf.Options.ClusterInfoWindowClickBehavior;
+import com.twotoasters.clusterkraf.Options.SinglePointClickBehavior;
 
 /**
  * 
  * @author Rob Stein
  * 
  */
-public class MapActivity extends BaseLocationFragmentActivity implements OnMapClickListener, OnCameraChangeListener {
+public class MapActivity extends BaseLocationFragmentActivity implements OnCameraChangeListener, ProcessingListener {
 
 	// Constants
 	private static final String TAG = "MapActivity";
@@ -116,8 +119,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 
 	// Story Lists
 	List<Story> mStories;
-	List<Circle> mCircles;
-	List<GroundOverlay> mGroundOverlays;
+	WeakHashMap<Marker, Story> mMarkers;
 	Integer mCurrentStory;
 	Integer mResumeStory;
 
@@ -198,6 +200,8 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	private GestureDetector mGestureDetector;
 	private OnTouchListener mGestureListener;
 
+	Clusterkraf clusterkraf;
+
 	/* ***** ACTIVITY LIFECYCLE BEGIN ***** */
 
 	@Override
@@ -235,8 +239,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	 */
 	private void initStoryLists() {
 		mStories = new ArrayList<Story>();
-		mCircles = new ArrayList<Circle>();
-		mGroundOverlays = new ArrayList<GroundOverlay>();
+		mMarkers = new WeakHashMap<Marker, Story>();
 	}
 
 	private void initViews() {
@@ -494,7 +497,13 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	private void setUpMap() {
 		mMap.setMyLocationEnabled(true);
 		mMap.setOnCameraChangeListener(this);
-		mMap.setOnMapClickListener(this);
+		mMap.setOnMarkerClickListener(new OnMarkerClickListener() {
+			@Override
+			public boolean onMarkerClick(Marker marker) {
+				ArticleLauncher.openStory(mContext, mMarkers.get(marker));
+				return false; // Don't show info-window
+			}
+		});
 	}
 
 	/* ***** MAP SETUP END ***** */
@@ -504,136 +513,71 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 	void drawCirlesOnMap() {
 		int i = 0;
 		for (Story s : mStories) {
-
-			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
-
-			// Force bubble size at zoom 13
-			// double newRadius = BubbleSizer.getBubbleSize(i,
-			// mStories.size(),
-			// GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels,
-			// 13));
-
-			s.setRadius(newRadius);
-			mStories.get(i).setRadius(newRadius);
-			drawBubble(s.lat, s.lng, s.radius, s.category);
+			// addMarker(s);
 			i++;
-
 		}
-		//moveBubblesToPreventOverlap();
+		buildClusterkrafInputPoints();
+		initClusterkraf();
 	}
 
-	private void updateBubbleSizes() {
-		int i = 0;
+	private void addMarker(Story s) {
+		Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(s.lat, s.lng)).anchor(.5f, .5f)
+				.icon(BitmapDescriptorFactory.fromResource(R.drawable.community_bubble)));
+
+	}
+
+	ArrayList<InputPoint> mClusterkrafInputPoints;
+
+	private void buildClusterkrafInputPoints() {
+		mClusterkrafInputPoints = new ArrayList<InputPoint>(mStories.size());
 		for (Story s : mStories) {
-			double newRadius = BubbleSizer.getBubbleSize(i, mStories.size(), mMapWidthInMeters);
-
-			mStories.get(i).setRadius(newRadius);
-			mCircles.get(i).setRadius(newRadius);
-			mGroundOverlays.get(i).setDimensions((int) (newRadius * 3 / 4), (int) (newRadius * 3 / 4));
-			i++;
+			mClusterkrafInputPoints.add(new InputPoint(new LatLng(s.lat, s.lng), s));
 		}
 	}
 
-	private void moveBubblesToPreventOverlap() {
-		List<LatLng> newLocations = reposition(mStories);
-		int i = 0;
-		for (LatLng o : newLocations) {
-			animateBubbleAdjust(i, o, false);
-			i++;
+	private void initClusterkraf() {
+		if (mMap != null && mClusterkrafInputPoints != null && mClusterkrafInputPoints.size() > 0) {
+			Options options = new Options();
+			// applyOptionsToClusterkrafOptions(options);
+			this.clusterkraf = new Clusterkraf(mMap, options, mClusterkrafInputPoints);
 		}
 	}
 
-	/**
-	 * Given a list of circles, compute new positions of the circles such no
-	 * circle overlaps with another.
-	 * <p>
-	 * You can use and fill {@link LatLng#latitude} and {@link LatLng#longitude}
-	 * members of LatLng objects or just make new LatLng objects with the
-	 * {@link LatLng#LatLng(double, double)} constructor.
-	 * <p>
-	 * Also you can access the latitude, longitude, and radius component of the
-	 * initial story from {@link Story#lat}, {@link Story#lng}, and
-	 * {@link Story#radius}.
-	 * <p>
-	 * TODO @MATT add your implementation details here
-	 * 
-	 * @author Matt Birkel
-	 * @param stories
-	 * @return
-	 * @see GlobeTrigonometry#distBetween(double, double, double, double)
-	 * @see LatLng
-	 * @see Story
-	 * @see List
-	 */
-	private List<LatLng> reposition(List<Story> stories) {
-		// TODO @MATT, implement this function
-		// Right now it just outputs the input coordinates
+	private void applyOptionsToClusterkrafOptions(Options options) {
+		options.setTransitionInterpolator(new AccelerateDecelerateInterpolator());
+		options.setPixelDistanceToJoinCluster((int) Tools.dipToPixels(this, 100));
 
-		List<LatLng> returnList = new ArrayList<LatLng>();
+		options.setZoomToBoundsAnimationDuration(500);
+		options.setShowInfoWindowAnimationDuration(500);
+		options.setExpandBoundsFactor(0.5d);
+		options.setSinglePointClickBehavior(SinglePointClickBehavior.NO_OP);
+		options.setClusterClickBehavior(ClusterClickBehavior.ZOOM_TO_BOUNDS);
+		options.setClusterInfoWindowClickBehavior(ClusterInfoWindowClickBehavior.ZOOM_TO_BOUNDS);
 
-		// This is foreach notation, read it as "for each Story, s, in stories"
-		for (Story s : stories) {
-			returnList.add(new LatLng(s.lat, s.lng));
-		}
+		options.setZoomToBoundsPadding(getResources().getDrawable(R.drawable.community_bubble).getIntrinsicHeight());
 
-		return returnList;
+		options.setProcessingListener(this);
 	}
 
-	private void animateBubbleAdjust(final int bubbleIndex, final LatLng toPosition, final boolean hideMarker) {
-		final Handler handler = new Handler();
-		final long start = SystemClock.uptimeMillis();
-		Projection proj = mMap.getProjection();
-		Point startPoint = proj.toScreenLocation(mCircles.get(bubbleIndex).getCenter());
-		final LatLng startLatLng = proj.fromScreenLocation(startPoint);
-		final long duration = 500;
-		final LinearInterpolator interpolator = new LinearInterpolator();
+	private DelayedIndeterminateProgressBarRunnable delayedIndeterminateProgressBarRunnable;
+	private final Handler handler = new Handler();
+	private static final long DELAY_CLUSTERING_SPINNER_MILLIS = 200l;
 
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				long elapsed = SystemClock.uptimeMillis() - start;
-				float t = interpolator.getInterpolation((float) elapsed / duration);
-				double lng = t * toPosition.longitude + (1 - t) * startLatLng.longitude;
-				double lat = t * toPosition.latitude + (1 - t) * startLatLng.latitude;
-				LatLng nextLocation = new LatLng(lat, lng);
-				try {
-					mCircles.get(bubbleIndex).setCenter(nextLocation);
-					mGroundOverlays.get(bubbleIndex).setPosition(nextLocation);
-				} catch (IndexOutOfBoundsException e) {
-					Log.e("nooz debug", "CAUGHT THE BUG! BOOYAH!");
-				}
-				if (t < 1.0) {
-					// Post again 16ms later.
-					handler.postDelayed(this, 16);
-				}
-			}
-		});
+	@Override
+	public void onClusteringStarted() {
+		if (delayedIndeterminateProgressBarRunnable == null) {
+			delayedIndeterminateProgressBarRunnable = new DelayedIndeterminateProgressBarRunnable(this);
+			handler.postDelayed(delayedIndeterminateProgressBarRunnable, DELAY_CLUSTERING_SPINNER_MILLIS);
+		}
 	}
 
-	private void drawBubble(double lat, double lng, double radius, String category) {
-		CircleOptions circleOptions;
-		circleOptions = new CircleOptions().center(new LatLng(lat, lng)).radius(radius);
-		final Circle c = mMap.addCircle(circleOptions);
-		mCircles.add(c);
-
-		GroundOverlayOptions groundOverlayOptions;
-		if (mCircles.indexOf(c) == mResumeStory) {
-			c.setFillColor(CategoryResourceHelper.getColorByCategory(category, HIGHLIGHT));
-			c.setStrokeColor(CategoryResourceHelper.getStrokeColorByCategory(category, HIGHLIGHT));
-			groundOverlayOptions = new GroundOverlayOptions()
-					.image(BitmapDescriptorFactory.fromResource(CategoryResourceHelper
-							.getActiveGroundOverlayByCategory(category))).anchor(0.5f, 0.5f)
-					.position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
-		} else {
-			c.setFillColor(CategoryResourceHelper.getColorByCategory(category, SHADE));
-			c.setStrokeColor(CategoryResourceHelper.getStrokeColorByCategory(category, SHADE));
-			groundOverlayOptions = new GroundOverlayOptions()
-					.image(BitmapDescriptorFactory.fromResource(CategoryResourceHelper
-							.getGroundOverlayByCategory(category))).anchor(0.5f, 0.5f)
-					.position(new LatLng(lat, lng), (int) (radius * 3 / 4), (int) (radius * 3 / 4));
+	@Override
+	public void onClusteringFinished() {
+		if (delayedIndeterminateProgressBarRunnable != null) {
+			handler.removeCallbacks(delayedIndeterminateProgressBarRunnable);
+			delayedIndeterminateProgressBarRunnable = null;
 		}
-		GroundOverlay icon = mMap.addGroundOverlay(groundOverlayOptions);
-		mGroundOverlays.add(icon);
+		setProgressBarIndeterminateVisibility(false);
 	}
 
 	/* ***** BUBBLES END ***** */
@@ -656,18 +600,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		}
 	}
 
-	/*
-	 * When we click on a bubble, open that story.
-	 */
-	@Override
-	public void onMapClick(LatLng point) {
-		for (Story s : mStories) {
-			if (GlobeTrigonometry.distBetween(s.lat, s.lng, point.latitude, point.longitude) < s.radius) {
-				ArticleLauncher.openStory(this, s);
-			}
-		}
-	}
-
 	@Override
 	public void onCameraChange(CameraPosition position) {
 		Log.d("Zoom", "Zoom: " + position.zoom);
@@ -675,7 +607,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 		// Update Bubbles
 		if (mPreviousZoomLevel != position.zoom) {
 			mMapWidthInMeters = GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, position.zoom);
-			updateBubbleSizes();
 		}
 		mPreviousZoomLevel = position.zoom;
 
@@ -809,4 +740,5 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnMapCl
 
 		mStories.get(openedStoryIndex).userRelevance = input;
 	}
+
 }

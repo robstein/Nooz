@@ -1,14 +1,10 @@
 package com.nooz.nooz.activity.map;
 
 import java.util.List;
+import java.util.Map.Entry;
 
-import android.content.Intent;
-import android.os.Bundle;
-
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.nooz.nooz.activity.article.ArticleActivity;
+import com.google.android.gms.maps.model.Marker;
 import com.nooz.nooz.model.Story;
 
 public class StoryDataController {
@@ -61,14 +57,10 @@ public class StoryDataController {
 	 * and then clears all elements in the Circles and GroundOverlay Lists.
 	 **/
 	private void clearMap() {
-		for (Circle c : mC.mCircles) {
-			c.remove();
+		for (Entry<Marker, Story> entry : mC.mMarkers.entrySet()) {
+			entry.getKey().remove();
 		}
-		for (GroundOverlay g : mC.mGroundOverlays) {
-			g.remove();
-		}
-		mC.mCircles.clear();
-		mC.mGroundOverlays.clear();
+		mC.mMarkers.clear();
 	}
 
 }
