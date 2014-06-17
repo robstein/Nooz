@@ -6,3 +6,4 @@
 - Azure/azure-mobile-services
 - jdamcd/android-crop
 - mcxiaoke/android-volley
+- bkhall/AndroidMediaUtil
