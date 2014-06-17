@@ -92,7 +92,6 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		initBundleParameters();
 		initStory();
 		initModule();
-
 	}
 
 	private void initFields() {
@@ -271,12 +270,18 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		registerReceivers();
 		mArticleImage.setImageUrl(GlobalConstant.MEDIA_URL + mStory.id, mImageLoader);
 		mAuthorPicture.setImageUrl(GlobalConstant.PROFILE_URL + mStory.authorId, mImageLoader);
+
+		initComments();
 	}
 
 	private void registerReceivers() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(GlobalConstant.BLOB_LOADED_ACTION);
 		registerReceiver(mReceiver, filter);
+	}
+
+	private void initComments() {
+		mArticleDataController.getComments();
 	}
 
 	@Override
@@ -377,7 +382,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		broadcast.setAction(GlobalConstant.RELEVANCE_UPDATE_ACTION);
 		broadcast.putExtra("id", mStory.id);
 		broadcast.putExtra("input", input);
-		mContext.sendBroadcast(broadcast);		
+		mContext.sendBroadcast(broadcast);
 	}
 
 	TableJsonOperationCallback onSaveRelevance = new TableJsonOperationCallback() {

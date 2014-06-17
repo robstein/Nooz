@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.nooz.nooz"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <LinearLayout
+        android:id="@+id/comment_vote"
+        android:layout_width="32dp"
+        android:layout_height="64dp"
+        android:orientation="vertical" >
+
+        <com.nooz.nooz.widget.TextView
+            android:id="@+id/comment_plus"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:text="+"
+            android:textSize="16sp"
+            custom:typeface="Bariol_Regular.otf" />
+
+        <com.nooz.nooz.widget.TextView
+            android:id="@+id/comment_minus"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:text="-"
+            android:textSize="16sp"
+            custom:typeface="Bariol_Regular.otf" />
+    </LinearLayout>
+
+    <com.nooz.nooz.widget.TextView
+        android:id="@+id/comment_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/comment_vote"
+        android:paddingLeft="8dp"
+        android:paddingTop="8dp"
+        android:text="Rob Stein"
+        android:textSize="14sp"
+        custom:typeface="Bariol_Regular.otf" />
+
+    <com.nooz.nooz.widget.TextView
+        android:id="@+id/comment_datetime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/comment_author"
+        android:paddingLeft="8dp"
+        android:paddingTop="8dp"
+        android:text="8:03am Aug 4, 2014"
+        android:textSize="14sp"
+        custom:typeface="Bariol_Regular.otf" />
+
+    <com.nooz.nooz.widget.TextView
+        android:id="@+id/comment_score"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentRight="true"
+        android:paddingLeft="8dp"
+        android:paddingTop="8dp"
+        android:text="38"
+        android:textSize="16sp"
+        custom:typeface="Bariol_Regular.otf" />
+
+    <com.nooz.nooz.widget.TextView
+        android:id="@+id/comment_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/comment_author"
+        android:layout_toRightOf="@id/comment_vote"
+        android:paddingLeft="8dp"
+        android:paddingTop="8dp"
+        android:text="Haha lul what this is a comment hello world. okay?"
+        android:textSize="12sp"
+        custom:typeface="Bariol_Regular.otf" />
+
+</RelativeLayout>

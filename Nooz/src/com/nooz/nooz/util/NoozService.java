@@ -34,6 +34,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.activity.map.FilterSettings;
 import com.nooz.nooz.activity.map.MapActivity;
+import com.nooz.nooz.model.Comment;
 import com.nooz.nooz.model.ProfileInfo;
 import com.nooz.nooz.model.Story;
 
@@ -354,10 +355,11 @@ public class NoozService {
 	 *            filter settings
 	 * @param currentSearchType
 	 *            relevant, breaking, or profile
-	 * @param authorUserId 
+	 * @param authorUserId
 	 * @see #getLoadedStories()
 	 */
-	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings, SearchType currentSearchType, String authorUserId) {
+	public void getAllStories(LatLngBounds bounds, FilterSettings filterSettings, SearchType currentSearchType,
+			String authorUserId) {
 		JsonObject body = new JsonObject();
 		body.addProperty("searchType", currentSearchType.toString());
 		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
@@ -565,6 +567,11 @@ public class NoozService {
 
 		});
 
+	}
+
+	public List<Comment> getLoadedComments() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

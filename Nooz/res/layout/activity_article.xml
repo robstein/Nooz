@@ -142,6 +142,14 @@
                 android:textColor="#4D4D4D"
                 android:textSize="14sp"
                 custom:typeface="Bariol_Regular.otf" />
+
+            <LinearLayout
+                android:id="@+id/comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp" >
+            </LinearLayout>
         </RelativeLayout>
     </com.nooz.nooz.widget.StickyScrollView>
 

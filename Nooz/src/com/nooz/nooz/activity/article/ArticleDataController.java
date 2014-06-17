@@ -1,18 +1,13 @@
 package com.nooz.nooz.activity.article;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.List;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.gson.JsonObject;
+import com.nooz.nooz.model.Comment;
 import com.nooz.nooz.util.GlobalConstant;
 
 public class ArticleDataController {
@@ -36,9 +31,6 @@ public class ArticleDataController {
 		sasUrl = sasUrl.replace("\"", "");
 		if ("AUDIO".equals(mC.mStory.medium)) {
 			(new ArticleAudioFetcherTask(sasUrl)).execute();
-		}
-		if ("PICTURE".equals(mC.mStory.medium)) {
-			(new ArticleImageFetcherTask(sasUrl)).execute();
 		}
 		if ("VIDEO".equals(mC.mStory.medium)) {
 
@@ -86,72 +78,14 @@ public class ArticleDataController {
 		}
 	}
 
-	private class ArticleImageFetcherTask extends AsyncTask<Void, Void, Boolean> {
-		private static final String TAG = "ArticleImageFetcherTask";
-		private String mUrl;
-		private Bitmap mBitmap;
+	public void getComments() {
+		// TODO Auto-generated method stub
 
-		public ArticleImageFetcherTask(String url) {
-			mUrl = url;
-		}
+	}
 
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			// Show loading
-			// TODO
-		}
-
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			boolean retval = true;
-			Exception ex = new Exception();
-			try {
-				mBitmap = BitmapFactory.decodeStream((InputStream) new URL(mUrl).getContent());
-			} catch (MalformedURLException e) {
-				retval = false;
-				ex = e;
-			} catch (FileNotFoundException e) {
-				retval = false;
-				ex = e;
-			} catch (IOException e) {
-				retval = false;
-				ex = e;
-			}
-
-			if (!retval) {
-				cancel(FORCE_STOP);
-			}
-
-			if (ex instanceof MalformedURLException) {
-				Log.e(TAG, "MalformedURLException - Bad blob url: " + ex.getCause().getMessage());
-			}
-			if (ex instanceof FileNotFoundException) {
-				Log.e(TAG, "FileNotFoundException - No blob at url: " + ex.getCause().getMessage());
-			}
-			if (ex instanceof IOException) {
-				Log.e(TAG, "IOException - There was an error decoding bitmap from URL: " + ex.getCause().getMessage());
-			}
-
-			return retval;
-		}
-
-		/***
-		 * If the image was loaded successfully, set the image view
-		 */
-		@Override
-		protected void onPostExecute(Boolean loaded) {
-			// Hide loading
-			// TODO
-			if (loaded) {
-				// SHow image
-				mC.mArticleImage.setImageBitmap(mBitmap);
-			} else {
-				// Show error
-				// TODO
-			}
-			// Set loaded flag
-			mC.mLoaded = true;
-		}
+	public void loadComments() {
+		List<Comment> listOfComments = mC.getNoozService().getLoadedComments();
+		CommentThreadTree commentTree = new CommentThreadTree(listOfComments);
+		// TODO Add comments to views
 	}
 }
