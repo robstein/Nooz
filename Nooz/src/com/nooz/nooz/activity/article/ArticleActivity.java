@@ -18,6 +18,9 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -31,6 +34,7 @@ import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.profile.ProfileLauncher;
+import com.nooz.nooz.model.Comment;
 import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.CategoryResourceHelper;
@@ -61,6 +65,9 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	private TextView mIrrelevanceScore;
 	private TextView mIrrelevanceLabel;
 	private ImageView mButtonComments;
+	ExpandableListView mLayoutComments;
+	Button mButtonPostComment;
+	EditText mInputTextComment;
 
 	boolean mLoaded;
 	Story mStory;
@@ -69,6 +76,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	private Integer mScoreRel;
 	private Integer mScoreIrr;
 	private int mScreenWidthInPixels;
+	String parentIdOfCommentToBe;
 
 	/***
 	 * Broadcast mReceiver handles a blob being loaded
@@ -102,6 +110,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mIrrelevant = false;
 		mScoreRel = 0;
 		mScoreIrr = 0;
+		parentIdOfCommentToBe = Comment.NONE;
 	}
 
 	private void initViews() {
@@ -123,6 +132,9 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mIrrelevanceScore = (TextView) findViewById(R.id.irrelevance_score);
 		mIrrelevanceLabel = (TextView) findViewById(R.id.irrelevance_label);
 		mButtonComments = (ImageView) findViewById(R.id.btn_comments);
+		mLayoutComments = (ExpandableListView) findViewById(R.id.comments);
+		mButtonPostComment = (Button) findViewById(R.id.btn_post_comment);
+		mInputTextComment = (EditText) findViewById(R.id.input_text_comment);
 	}
 
 	private void initViewListeners() {
@@ -133,6 +145,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mButtonRelevant.setOnClickListener(this);
 		mButtonIrrelevant.setOnClickListener(this);
 		mButtonComments.setOnClickListener(this);
+		mButtonPostComment.setOnClickListener(this);
 	}
 
 	private void initScreenMeasurements() {
@@ -277,6 +290,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	private void registerReceivers() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(GlobalConstant.BLOB_LOADED_ACTION);
+		filter.addAction(GlobalConstant.COMMENTS_LOADED_ACTION);
 		registerReceiver(mReceiver, filter);
 	}
 
@@ -323,8 +337,25 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		case R.id.button_irrelevant:
 			clickIrrelevant();
 			break;
+		case R.id.btn_comments:
+			// TODO program this
+			break;
+		case R.id.btn_post_comment:
+			mNoozService.postComment(mInputTextComment.getText().toString(), parentIdOfCommentToBe, mStory.id, onPostComment);
+			break;
 		}
 	}
+	
+	TableJsonOperationCallback onPostComment = new TableJsonOperationCallback() {
+		@Override
+		public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+			if (exception == null) {
+				Log.i("nooz debug", "posted the comment!");
+			} else {
+				Log.e("nooz debug", "Error posting comment: " + exception.getMessage());
+			}
+		}
+	};
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {

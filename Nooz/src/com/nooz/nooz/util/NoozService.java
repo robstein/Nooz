@@ -56,6 +56,9 @@ public class NoozService {
 	private MobileServiceJsonTable mTableStories;
 	private MobileServiceJsonTable mTableRelevance;
 	private MobileServiceJsonTable mTableBlobs;
+	private MobileServiceJsonTable mTableComments;
+	private MobileServiceJsonTable mTableCommentsRelevance;
+
 
 	private List<Story> mLoadedStories;
 	private JsonObject mLoadedBlob;
@@ -77,6 +80,9 @@ public class NoozService {
 			mTableStories = mClient.getTable("stories");
 			mTableRelevance = mClient.getTable("relevance");
 			mTableBlobs = mClient.getTable("BlobBlobs");
+			mTableComments = mClient.getTable("comments");
+			mTableCommentsRelevance = mClient.getTable("comments_relevance");
+
 		} catch (MalformedURLException e) {
 			Log.e(TAG, "There was an error creating the Mobile Service.  Verify the URL");
 		}
@@ -566,12 +572,57 @@ public class NoozService {
 			}
 
 		});
-
 	}
+	
+	private List<Comment> mLoadedComments;
 
 	public List<Comment> getLoadedComments() {
-		// TODO Auto-generated method stub
-		return null;
+		return mLoadedComments;
+	}
+
+	public void getComments(String id) {
+		JsonObject body = new JsonObject();
+		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
+		body.addProperty("story_id", id);
+
+		mClient.invokeApi("getstorycomments", body, new ApiJsonOperationCallback() {
+			
+			@Override
+			public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+				if (exception == null) {
+					Type listType = new TypeToken<List<Comment>>() {
+					}.getType();
+					List<Comment> comments = new Gson().fromJson(jsonObject, listType);
+
+					// In case we don't have user's relevance
+					for (Comment c : comments) {
+						if (c.getCurrentUserVote() == null)
+							c.setCurrentUserVote(0);
+					}
+
+					mLoadedComments = comments;
+
+					Intent broadcast = new Intent();
+					broadcast.setAction(GlobalConstant.COMMENTS_LOADED_ACTION);
+					mContext.sendBroadcast(broadcast);
+
+				} else {
+					Log.e(TAG, "There was an error retrieving stories: " + exception.getMessage());
+				}
+			}
+
+		});
+	}
+
+	public void postComment(String text, String parentIdOfCommentToBe, String storyId, TableJsonOperationCallback callback) {
+		JsonObject newComment = new JsonObject();
+		newComment.addProperty("commenter_id", mClient.getCurrentUser().getUserId());
+		newComment.addProperty("parent_id", parentIdOfCommentToBe);
+		newComment.addProperty("story_id", storyId);
+		newComment.addProperty("text", text);
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("postComment", "true"));
+		mTableComments.insert(newComment, parameters, callback);		
 	}
 
 }

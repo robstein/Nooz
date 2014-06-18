@@ -79,13 +79,12 @@ public class ArticleDataController {
 	}
 
 	public void getComments() {
-		// TODO Auto-generated method stub
-
+		mC.getNoozService().getComments(mC.mStory.id);
 	}
 
 	public void loadComments() {
 		List<Comment> listOfComments = mC.getNoozService().getLoadedComments();
 		CommentThreadTree commentTree = new CommentThreadTree(listOfComments);
-		// TODO Add comments to views
+		commentTree.inflate(mC, mC.mLayoutComments);
 	}
 }

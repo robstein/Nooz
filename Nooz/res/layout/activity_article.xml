@@ -143,13 +143,28 @@
                 android:textSize="14sp"
                 custom:typeface="Bariol_Regular.otf" />
 
-            <LinearLayout
+            <ExpandableListView
                 android:id="@+id/comments"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp" >
-            </LinearLayout>
+                android:layout_below="@id/caption"
+                android:padding="20dp" />
+
+            <Button
+                android:id="@+id/btn_post_comment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/comments"
+                android:text="Post" />
+
+            <com.nooz.nooz.widget.EditText
+                android:id="@+id/input_text_comment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/comments"
+                android:layout_toLeftOf="@id/btn_post_comment"
+                android:hint="Add a comment" />
         </RelativeLayout>
     </com.nooz.nooz.widget.StickyScrollView>
 
@@ -247,8 +262,7 @@
             android:layout_height="38dp"
             android:layout_marginLeft="8dp"
             android:clickable="true"
-            android:src="@drawable/comments_arts_and_life_fullsize"
-            android:visibility="gone" />
+            android:src="@drawable/comments_arts_and_life_fullsize" />
     </LinearLayout>
 
     <View

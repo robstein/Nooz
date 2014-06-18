@@ -13,6 +13,8 @@ public class ArticleBroadcastReceiver extends BroadcastReceiver {
 		String intentAction = intent.getAction();
 		if (GlobalConstant.BLOB_LOADED_ACTION.equals(intentAction)) {
 			((ArticleActivity) context).mArticleDataController.handleBlob();
+		} else if (GlobalConstant.COMMENTS_LOADED_ACTION.equals(intentAction)) {
+			((ArticleActivity) context).mArticleDataController.loadComments();
 		}
 	}
 

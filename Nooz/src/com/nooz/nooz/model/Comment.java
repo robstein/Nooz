@@ -56,7 +56,7 @@ public class Comment {
 	/**
 	 * id of the comment's parent. is "null" if the comment has no parent
 	 */
-	@SerializedName("id")
+	@SerializedName("parentId")
 	public String parentId;
 
 	public String getId() {
