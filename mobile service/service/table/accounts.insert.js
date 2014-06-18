@@ -22,8 +22,7 @@ function insert(item, user, request) {
 							request.respond(200, {
 								user: { userId : userId },
 								token: zumoJwt(expiry, userId, masterKey),
-                                firstName: account.firstName,
-                                lastName: account.lastName
+                                name: account.name
 							});
 						}
 						else {
