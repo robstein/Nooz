@@ -19,8 +19,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.Location;
-import android.media.MediaCodec;
-import android.media.MediaFormat;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;

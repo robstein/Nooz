@@ -1,7 +1,6 @@
 exports.post = function(request, response) {
   var mssql = request.service.mssql;
-  var sql = "SELECT A.firstName as firstName, " +
-            "A.lastName as lastName, " +
+  var sql = "SELECT A.name as authorName, " +
             "A.id as authorId, " +
             "S.id as id, " +
             "S.medium as medium, " +

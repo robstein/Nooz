@@ -1,22 +1,19 @@
 package com.nooz.nooz.activity.profile;
 
+import android.content.Context;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
 import com.android.volley.toolbox.NetworkImageView;
 import com.nooz.nooz.R;
 import com.nooz.nooz.activity.article.ArticleLauncher;
 import com.nooz.nooz.util.CategoryResourceHelper;
 import com.nooz.nooz.util.GlobalConstant;
-
-import android.content.Context;
-import android.support.v4.view.ViewPager;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.View.OnClickListener;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 public class ProfileStoryAdapter extends BaseAdapter {
 
@@ -75,8 +72,7 @@ public class ProfileStoryAdapter extends BaseAdapter {
 		View categoryRuler = (View) layout.findViewById(R.id.categoryRuler);
 
 		title.setText(mC.mProfileStoriesController.mStories.get(position).headline);
-		author.setText(mC.mProfileStoriesController.mStories.get(position).firstName + " "
-				+ mC.mProfileStoriesController.mStories.get(position).lastName);
+		author.setText(mC.mProfileStoriesController.mStories.get(position).authorName);
 		categoryRuler.setBackgroundColor(CategoryResourceHelper.getColorByCategory(
 				mC.mProfileStoriesController.mStories.get(position).category, ProfileActivity.HIGHLIGHT));
 

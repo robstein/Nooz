@@ -28,16 +28,10 @@ public class Story implements Parcelable {
 	public String authorId;
 
 	/**
-	 * story author's first name
+	 * story author's name
 	 */
-	@SerializedName("firstName")
-	public String firstName;
-
-	/**
-	 * story author's last name
-	 */
-	@SerializedName("lastName")
-	public String lastName;
+	@SerializedName("authorName")
+	public String authorName;
 
 	/**
 	 * story's category
@@ -116,11 +110,6 @@ public class Story implements Parcelable {
 	@SerializedName("medium")
 	public String medium;
 
-	/**
-	 * radius of this story on a map
-	 */
-	public Double radius;
-
 	@Override
 	public int describeContents() {
 		return 0;
@@ -129,8 +118,7 @@ public class Story implements Parcelable {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(id);
-		dest.writeString(firstName);
-		dest.writeString(lastName);
+		dest.writeString(authorName);
 		dest.writeString(category);
 		dest.writeString(headline);
 		dest.writeString(caption);
@@ -156,8 +144,7 @@ public class Story implements Parcelable {
 	public Story(Parcel pc) {
 		// reads back fields IN THE ORDER they were written
 		id = pc.readString();
-		firstName = pc.readString();
-		lastName = pc.readString();
+		authorName = pc.readString();
 		category = pc.readString();
 		headline = pc.readString();
 		caption = pc.readString();
@@ -229,22 +216,6 @@ public class Story implements Parcelable {
 
 	/**
 	 * 
-	 * @return story bubble radius
-	 */
-	public Double getRadius() {
-		return radius;
-	}
-
-	/**
-	 * 
-	 * @param radius
-	 */
-	public void setRadius(Double radius) {
-		this.radius = radius;
-	}
-
-	/**
-	 * 
 	 * @return story id
 	 */
 	public String getId() {
@@ -261,36 +232,18 @@ public class Story implements Parcelable {
 
 	/**
 	 * 
-	 * @return author first name
+	 * @return author name
 	 */
-	public String getFirstName() {
-		return firstName;
+	public String getAuthorName() {
+		return authorName;
 	}
 
 	/**
 	 * 
-	 * @param firstName
-	 *            author's first name
+	 * @param authorName
 	 */
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	/**
-	 * 
-	 * @return author last name
-	 */
-	public String getLastName() {
-		return lastName;
-	}
-
-	/**
-	 * 
-	 * @param lastName
-	 *            authors last name
-	 */
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setAuthorName(String authorName) {
+		this.authorName = authorName;
 	}
 
 	/**

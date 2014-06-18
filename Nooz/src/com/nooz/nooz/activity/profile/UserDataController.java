@@ -20,7 +20,7 @@ public class UserDataController {
 	 */
 	public void getUserData() {
 		mC.mProfileInfo = mC.getNoozService().getLoadedProfileInfo();
-		mC.mProfileName.setText(mC.mProfileInfo.firstName + " " + mC.mProfileInfo.lastName);
+		mC.mProfileName.setText(mC.mProfileInfo.name);
 		mC.mProfileLocation.setText(mC.mProfileInfo.homeLocation);
 		//mC.mButtonProfileNumbers.setText(mC.mProfileInfo.userScore.toString());
 	}

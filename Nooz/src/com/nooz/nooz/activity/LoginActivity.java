@@ -35,8 +35,7 @@ public class LoginActivity extends BaseFragmentActivity implements OnClickListen
 	private Button mButtonLogin;
 	private EditText mInputTextLoginEmail;
 	private EditText mInputTextLoginPassword;
-	private EditText mInputTextSignupNameFirst;
-	private EditText mInputTextSignupNameLast;
+	private EditText mInputTextSignupName;
 	private EditText mInputTextSignupEmail;
 	private EditText mInputTextSignupPassword;
 	private EditText mInputTextSignupPasswordConfirm;
@@ -65,8 +64,7 @@ public class LoginActivity extends BaseFragmentActivity implements OnClickListen
 		mButtonLogin = (Button) findViewById(R.id.button_login);
 		mInputTextLoginEmail = (EditText) findViewById(R.id.input_text_login_email);
 		mInputTextLoginPassword = (EditText) findViewById(R.id.input_text_login_password);
-		mInputTextSignupNameFirst = (EditText) findViewById(R.id.input_text_signup_name_first);
-		mInputTextSignupNameLast = (EditText) findViewById(R.id.input_text_signup_name_last);
+		mInputTextSignupName = (EditText) findViewById(R.id.input_text_signup_name);
 		mInputTextSignupEmail = (EditText) findViewById(R.id.input_text_signup_email);
 		mInputTextSignupPassword = (EditText) findViewById(R.id.input_text_signup_password);
 		mInputTextSignupPasswordConfirm = (EditText) findViewById(R.id.text_input_signup_password_confirm);
@@ -108,7 +106,7 @@ public class LoginActivity extends BaseFragmentActivity implements OnClickListen
 		mLinearLayoutLoginActivityTop.startAnimation(mSlideOutBottom);
 		mLinearLayoutSignup.setVisibility(View.VISIBLE);
 		mLinearLayoutSignup.startAnimation(mSlideInBottom);
-		mInputTextSignupNameFirst.requestFocus();
+		mInputTextSignupName.requestFocus();
 	}
 
 	private void showLoginForms() {
@@ -153,8 +151,7 @@ public class LoginActivity extends BaseFragmentActivity implements OnClickListen
 		if (mInputTextSignupEmail.getText().toString().equals("")
 				|| mInputTextSignupPassword.getText().toString().equals("")
 				|| mInputTextSignupPasswordConfirm.getText().toString().equals("")
-				|| mInputTextSignupNameFirst.getText().toString().equals("")
-				|| mInputTextSignupNameLast.getText().toString().equals("")) {
+				|| mInputTextSignupName.getText().toString().equals("")) {
 			Log.w(TAG, "You must enter all fields to register");
 			Alert.createAndShowDialog("You must enter all fields to register", "Oops!", this);
 			return;
@@ -165,9 +162,8 @@ public class LoginActivity extends BaseFragmentActivity implements OnClickListen
 			return;
 		} else {
 			splashLoadingScreen();
-			mNoozService.registerUser(mInputTextSignupNameFirst.getText().toString(), mInputTextSignupNameLast
-					.getText().toString(), mInputTextSignupEmail.getText().toString(), mInputTextSignupPassword
-					.getText().toString(), onRegisterUser);
+			mNoozService.registerUser(mInputTextSignupName.getText().toString(), mInputTextSignupEmail.getText()
+					.toString(), mInputTextSignupPassword.getText().toString(), onRegisterUser);
 		}
 	}
 

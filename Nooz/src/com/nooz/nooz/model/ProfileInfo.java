@@ -10,16 +10,10 @@ public class ProfileInfo {
 	public String id;
 
 	/**
-	 * first name of the profile owner
+	 * name of the profile owner
 	 */
-	@SerializedName("firstName")
-	public String firstName;
-
-	/**
-	 * last name of the profile owner
-	 */
-	@SerializedName("lastName")
-	public String lastName;
+	@SerializedName("name")
+	public String name;
 
 	/**
 	 * Home location of the profile owner

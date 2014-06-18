@@ -49,7 +49,7 @@ public class StoryAdapter extends PagerAdapter {
 		View categoryRuler = (View) layout.findViewById(R.id.categoryRuler);
 
 		title.setText(mC.mStories.get(position).headline);
-		author.setText(mC.mStories.get(position).firstName + " " + mC.mStories.get(position).lastName);
+		author.setText(mC.mStories.get(position).authorName);
 		categoryRuler.setBackgroundColor(CategoryResourceHelper.getColorByCategory(mC.mStories.get(position).category,
 				mC.HIGHLIGHT));
 		if (position == mC.mResumeStory) {

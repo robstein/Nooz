@@ -59,7 +59,6 @@ public class NoozService {
 	private MobileServiceJsonTable mTableComments;
 	private MobileServiceJsonTable mTableCommentsRelevance;
 
-
 	private List<Story> mLoadedStories;
 	private JsonObject mLoadedBlob;
 	private HashMap<Integer, JsonObject> mStoryImages;
@@ -141,10 +140,8 @@ public class NoozService {
 	/**
 	 * Sends the user's new info to be saved in Azure. Returns with callback.
 	 * 
-	 * @param firstName
-	 *            new user first name
-	 * @param lastName
-	 *            new user last name
+	 * @param name
+	 *            new user name
 	 * @param email
 	 *            new user email
 	 * @param password
@@ -152,11 +149,9 @@ public class NoozService {
 	 * @param callback
 	 *            the callback function
 	 */
-	public void registerUser(String firstName, String lastName, String email, String password,
-			TableJsonOperationCallback callback) {
+	public void registerUser(String name, String email, String password, TableJsonOperationCallback callback) {
 		JsonObject newUser = new JsonObject();
-		newUser.addProperty("firstName", firstName);
-		newUser.addProperty("lastName", lastName);
+		newUser.addProperty("name", name);
 		newUser.addProperty("email", email);
 		newUser.addProperty("password", password);
 		mTableAccounts.insert(newUser, callback);
@@ -192,10 +187,9 @@ public class NoozService {
 		JsonObject user = jsonObject.getAsJsonObject("user");
 		String userId = user.getAsJsonPrimitive("userId").getAsString();
 		String token = jsonObject.getAsJsonPrimitive("token").getAsString();
-		String firstName = jsonObject.getAsJsonPrimitive("firstName").getAsString();
-		String lastName = jsonObject.getAsJsonPrimitive("lastName").getAsString();
+		String name = jsonObject.getAsJsonPrimitive("name").getAsString();
 		setUser(userId, token);
-		saveUserData(firstName, lastName);
+		saveUserData(name);
 	}
 
 	private void setUser(String userId, String token) {
@@ -204,12 +198,12 @@ public class NoozService {
 		mClient.setCurrentUser(user);
 	}
 
-	private void saveUserData(String firstName, String lastName) {
+	private void saveUserData(String name) {
 		SharedPreferences settings = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
 		SharedPreferences.Editor preferencesEditor = settings.edit();
 		preferencesEditor.putString("userid", getUserId());
 		preferencesEditor.putString("token", mClient.getCurrentUser().getAuthenticationToken());
-		preferencesEditor.putString("user_name", firstName + " " + lastName);
+		preferencesEditor.putString("user_name", name);
 		preferencesEditor.commit();
 	}
 
@@ -573,7 +567,7 @@ public class NoozService {
 
 		});
 	}
-	
+
 	private List<Comment> mLoadedComments;
 
 	public List<Comment> getLoadedComments() {
@@ -586,7 +580,7 @@ public class NoozService {
 		body.addProperty("story_id", id);
 
 		mClient.invokeApi("getstorycomments", body, new ApiJsonOperationCallback() {
-			
+
 			@Override
 			public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
 				if (exception == null) {
@@ -614,7 +608,8 @@ public class NoozService {
 		});
 	}
 
-	public void postComment(String text, String parentIdOfCommentToBe, String storyId, TableJsonOperationCallback callback) {
+	public void postComment(String text, String parentIdOfCommentToBe, String storyId,
+			TableJsonOperationCallback callback) {
 		JsonObject newComment = new JsonObject();
 		newComment.addProperty("commenter_id", mClient.getCurrentUser().getUserId());
 		newComment.addProperty("parent_id", parentIdOfCommentToBe);
@@ -622,7 +617,7 @@ public class NoozService {
 		newComment.addProperty("text", text);
 		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("postComment", "true"));
-		mTableComments.insert(newComment, parameters, callback);		
+		mTableComments.insert(newComment, parameters, callback);
 	}
 
 }

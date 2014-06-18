@@ -209,7 +209,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	private void drawArticleHeadlineAuthorAndText() {
 		mHeadline.setText(mStory.headline);
 		// TODO Set mAuthorPicture
-		mAuthor.setText(mStory.firstName + " " + mStory.lastName);
+		mAuthor.setText(mStory.authorName);
 		mCaption.setText(mStory.caption);
 	}
 
@@ -341,11 +341,12 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 			// TODO program this
 			break;
 		case R.id.btn_post_comment:
-			mNoozService.postComment(mInputTextComment.getText().toString(), parentIdOfCommentToBe, mStory.id, onPostComment);
+			mNoozService.postComment(mInputTextComment.getText().toString(), parentIdOfCommentToBe, mStory.id,
+					onPostComment);
 			break;
 		}
 	}
-	
+
 	TableJsonOperationCallback onPostComment = new TableJsonOperationCallback() {
 		@Override
 		public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {

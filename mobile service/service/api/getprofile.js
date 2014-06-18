@@ -1,10 +1,8 @@
 exports.post = function(request, response) {
     var mssql = request.service.mssql;
     var sql = "SELECT id AS id, " +
-                     "firstName AS firstName, " +
-                     "lastName AS lastName, " +
+                     "name AS name, " +
                      "user_location AS homeLocation, " +
-                     "firstName AS firstName, " +
               "" +
                 "(SELECT count(R.input) " +
                 "FROM relevance AS R " +
