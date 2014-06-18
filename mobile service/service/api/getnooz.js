@@ -105,11 +105,16 @@ exports.post = function(request, response) {
         // Slice the array, take the first 10 elements (if there are that many)
         response.send(200, results.reverse().sort(rankingFunction).slice(0, Math.min(results.length, 10)));
       }
-      if (("BREAKING" == request.body.searchType) || ("PROFILE" == request.body.searchType)) {
-        // BREAKING ALGO (or PROFILE)
+      if ("BREAKING" == request.body.searchType) {
+        // BREAKING ALGO
         // Reverse to get newest to oldest
         // Slice the array, take the first 10 elements (if there are that many)              
         response.send(200, results.reverse().slice(0, Math.min(results.length, 10)));
+      }
+      if  ("PROFILE" == request.body.searchType) {
+        // PROFILE stories
+        // Reverse to get newest to oldest
+        response.send(200, results.reverse());
       }
     }
   })
