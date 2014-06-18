@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.nooz.nooz"
+    android:id="@+id/article_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <com.nooz.nooz.widget.SquareNetworkImageView
+        android:id="@+id/article_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop" />
+
+    <RelativeLayout
+        android:id="@+id/article_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/article_image"
+        android:background="@drawable/headline_transition"
+        android:clickable="true"
+        android:padding="20dp"
+        android:tag="sticky-hastransparancy" >
+
+        <com.nooz.nooz.widget.TextView
+            android:id="@+id/headline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:maxLines="4"
+            android:scrollHorizontally="false"
+            android:scrollbars="vertical"
+            android:singleLine="false"
+            android:text="Default headline"
+            android:textColor="#FEFEFE"
+            android:textColorHint="#FEFEFE"
+            android:textSize="28dp"
+            android:textStyle="bold"
+            custom:typeface="Bariol_Regular.otf" />
+
+        <com.nooz.nooz.widget.ProfileImageView
+            android:id="@+id/author_picture"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/headline"
+            android:layout_marginTop="6dp"
+            android:clickable="true"
+            android:contentDescription="Profile Picture"
+            custom:large="false" />
+
+        <com.nooz.nooz.widget.TextView
+            android:id="@+id/author"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/headline"
+            android:layout_marginLeft="6dp"
+            android:layout_marginTop="15dp"
+            android:layout_toRightOf="@id/author_picture"
+            android:clickable="true"
+            android:singleLine="true"
+            android:text="Default Author"
+            android:textColor="#FEFEFE"
+            android:textColorHint="#FEFEFE"
+            android:textSize="14sp"
+            custom:typeface="Bariol_Regular.otf" />
+    </RelativeLayout>
+
+    <com.nooz.nooz.widget.TextView
+        android:id="@+id/caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/article_image"
+        android:padding="20dp"
+        android:singleLine="false"
+        android:text="@string/example_caption"
+        android:textColor="#4D4D4D"
+        android:textSize="14sp"
+        custom:typeface="Bariol_Regular.otf" />
+
+</RelativeLayout>

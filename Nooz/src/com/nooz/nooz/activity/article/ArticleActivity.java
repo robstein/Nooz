@@ -1,11 +1,5 @@
 package com.nooz.nooz.activity.article;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -13,6 +7,7 @@ import android.graphics.Point;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -20,14 +15,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.toolbox.NetworkImageView;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
@@ -39,6 +35,7 @@ import com.nooz.nooz.model.Story;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.CategoryResourceHelper;
 import com.nooz.nooz.util.GlobalConstant;
+import com.nooz.nooz.util.Tools;
 
 /**
  * 
@@ -48,16 +45,23 @@ import com.nooz.nooz.util.GlobalConstant;
 public class ArticleActivity extends BaseLocationFragmentActivity implements OnClickListener {
 	private static final String TAG = "ArticleActivity";
 
+	// Top bar
 	private ImageView mArticleCategoryLogo;
 	private TextView mArticleCategory;
 	private TextView mArticleDate;
 	private ImageView mArticleInfo;
+
+	// Story Views
+	RelativeLayout mArticleContent;
 	NetworkImageView mArticleImage;
-	private RelativeLayout mArticleHeader;
-	private TextView mHeadline;
-	private NetworkImageView mAuthorPicture;
-	private TextView mAuthor;
-	private TextView mCaption;
+	RelativeLayout mArticleHeader;
+	TextView mHeadline;
+	NetworkImageView mAuthorPicture;
+	TextView mAuthor;
+	TextView mCaption;
+
+	// Relevance bar
+	private LinearLayout mRelevanceFooter;
 	private LinearLayout mButtonRelevant;
 	private TextView mRelevanceScore;
 	private TextView mRelevanceLabel;
@@ -65,7 +69,9 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	private TextView mIrrelevanceScore;
 	private TextView mIrrelevanceLabel;
 	private ImageView mButtonComments;
-	ExpandableListView mLayoutComments;
+
+	ListView mLayoutComments;
+
 	Button mButtonPostComment;
 	EditText mInputTextComment;
 
@@ -96,7 +102,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		initViews();
 		initViewListeners();
 		initScreenMeasurements();
-		initPictureParameters();
+		// initPictureParameters();
 		initBundleParameters();
 		initStory();
 		initModule();
@@ -119,12 +125,8 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mArticleCategory = (TextView) findViewById(R.id.article_category);
 		mArticleDate = (TextView) findViewById(R.id.article_date);
 		mArticleInfo = (ImageView) findViewById(R.id.article_info);
-		mArticleImage = (NetworkImageView) findViewById(R.id.article_image);
-		mArticleHeader = (RelativeLayout) findViewById(R.id.article_header);
-		mHeadline = (TextView) findViewById(R.id.headline);
-		mAuthorPicture = (NetworkImageView) findViewById(R.id.author_picture);
-		mAuthor = (TextView) findViewById(R.id.author);
-		mCaption = (TextView) findViewById(R.id.caption);
+		// initStoryViews(this);
+		mRelevanceFooter = (LinearLayout) findViewById(R.id.relevance_footer);
 		mButtonRelevant = (LinearLayout) findViewById(R.id.button_relevant);
 		mRelevanceScore = (TextView) findViewById(R.id.relevance_score);
 		mRelevanceLabel = (TextView) findViewById(R.id.relevance_label);
@@ -132,20 +134,33 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mIrrelevanceScore = (TextView) findViewById(R.id.irrelevance_score);
 		mIrrelevanceLabel = (TextView) findViewById(R.id.irrelevance_label);
 		mButtonComments = (ImageView) findViewById(R.id.btn_comments);
-		mLayoutComments = (ExpandableListView) findViewById(R.id.comments);
+		mLayoutComments = (ListView) findViewById(R.id.comments);
 		mButtonPostComment = (Button) findViewById(R.id.btn_post_comment);
 		mInputTextComment = (EditText) findViewById(R.id.input_text_comment);
 	}
 
+	void initStoryViews(View parent) {
+		mArticleContent = (RelativeLayout) parent.findViewById(R.id.article_content);
+		mArticleImage = (NetworkImageView) parent.findViewById(R.id.article_image);
+		mArticleHeader = (RelativeLayout) parent.findViewById(R.id.article_header);
+		mHeadline = (TextView) parent.findViewById(R.id.headline);
+		mAuthorPicture = (NetworkImageView) parent.findViewById(R.id.author_picture);
+		mAuthor = (TextView) parent.findViewById(R.id.author);
+		mCaption = (TextView) parent.findViewById(R.id.caption);
+	}
+
 	private void initViewListeners() {
 		mArticleInfo.setOnClickListener(this);
-		mArticleImage.setOnClickListener(this);
-		mAuthorPicture.setOnClickListener(this);
-		mAuthor.setOnClickListener(this);
+		// initStoryListeners();
 		mButtonRelevant.setOnClickListener(this);
 		mButtonIrrelevant.setOnClickListener(this);
 		mButtonComments.setOnClickListener(this);
 		mButtonPostComment.setOnClickListener(this);
+	}
+
+	void initStoryListeners() {
+		mAuthorPicture.setOnClickListener(this);
+		mAuthor.setOnClickListener(this);
 	}
 
 	private void initScreenMeasurements() {
@@ -158,7 +173,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	/**
 	 * Make the article picture the right size
 	 */
-	private void initPictureParameters() {
+	void initPictureParameters() {
 		RelativeLayout.LayoutParams imageLayoutParams = (RelativeLayout.LayoutParams) mArticleImage.getLayoutParams();
 		imageLayoutParams.height = mScreenWidthInPixels;
 		imageLayoutParams.width = mScreenWidthInPixels;
@@ -177,36 +192,21 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	 */
 	private void initStory() {
 		drawArticleHeader();
-		drawArticleHeadlineAuthorAndText();
+		// drawArticleHeadlineAuthorAndText();
 		drawArticleRelevance();
-		drawArticleComments();
+		drawArticleCommentButton();
 	}
 
 	private void drawArticleHeader() {
 		mArticleCategoryLogo.setImageResource(CategoryResourceHelper.getLogoByCategory(mStory.category));
 		mArticleCategory.setText(mStory.category);
 		mArticleCategory.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
-		mArticleDate.setText(getDate(mStory.__createdAt));
+		mArticleDate.setText(Tools.getDate(mStory.__createdAt));
 		mArticleDate.setTextColor(CategoryResourceHelper.getColorByCategory(mStory.category));
 		// mArticleInfo.setImageResource(CategoryResourceHelper.getInfoByCategory(mStory.category));
 	}
 
-	private String getDate(String __createdAt) {
-		SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss", Locale.US);
-		inputFormat.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
-		SimpleDateFormat outputFormat = new SimpleDateFormat("MMM. dd, yyyy", java.util.Locale.getDefault());
-
-		// Adjust locale and zone appropriately
-		try {
-			Date date = inputFormat.parse(__createdAt);
-			return outputFormat.format(date);
-		} catch (ParseException e) {
-			Log.e(TAG, "Error parsing date: " + e.getCause().getMessage());
-			return "";
-		}
-	}
-
-	private void drawArticleHeadlineAuthorAndText() {
+	void drawArticleHeadlineAuthorAndText() {
 		mHeadline.setText(mStory.headline);
 		// TODO Set mAuthorPicture
 		mAuthor.setText(mStory.authorName);
@@ -252,7 +252,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		}
 	}
 
-	private void drawArticleComments() {
+	private void drawArticleCommentButton() {
 		mButtonComments.setImageResource(CategoryResourceHelper.getCommentsByCategory(mStory.category));
 	}
 
@@ -281,10 +281,14 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		super.onResume();
 
 		registerReceivers();
-		mArticleImage.setImageUrl(GlobalConstant.MEDIA_URL + mStory.id, mImageLoader);
-		mAuthorPicture.setImageUrl(GlobalConstant.PROFILE_URL + mStory.authorId, mImageLoader);
+		// loadNetworkImages();
 
 		initComments();
+	}
+
+	void loadNetworkImages() {
+		mArticleImage.setImageUrl(GlobalConstant.MEDIA_URL + mStory.id, mImageLoader);
+		mAuthorPicture.setImageUrl(GlobalConstant.PROFILE_URL + mStory.authorId, mImageLoader);
 	}
 
 	private void registerReceivers() {
@@ -338,7 +342,9 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 			clickIrrelevant();
 			break;
 		case R.id.btn_comments:
-			// TODO program this
+			mButtonPostComment.setVisibility(View.VISIBLE);
+			mInputTextComment.setVisibility(View.VISIBLE);
+			mRelevanceFooter.setVisibility(View.GONE);
 			break;
 		case R.id.btn_post_comment:
 			mNoozService.postComment(mInputTextComment.getText().toString(), parentIdOfCommentToBe, mStory.id,
@@ -352,6 +358,23 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
 			if (exception == null) {
 				Log.i("nooz debug", "posted the comment!");
+				mButtonPostComment.setVisibility(View.GONE);
+				mInputTextComment.setVisibility(View.GONE);
+				mRelevanceFooter.setVisibility(View.VISIBLE);
+				mInputTextComment.setText("");
+
+				Time now = new Time();
+				now.switchTimezone(Time.TIMEZONE_UTC);
+				now.setToNow();
+				Comment newComment = new Gson().fromJson(jsonObject, Comment.class);
+				newComment.setCommenterName(mNoozService.getUserName());
+				newComment.setCreatedAt(now.format("%FT%TZ"));
+				newComment.setCurrentUserVote(0);
+				newComment.setDown(0);
+				newComment.setUp(0);
+				newComment.setParentId(parentIdOfCommentToBe);
+				mArticleDataController.mCommentTree.addComment(newComment);
+				mArticleDataController.mCommentAdapter.notifyDataSetChanged();
 			} else {
 				Log.e("nooz debug", "Error posting comment: " + exception.getMessage());
 			}

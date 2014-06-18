@@ -214,6 +214,11 @@ public class NoozService {
 	public String getUserId() {
 		return mClient.getCurrentUser().getUserId();
 	}
+	
+	public String getUserName() {
+		SharedPreferences userData = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
+		return userData.getString("user_name", "");
+	}
 
 	/**
 	 * Logs the user out of Nooz
@@ -619,5 +624,4 @@ public class NoozService {
 		parameters.add(new Pair<String, String>("postComment", "true"));
 		mTableComments.insert(newComment, parameters, callback);
 	}
-
 }

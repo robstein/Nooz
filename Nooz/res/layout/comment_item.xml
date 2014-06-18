@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res/com.nooz.nooz"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:padding="4dp" >
 
     <LinearLayout
         android:id="@+id/comment_vote"
@@ -10,23 +11,19 @@
         android:layout_height="64dp"
         android:orientation="vertical" >
 
-        <com.nooz.nooz.widget.TextView
+        <ImageButton
             android:id="@+id/comment_plus"
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:gravity="center"
-            android:text="+"
-            android:textSize="16sp"
-            custom:typeface="Bariol_Regular.otf" />
+            android:src="@drawable/ic_action_good" />
 
-        <com.nooz.nooz.widget.TextView
-            android:id="@+id/comment_minus"
+        <ImageButton
+            android:id="@+id/comment_plus"
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:gravity="center"
-            android:text="-"
-            android:textSize="16sp"
-            custom:typeface="Bariol_Regular.otf" />
+            android:src="@drawable/ic_action_bad" />
     </LinearLayout>
 
     <com.nooz.nooz.widget.TextView

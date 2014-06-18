@@ -405,9 +405,12 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnCamer
 	}
 
 	private void getUserData() {
-		SharedPreferences userData = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
-		mButtonProfile.setText(userData.getString("user_name", ""));
-		mUserId = userData.getString("userid", null);
+		//SharedPreferences userData = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
+		//mButtonProfile.setText(userData.getString("user_name", ""));
+		//mUserId = userData.getString("userid", null);
+		mButtonProfile.setText(mNoozService.getUserName());
+		mUserId = mNoozService.getUserId();
+		
 	}
 
 	private void restoreSettings() {

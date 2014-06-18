@@ -38,8 +38,13 @@ public class CommentTreeNode {
 		}
 	}
 
-	public void addChild(Comment c) {
-		children.add(new CommentTreeNode(c));
+	public CommentTreeNode addChild(Comment c, boolean insertAtBeginning) {
+		CommentTreeNode newNode = new CommentTreeNode(c);
+		if (insertAtBeginning) {
+			children.add(0, newNode);
+		} else {
+			children.add(newNode);
+		}
+		return newNode;
 	}
-
 }

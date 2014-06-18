@@ -4,20 +4,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-
-import android.content.Context;
-import android.widget.ExpandableListView;
+import java.util.Map;
 
 import com.nooz.nooz.model.Comment;
 
 public class CommentThreadTree {
 
-	CommentTreeNode root;
-	HashMap<String, CommentTreeNode> parentMap;
-	HashSet<String> parentSet;
-	private ExpandableListView mLayoutComments;
-	private Context mContext;
-	private CommentAdapter mCommentAdapter;
+	private CommentTreeNode root;
+	private HashMap<String, CommentTreeNode> parentMap;
+	private HashSet<String> parentSet;
+	private List<Comment> preOrderTraversedTree;
+	private int count;
+	
+	static final boolean INSERT_AT_END = false;
+	static final boolean INSERT_AT_BEGINNING = false;
+
 
 	public CommentThreadTree(List<Comment> listOfComments) {
 		// Initially add the "no parent" node to the parentSet
@@ -32,6 +33,82 @@ public class CommentThreadTree {
 		// Build the tree
 		addParents(listOfComments);
 		connectNodes(listOfComments);
+
+		// Calculate count
+		calculateCount();
+
+		// Set depths
+		calculateDepths();
+
+		// Generate list
+		generateList();
+	}
+
+	/**
+	 * Adds a comment to the tree.
+	 * 
+	 * @param c
+	 */
+	public void addComment(Comment c) {
+		// Find the parent
+		CommentTreeNode parent = findNodeById(c.parentId);
+
+		// Add new comment's parent to the parent set
+		if (!parentSet.contains(c.parentId)) {
+			// Haven't seen that parent before, add it
+			parentSet.add(c.parentId);
+			parentMap.put(c.parentId, parent);
+		}
+
+		// Make new node a child of the parent
+		CommentTreeNode newNode = parent.addChild(c, INSERT_AT_END);
+
+		// Add to count
+		count += 1;
+
+		// Set new node's depth
+		newNode.comment.setDepth(parent.comment.getDepth() + 1);
+
+		// Generate list
+		// All of the above code in this method is trying to be efficient, yet
+		// we need to do a linear traversal (or at least a linear lookup into
+		// the comment list) to finally add the new comment :(
+		generateList();
+	}
+
+	/**
+	 * Node lookup.
+	 * 
+	 * Runtime efficiency: O(log n)
+	 * 
+	 * @param id
+	 * @return
+	 */
+	private CommentTreeNode findNodeById(String id) {
+		return findNodeById(root, id);
+	}
+
+	private CommentTreeNode findNodeById(CommentTreeNode node, String id) {
+		if (node == null) {
+			return null;
+		}
+		if (node.comment == null) {
+			return null;
+		}
+		if (node.comment.id == null) {
+			return null;
+		}
+		if (id.equals(node.comment.id)) {
+			return node;
+		} else {
+			for (CommentTreeNode child : node.children) {
+				CommentTreeNode potentialRetVal = findNodeById(child, id);
+				if (potentialRetVal != null) {
+					return potentialRetVal;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -56,7 +133,7 @@ public class CommentThreadTree {
 			if (parentSet.contains(c)) {
 				finishBuilding(c);
 			} else {
-				parentMap.get(c.parentId).addChild(c);
+				parentMap.get(c.parentId).addChild(c, INSERT_AT_END);
 			}
 		}
 	}
@@ -72,36 +149,53 @@ public class CommentThreadTree {
 		incompleteComment.comment.setUp(c.up);
 	}
 
-	public void inflate(Context c, ExpandableListView layoutComments) {
-		mContext = c;
-		mLayoutComments = layoutComments;
-
-		List<String> listDataHeader = new ArrayList<String>();
-		for (CommentTreeNode child : root.children) {
-			listDataHeader.add(child.comment.id);
-		}
-
-		mCommentAdapter = new CommentAdapter(mContext, listDataHeader, new HashMap<String, List<String>>());
-		layoutComments.setAdapter(mCommentAdapter);
-
-		// inflate(root, 0);
+	/**
+	 * Returns the number of comments in the tree.
+	 * 
+	 * @return
+	 */
+	public int getCount() {
+		return count;
 	}
 
-	/**
-	 * (Recursive) Pre-order traversal
-	 * 
-	 * @param curr
-	 * @param depth
-	 */
-	private void inflate(CommentTreeNode curr, int depth) {
-		if (curr == null) {
+	public Comment getItem(int position) {
+		return preOrderTraversedTree.get(position);
+	}
+
+	private void calculateCount() {
+		int sum = 0;
+		for (Map.Entry<String, CommentTreeNode> entry : parentMap.entrySet()) {
+			sum += entry.getValue().children.size();
+		}
+		count = sum;
+	}
+
+	private void calculateDepths() {
+		setDepths(root, 0);
+	}
+
+	private void setDepths(CommentTreeNode node, int depth) {
+		if (node == null)
 			return;
+		node.comment.setDepth(depth);
+		for (CommentTreeNode child : node.children) {
+			setDepths(child, depth + 1);
 		}
-		if (curr != root) {
-			// writeComment(curr.comment, depth);
+	}
+
+	private void generateList() {
+		preOrderTraversedTree = new ArrayList<Comment>();
+		preOrderTraverse(root);
+	}
+
+	private void preOrderTraverse(CommentTreeNode node) {
+		if (node == null)
+			return;
+		if (node != root) {
+			preOrderTraversedTree.add(node.comment);
 		}
-		for (CommentTreeNode node : curr.children) {
-			inflate(node, depth + 1);
+		for (CommentTreeNode child : node.children) {
+			preOrderTraverse(child);
 		}
 	}
 }

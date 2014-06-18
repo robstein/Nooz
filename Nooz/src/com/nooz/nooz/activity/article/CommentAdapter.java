@@ -1,103 +1,84 @@
 package com.nooz.nooz.activity.article;
 
-import java.util.HashMap;
-import java.util.List;
-
 import android.content.Context;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.nooz.nooz.R;
+import com.nooz.nooz.model.Comment;
+import com.nooz.nooz.util.Tools;
 
-public class CommentAdapter extends BaseExpandableListAdapter {
+public class CommentAdapter extends BaseAdapter {
 
-	private Context _context;
-	private List<String> _listDataHeader; // header titles
-	// child data in format of header title, child title
-	private HashMap<String, List<String>> _listDataChild;
+	private ArticleActivity mContext;
+	private CommentThreadTree mCommentTree;
 
-	public CommentAdapter(Context context, List<String> listDataHeader, HashMap<String, List<String>> listChildData) {
-		this._context = context;
-		this._listDataHeader = listDataHeader;
-		this._listDataChild = listChildData;
+	public CommentAdapter(ArticleActivity context, CommentThreadTree commentThreadTree) {
+		mContext = context;
+		mCommentTree = commentThreadTree;
 	}
 
 	@Override
-	public Object getChild(int groupPosition, int childPosititon) {
-		return this._listDataChild.get(this._listDataHeader.get(groupPosition)).get(childPosititon);
+	public int getCount() {
+		return mCommentTree.getCount() + 1;
 	}
 
 	@Override
-	public long getChildId(int groupPosition, int childPosition) {
-		return childPosition;
+	public Comment getItem(int position) {
+		return mCommentTree.getItem(position - 1);
 	}
 
 	@Override
-	public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView,
-			ViewGroup parent) {
+	public long getItemId(int position) {
+		return position;
+	}
 
-		final String childText = (String) getChild(groupPosition, childPosition);
-
-		if (convertView == null) {
-			LayoutInflater infalInflater = (LayoutInflater) this._context
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		View retval;
+		if (position == 0) {
+			LayoutInflater infalInflater = (LayoutInflater) this.mContext
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = infalInflater.inflate(R.layout.comment_item, null);
+			View storyView = infalInflater.inflate(R.layout.layout_story_content, null);
+
+			mContext.initStoryViews(storyView);
+			mContext.initStoryListeners();
+			mContext.initPictureParameters();
+			mContext.drawArticleHeadlineAuthorAndText();
+			mContext.loadNetworkImages();
+
+			retval = storyView;
+		} else {
+			if (convertView == null) {
+				LayoutInflater infalInflater = (LayoutInflater) this.mContext
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				convertView = infalInflater.inflate(R.layout.comment_item, null);
+			} else if (convertView.getId() == R.id.article_content) {
+				LayoutInflater infalInflater = (LayoutInflater) this.mContext
+						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				convertView = infalInflater.inflate(R.layout.comment_item, null);
+			}
+
+			Comment comment = (Comment) getItem(position);
+			if (comment == null) {
+				return convertView;
+			}
+
+			TextView viewAuthor = (TextView) convertView.findViewById(R.id.comment_author);
+			TextView viewDatetime = (TextView) convertView.findViewById(R.id.comment_datetime);
+			TextView viewScore = (TextView) convertView.findViewById(R.id.comment_score);
+			TextView viewText = (TextView) convertView.findViewById(R.id.comment_text);
+
+			viewAuthor.setText(comment.commenterName);
+			viewDatetime.setText(Tools.getDate(comment.createdAt));
+			viewScore.setText("" + (comment.up - comment.down));
+			viewText.setText(comment.text);
+
+			retval = convertView;
 		}
-
-		TextView txtListChild = (TextView) convertView.findViewById(R.id.comment_author);
-		txtListChild.setText(childText);
-
-		return convertView;
-	}
-
-	@Override
-	public int getChildrenCount(int groupPosition) {
-		return this._listDataChild.get(this._listDataHeader.get(groupPosition)).size();
-	}
-
-	@Override
-	public Object getGroup(int groupPosition) {
-		return this._listDataHeader.get(groupPosition);
-	}
-
-	@Override
-	public int getGroupCount() {
-		return this._listDataHeader.size();
-	}
-
-	@Override
-	public long getGroupId(int groupPosition) {
-		return groupPosition;
-	}
-
-	@Override
-	public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-
-		String headerTitle = (String) getGroup(groupPosition);
-		if (convertView == null) {
-			LayoutInflater infalInflater = (LayoutInflater) this._context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = infalInflater.inflate(R.layout.comment_item, null);
-		}
-
-		TextView lblListHeader = (TextView) convertView.findViewById(R.id.comment_author);
-		lblListHeader.setTypeface(null, Typeface.BOLD);
-		lblListHeader.setText(headerTitle);
-
-		return convertView;
-	}
-
-	@Override
-	public boolean hasStableIds() {
-		return false;
-	}
-
-	@Override
-	public boolean isChildSelectable(int groupPosition, int childPosition) {
-		return true;
+		return retval;
 	}
 }

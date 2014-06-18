@@ -16,6 +16,8 @@ public class ArticleDataController {
 	private static final boolean FORCE_STOP = true;
 
 	private ArticleActivity mC;
+	CommentAdapter mCommentAdapter;
+	CommentThreadTree mCommentTree;
 
 	public ArticleDataController(ArticleActivity a) {
 		this.mC = a;
@@ -84,7 +86,8 @@ public class ArticleDataController {
 
 	public void loadComments() {
 		List<Comment> listOfComments = mC.getNoozService().getLoadedComments();
-		CommentThreadTree commentTree = new CommentThreadTree(listOfComments);
-		commentTree.inflate(mC, mC.mLayoutComments);
+		mCommentTree = new CommentThreadTree(listOfComments);
+		mCommentAdapter = new CommentAdapter(mC, mCommentTree);
+		mC.mLayoutComments.setAdapter(mCommentAdapter);
 	}
 }
