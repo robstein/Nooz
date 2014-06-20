@@ -61,7 +61,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 	TextView mCaption;
 
 	// Relevance bar
-	private LinearLayout mRelevanceFooter;
+	LinearLayout mRelevanceFooter;
 	private LinearLayout mButtonRelevant;
 	private TextView mRelevanceScore;
 	private TextView mRelevanceLabel;

@@ -47,4 +47,12 @@ public class CommentTreeNode {
 		}
 		return newNode;
 	}
+
+	public void addChild(CommentTreeNode filledInNode, boolean insertAtBeginning) {
+		if (insertAtBeginning) {
+			children.add(0, filledInNode);
+		} else {
+			children.add(filledInNode);
+		}
+	}
 }

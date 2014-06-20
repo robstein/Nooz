@@ -15,10 +15,9 @@ public class CommentThreadTree {
 	private HashSet<String> parentSet;
 	private List<Comment> preOrderTraversedTree;
 	private int count;
-	
+
 	static final boolean INSERT_AT_END = false;
 	static final boolean INSERT_AT_BEGINNING = false;
-
 
 	public CommentThreadTree(List<Comment> listOfComments) {
 		// Initially add the "no parent" node to the parentSet
@@ -130,15 +129,16 @@ public class CommentThreadTree {
 
 	private void connectNodes(List<Comment> listOfComments) {
 		for (Comment c : listOfComments) {
-			if (parentSet.contains(c)) {
-				finishBuilding(c);
+			if (parentSet.contains(c.id)) {
+				CommentTreeNode filledInNode = finishBuilding(c);
+				parentMap.get(c.parentId).addChild(filledInNode, INSERT_AT_END);
 			} else {
 				parentMap.get(c.parentId).addChild(c, INSERT_AT_END);
 			}
 		}
 	}
 
-	private void finishBuilding(Comment c) {
+	private CommentTreeNode finishBuilding(Comment c) {
 		CommentTreeNode incompleteComment = parentMap.get(c.id);
 		incompleteComment.comment.setCommenterName(c.commenterName);
 		incompleteComment.comment.setCreatedAt(c.createdAt);
@@ -147,6 +147,7 @@ public class CommentThreadTree {
 		incompleteComment.comment.setParentId(c.parentId);
 		incompleteComment.comment.setText(c.text);
 		incompleteComment.comment.setUp(c.up);
+		return incompleteComment;
 	}
 
 	/**
