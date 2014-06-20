@@ -18,7 +18,6 @@ import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -41,9 +40,9 @@ import android.widget.TextView.OnEditorActionListener;
 import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -61,6 +60,7 @@ import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.PagerContainer;
 import com.twotoasters.clusterkraf.Clusterkraf;
 import com.twotoasters.clusterkraf.Clusterkraf.ProcessingListener;
+import com.twotoasters.clusterkraf.CustomOnCameraChangeCallable;
 import com.twotoasters.clusterkraf.InputPoint;
 import com.twotoasters.clusterkraf.Options;
 import com.twotoasters.clusterkraf.Options.ClusterClickBehavior;
@@ -72,7 +72,7 @@ import com.twotoasters.clusterkraf.Options.SinglePointClickBehavior;
  * @author Rob Stein
  * 
  */
-public class MapActivity extends BaseLocationFragmentActivity implements OnCameraChangeListener, ProcessingListener {
+public class MapActivity extends BaseLocationFragmentActivity implements ProcessingListener {
 
 	// Constants
 	private static final String TAG = "MapActivity";
@@ -405,12 +405,13 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnCamer
 	}
 
 	private void getUserData() {
-		//SharedPreferences userData = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
-		//mButtonProfile.setText(userData.getString("user_name", ""));
-		//mUserId = userData.getString("userid", null);
+		// SharedPreferences userData =
+		// mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
+		// mButtonProfile.setText(userData.getString("user_name", ""));
+		// mUserId = userData.getString("userid", null);
 		mButtonProfile.setText(mNoozService.getUserName());
 		mUserId = mNoozService.getUserId();
-		
+
 	}
 
 	private void restoreSettings() {
@@ -448,6 +449,16 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnCamer
 	protected void onPause() {
 		unRegisterReceivers();
 		saveSettings();
+
+		/*
+		 * When pausing, we clear all of the clusterkraf's markers in order to
+		 * conserve memory. When (if) we resume, we can rebuild from where we
+		 * left off.
+		 */
+		if (clusterkraf != null) {
+			clusterkraf.clear();
+			clusterkraf = null;
+		}
 
 		super.onPause();
 	}
@@ -490,16 +501,17 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnCamer
 			// Check if we were successful in obtaining the map.
 			if (mMap != null) {
 				// The Map is verified. It is now safe to manipulate the map.
-				setUpMap();
+				setUpMapAndInitClusterkraf();
 			}
 		} else {
-			setUpMap();
+			setUpMapAndInitClusterkraf();
 		}
 	}
 
-	private void setUpMap() {
-		mMap.setMyLocationEnabled(true);
-		mMap.setOnCameraChangeListener(this);
+	private void setUpMapAndInitClusterkraf() {
+		mMap.setMyLocationEnabled(false);
+		UiSettings uiSettings = mMap.getUiSettings();
+		uiSettings.setZoomControlsEnabled(true);
 		mMap.setOnMarkerClickListener(new OnMarkerClickListener() {
 			@Override
 			public boolean onMarkerClick(Marker marker) {
@@ -507,6 +519,8 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnCamer
 				return false; // Don't show info-window
 			}
 		});
+		// Init Clusterkraf
+		initClusterkraf();
 	}
 
 	/* ***** MAP SETUP END ***** */
@@ -514,11 +528,11 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnCamer
 	/* ***** BUBBLES BEGIN ***** */
 
 	void drawCirlesOnMap() {
-		int i = 0;
-		for (Story s : mStories) {
-			// addMarker(s);
-			i++;
-		}
+		// int i = 0;
+		// for (Story s : mStories) {
+		// addMarker(s);
+		// i++;
+		// }
 		buildClusterkrafInputPoints();
 		initClusterkraf();
 	}
@@ -541,14 +555,20 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnCamer
 	private void initClusterkraf() {
 		if (mMap != null && mClusterkrafInputPoints != null && mClusterkrafInputPoints.size() > 0) {
 			Options options = new Options();
-			// applyOptionsToClusterkrafOptions(options);
-			this.clusterkraf = new Clusterkraf(mMap, options, mClusterkrafInputPoints);
+			applyOptionsToClusterkrafOptions(options);
+			this.clusterkraf = new Clusterkraf(mMap, options, mClusterkrafInputPoints,
+					new CustomOnCameraChangeCallable() {
+						@Override
+						public void onCameraChange() {
+							mStoryDataController.clearAndPopulateStories();
+						}
+					});
 		}
 	}
 
 	private void applyOptionsToClusterkrafOptions(Options options) {
 		options.setTransitionInterpolator(new AccelerateDecelerateInterpolator());
-		options.setPixelDistanceToJoinCluster((int) Tools.dipToPixels(this, 100));
+		options.setPixelDistanceToJoinCluster((int) Tools.dipToPixels(this, 72));
 
 		options.setZoomToBoundsAnimationDuration(500);
 		options.setShowInfoWindowAnimationDuration(500);
@@ -558,7 +578,8 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnCamer
 		options.setClusterInfoWindowClickBehavior(ClusterInfoWindowClickBehavior.ZOOM_TO_BOUNDS);
 
 		options.setZoomToBoundsPadding(getResources().getDrawable(R.drawable.community_bubble).getIntrinsicHeight());
-
+		options.setMarkerOptionsChooser(new NoozMarkerOptionsChooser(this));
+		options.setOnMarkerClickDownstreamListener(new NoozOnMarkerClickDownstreamListener(this));
 		options.setProcessingListener(this);
 	}
 
@@ -601,22 +622,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements OnCamer
 		} else {
 			super.onBackPressed();
 		}
-	}
-
-	@Override
-	public void onCameraChange(CameraPosition position) {
-		Log.d("Zoom", "Zoom: " + position.zoom);
-
-		// Update Bubbles
-		if (mPreviousZoomLevel != position.zoom) {
-			mMapWidthInMeters = GlobeTrigonometry.mapWidthInMeters(mScreenWidthInPixels, position.zoom);
-		}
-		mPreviousZoomLevel = position.zoom;
-
-		// Update City
-		// updateCity();
-
-		mStoryDataController.clearAndPopulateStories();
 	}
 
 	/* ***** LISTENERS END ***** */

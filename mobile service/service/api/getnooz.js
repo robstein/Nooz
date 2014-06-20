@@ -103,13 +103,13 @@ exports.post = function(request, response) {
         // Reverse to get newest to oldest
         // Rank by rankingFunction compare logic
         // Slice the array, take the first 10 elements (if there are that many)
-        response.send(200, results.reverse().sort(rankingFunction).slice(0, Math.min(results.length, 10)));
+        response.send(200, results.reverse().sort(rankingFunction).slice(0, Math.min(results.length, 1000)));
       }
       if ("BREAKING" == request.body.searchType) {
         // BREAKING ALGO
         // Reverse to get newest to oldest
         // Slice the array, take the first 10 elements (if there are that many)              
-        response.send(200, results.reverse().slice(0, Math.min(results.length, 10)));
+        response.send(200, results.reverse().slice(0, Math.min(results.length, 1000)));
       }
       if  ("PROFILE" == request.body.searchType) {
         // PROFILE stories

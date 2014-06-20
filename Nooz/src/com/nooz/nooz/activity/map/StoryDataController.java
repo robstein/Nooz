@@ -61,6 +61,15 @@ public class StoryDataController {
 			entry.getKey().remove();
 		}
 		mC.mMarkers.clear();
+
+		clearClusterkraf();
+	}
+
+	private void clearClusterkraf() {
+		if (mC.clusterkraf != null) {
+			mC.clusterkraf.clear();
+			mC.clusterkraf = null;
+		}
 	}
 
 }
