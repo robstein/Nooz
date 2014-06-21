@@ -214,7 +214,7 @@ public class NoozService {
 	public String getUserId() {
 		return mClient.getCurrentUser().getUserId();
 	}
-	
+
 	public String getUserName() {
 		SharedPreferences userData = mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
 		return userData.getString("user_name", "");
@@ -269,6 +269,24 @@ public class NoozService {
 		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("postRelevanceInput", "true"));
 		mTableRelevance.insert(relevanceinput, parameters, callback);
+	}
+
+	/**
+	 * Save the upvote or downvote (specified by Integer input) to Azure.
+	 * Returns with the callback.
+	 * 
+	 * @param commentId
+	 * @param input
+	 * @param onUpvote
+	 */
+	public void saveCommentRelevanceInput(String commentId, Integer input, TableJsonOperationCallback callback) {
+		JsonObject relevanceinput = new JsonObject();
+		relevanceinput.addProperty("comment_id", commentId);
+		relevanceinput.addProperty("voter_id", mClient.getCurrentUser().getUserId());
+		relevanceinput.addProperty("input", input);
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("postCommentRelevanceInput", "true"));
+		mTableCommentsRelevance.insert(relevanceinput, parameters, callback);
 	}
 
 	/**
@@ -624,4 +642,5 @@ public class NoozService {
 		parameters.add(new Pair<String, String>("postComment", "true"));
 		mTableComments.insert(newComment, parameters, callback);
 	}
+
 }

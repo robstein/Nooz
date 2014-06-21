@@ -27,7 +27,7 @@
             android:src="@drawable/ic_action_good" />
 
         <ImageButton
-            android:id="@+id/comment_plus"
+            android:id="@+id/comment_minus"
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:gravity="center"
