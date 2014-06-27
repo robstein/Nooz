@@ -39,7 +39,7 @@ public class NoozMarkerOptionsChooser extends MarkerOptionsChooser {
 	public void choose(MarkerOptions markerOptions, ClusterPoint clusterPoint) {
 		Resources res = mContext.getResources();
 
-		markerOptions.icon(BitmapDescriptorFactory.fromBitmap(getClusterBitmap(res, R.drawable.ic_cluster_bubble,
+		markerOptions.icon(BitmapDescriptorFactory.fromBitmap(getClusterBitmap(res, R.drawable.ic_map_bubble_cluster,
 				clusterPoint.size())));
 
 		markerOptions.anchor(0.5f, 0.5f);
