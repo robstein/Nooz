@@ -19,5 +19,7 @@
     <color name="settings_button_background_normal">#00FFFFFF</color>
     <color name="settings_button_background_pressed">#60FFFFFF</color>
     <color name="settings_button_background_focused">#60FFFFFF</color>
+    <color name="actionbar_map_text">#222222</color>
+    <color name="actionbar_article_text">#FFFFFF</color>
 
 </resources>
