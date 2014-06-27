@@ -1,5 +1,6 @@
 <resources>
 
+    <string name="version">1.2.2</string>
     <string name="app_name">Nooz</string>
     <string name="relevant">RELEVANT</string>
     <string name="breaking">BREAKING</string>
@@ -7,9 +8,14 @@
     <string name="time">TIME</string>
     <string name="medium">MEDIUM</string>
     <string name="category">CATEGORY</string>
-    <string name="default_name">Michael Ochoa</string>
     <string name="map_filters_button">Map Filters</string>
-    <string name="top_nooz">Top Nooz</string>
+    <string name="action_search">Search</string>
+    <string name="action_new">New Story</string>
+    <string name="action_about">About</string>
+    <string name="action_profile">Profile</string>
+    <string name="action_map_filters">Map Filters</string>
+    <string name="action_settings">Settings</string>
+    <string name="logout">Logout</string>
 
     <string-array name="category_array">
         <item>Choose Category</item>
@@ -20,7 +26,28 @@
         <item>Public Safety</item>
         <item>Arts &amp; Life</item>
     </string-array>
+    <string-array name="map_actionbar_spinner_list">
+        <item>RELEVANT</item>
+        <item>BREAKING</item>
+    </string-array>
+    <string-array name="drawer_array_text">
+        <item>Name</item>
+        <item>Map Filters</item>
+        <item>Settings</item>
+    </string-array>
 
+    <string name="general_preferences">General Settings</string>
+    <string name="map_zoom_level">Default map zoom level</string>
+    <string name="story_text_size">Story text font size</string>
+    <string name="timezone">Timezone</string>
+    <string name="about_preferences">About</string>
+    <string name="about_nooz">About Nooz</string>
+    <string name="build_version">Build version</string>
+    <string name="open_source_licenses">Open source licenses</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="terms_of_use">Terms of use</string>
     <string name="example_caption">University of Illinois professor Anne Sautman gave a brief lecture on 18th century French portraits today. She discussed the difference in style between Italian painters during the late Renaissance. The museum\'s galleries are optn to the public daily and</string>
+    <string name="top_nooz">Top Nooz</string>
+    <string name="default_name">Michael Ochoa</string>
 
 </resources>

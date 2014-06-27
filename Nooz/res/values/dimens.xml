@@ -1,5 +1,11 @@
 <resources>
 
     <dimen name="cluster_text_size_medium">24sp</dimen>
+    <dimen name="fontsize_10">10sp</dimen>
+    <dimen name="fontsize_12">12sp</dimen>
+    <dimen name="fontsize_14">14sp</dimen>
+    <dimen name="fontsize_16">16sp</dimen>
+    <dimen name="fontsize_18">18sp</dimen>
+    <dimen name="fontsize_20">20sp</dimen>
 
 </resources>
