@@ -1,5 +1,7 @@
 package com.nooz.nooz.util;
 
+import android.graphics.drawable.Drawable;
+
 import com.nooz.nooz.R;
 
 /**
@@ -22,7 +24,7 @@ public class CategoryResourceHelper {
 	private static final int COLOR_FOOD_STROKE = 0xFF83D193;
 	private static final int COLOR_PUBLIC_SAFETY_STROKE = 0xFFEEAF7A;
 	private static final int COLOR_ARTS_AND_LIFE_STROKE = 0xFFAE7DCE;
-	
+
 	public static final int COLOR_WHITE = 0xFFFFFFFF;
 
 	public static int getColorByCategory(String category, boolean highlight) {
@@ -190,5 +192,39 @@ public class CategoryResourceHelper {
 		} else { // Arts and Life
 			return R.drawable.arts_and_life_solid_fullsize;
 		}
+	}
+
+	public static int getThemeByCategory(String category) {
+		if ("People".equals(category)) {
+			return R.style.Theme_People;
+		} else if ("Community".equals(category)) {
+			return R.style.Theme_Community;
+		} else if ("Sports".equals(category)) {
+			return R.style.Theme_Sports;
+		} else if ("Food".equals(category)) {
+			return R.style.Theme_Food;
+		} else if ("Public Safety".equals(category)) {
+			return R.style.Theme_Public_safety;
+		} else { // Arts and Life
+			return R.style.Theme_Arts_and_life;
+		}
+	}
+
+	public static int getActionBarIconByCategory(String category) {
+		if ("People".equals(category)) {
+			return R.drawable.ic_action_people;
+		} else if ("Community".equals(category)) {
+			return R.drawable.ic_action_community;
+		} else if ("Sports".equals(category)) {
+			return R.drawable.ic_action_sports;
+		} else if ("Food".equals(category)) {
+			return R.drawable.ic_action_food;
+		} else if ("Public Safety".equals(category)) {
+			return R.drawable.ic_action_public_safety;
+		} else { // Arts and Life
+			return R.drawable.ic_action_arts_and_life;
+		}
+		
+		
 	}
 }

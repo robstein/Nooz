@@ -36,12 +36,7 @@ public class MapActivityOnClickListener implements OnClickListener {
 			mC.mStoryDataController.clearAndPopulateStories();
 			break;
 		case R.id.button_new_story:
-			if (mC.getCurrentLocation() == null) {
-				Alert.createAndShowDialog("Please turn on Locations Services", "Location not found", mC);
-			} else {
-				Intent mediaRecorderIntent = new Intent(mC.getApplicationContext(), MediaRecorderActivity.class);
-				mC.startActivity(mediaRecorderIntent);
-			}
+			mC.attemptMakeNewStory();
 			break;
 		case R.id.story_item_shader:
 			ArticleLauncher.openStory(mC, mC.mStories.get(mC.mCurrentStory));

@@ -1,15 +1,19 @@
 package com.nooz.nooz.activity.article;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
@@ -95,19 +99,35 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 
 	ArticleModule mMediaModule;
 
+	private TextView mArticleContentDate;
+
 	/* ***** ACTIVITY SETUP BEGIN ***** */
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		initBundleParameters();
+		setTheme(CategoryResourceHelper.getThemeByCategory(mStory.category));
 		super.onCreate(savedInstanceState);
+		initActionBar();
 		initFields();
 		initViews();
 		initViewListeners();
 		initScreenMeasurements();
 		// initPictureParameters();
-		initBundleParameters();
 		initStory();
 		initModule();
+	}
+
+	private void initActionBar() {
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setTitle(mStory.category);
+		actionBar.setLogo(CategoryResourceHelper.getActionBarIconByCategory(mStory.category));
+	}
+
+	private void initBundleParameters() {
+		Bundle bundle = getIntent().getParcelableExtra("bundle");
+		mStory = bundle.getParcelable("story");
 	}
 
 	private void initFields() {
@@ -148,6 +168,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mHeadline = (TextView) parent.findViewById(R.id.headline);
 		mAuthorPicture = (NetworkImageView) parent.findViewById(R.id.author_picture);
 		mAuthor = (TextView) parent.findViewById(R.id.author);
+		mArticleContentDate = (TextView) parent.findViewById(R.id.article_content_date);
 		mCaption = (TextView) parent.findViewById(R.id.caption);
 	}
 
@@ -182,11 +203,6 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mArticleImage.setLayoutParams(imageLayoutParams);
 	}
 
-	private void initBundleParameters() {
-		Bundle bundle = getIntent().getParcelableExtra("bundle");
-		mStory = bundle.getParcelable("story");
-	}
-
 	/**
 	 * Uses the input parcelable story to populate the whole activity's layout.
 	 * However, the media is not loaded until a broadcast receiver is registered
@@ -212,7 +228,11 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 		mHeadline.setText(mStory.headline);
 		// TODO Set mAuthorPicture
 		mAuthor.setText(mStory.authorName);
+		mArticleContentDate.setText(Tools.getDate(mStory.__createdAt));
 		mCaption.setText(mStory.caption);
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+		mCaption.setTextSize(TypedValue.COMPLEX_UNIT_SP, Float.parseFloat(sharedPref.getString(getString(R.string.story_text_size), "14")));
 	}
 
 	@SuppressLint("NewApi")
@@ -377,7 +397,7 @@ public class ArticleActivity extends BaseLocationFragmentActivity implements OnC
 				newComment.setParentId(parentIdOfCommentToBe);
 				mArticleDataController.mCommentTree.addComment(newComment);
 				mArticleDataController.mCommentAdapter.notifyDataSetChanged();
-				
+
 				// Hide virtual keyboard
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(mInputTextComment.getWindowToken(), 0);

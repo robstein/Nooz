@@ -15,6 +15,9 @@ public class MapMenusController {
 	private static final int SEARCH_TYPE_ACTIVE_COLOR = 0xFF000000;
 	private static final int SEARCH_TYPE_FADED_COLOR = 0xFF979797;
 
+	private static final int SPINNER_POSITION_BREAKING = 1;
+	private static final int SPINNER_POSITION_RELEVANT = 0;
+
 	// Animations
 	private Animation mSlideInBottom;
 	private Animation mSlideOutBottom;
@@ -64,10 +67,10 @@ public class MapMenusController {
 		// Fade in the views underneath
 		mC.mMapContainer.setVisibility(View.VISIBLE);
 		mC.mMapContainer.startAnimation(mFadeIn);
-		mC.mMiddlebar.setVisibility(View.VISIBLE);
-		mC.mMiddlebar.startAnimation(mFadeIn);
-		mC.mMenuSettings.setVisibility(View.VISIBLE);
-		mC.mMenuSettings.startAnimation(mFadeIn);
+		//mC.mMiddlebar.setVisibility(View.VISIBLE);
+		//mC.mMiddlebar.startAnimation(mFadeIn);
+		//mC.mMenuSettings.setVisibility(View.VISIBLE);
+		//mC.mMenuSettings.startAnimation(mFadeIn);
 
 	}
 
@@ -80,10 +83,10 @@ public class MapMenusController {
 		// Prevent interaction with views underneath
 		mC.mMapContainer.setVisibility(View.INVISIBLE);
 		mC.mMapContainer.startAnimation(mFadeOut);
-		mC.mMiddlebar.setVisibility(View.INVISIBLE);
-		mC.mMiddlebar.startAnimation(mFadeOut);
-		mC.mMenuSettings.setVisibility(View.INVISIBLE);
-		mC.mMenuSettings.startAnimation(mFadeOut);
+		//mC.mMiddlebar.setVisibility(View.INVISIBLE);
+		//mC.mMiddlebar.startAnimation(mFadeOut);
+		//mC.mMenuSettings.setVisibility(View.INVISIBLE);
+		//mC.mMenuSettings.startAnimation(mFadeOut);
 
 	}
 
@@ -129,10 +132,10 @@ public class MapMenusController {
 
 	void switchSearchTypes(int pressedButton) {
 		// Change mCurrentSearchType
-		if ((mCurrentSearchType == SearchType.RELEVANT) && (pressedButton == R.id.button_breaking)) {
+		if ((mCurrentSearchType == SearchType.RELEVANT) && (pressedButton == SPINNER_POSITION_BREAKING)) {
 			mCurrentSearchType = SearchType.BREAKING;
 			mC.mStoryDataController.clearAndPopulateStories();
-		} else if ((mCurrentSearchType == SearchType.BREAKING) && (pressedButton == R.id.button_relevant)) {
+		} else if ((mCurrentSearchType == SearchType.BREAKING) && (pressedButton == SPINNER_POSITION_RELEVANT)) {
 			mCurrentSearchType = SearchType.RELEVANT;
 			mC.mStoryDataController.clearAndPopulateStories();
 		}

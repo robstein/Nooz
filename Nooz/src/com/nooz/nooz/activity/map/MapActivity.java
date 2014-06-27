@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.WeakHashMap;
 
+import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -18,22 +20,33 @@ import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v4.widget.DrawerLayout;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
@@ -54,7 +67,12 @@ import com.nooz.nooz.activity.ActivityGestureDetector;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.LoginActivity;
 import com.nooz.nooz.activity.article.ArticleLauncher;
+import com.nooz.nooz.activity.profile.ProfileActivity;
+import com.nooz.nooz.activity.profile.ProfileLauncher;
+import com.nooz.nooz.activity.settings.SettingsActivity;
+import com.nooz.nooz.mediarecorder.MediaRecorderActivity;
 import com.nooz.nooz.model.Story;
+import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.util.Tools;
 import com.nooz.nooz.widget.PagerContainer;
@@ -201,6 +219,9 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	private OnTouchListener mGestureListener;
 
 	Clusterkraf clusterkraf;
+	private DrawerLayout mDrawerLayout;
+	private ListView mDrawerList;
+	private String[] mDrawerText;
 
 	/* ***** ACTIVITY LIFECYCLE BEGIN ***** */
 
@@ -212,12 +233,106 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 			return;
 		}
 
+		initOptionsMenuSpinner();
+		// initDrawer();
 		initFields();
 		initViews();
 		initViewListeners();
 		initScreenMeasurements();
 		initPager();
 	}
+
+	private void initOptionsMenuSpinner() {
+		SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(this, R.array.map_actionbar_spinner_list,
+				android.R.layout.simple_spinner_dropdown_item);
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayShowTitleEnabled(false);
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		actionBar.setListNavigationCallbacks(mSpinnerAdapter, mOnNavigationListener);
+	}
+
+	private void initDrawer() {
+		mDrawerText = getResources().getStringArray(R.array.drawer_array_text);
+
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerList = (ListView) findViewById(R.id.left_drawer);
+		// Set the adapter for the list view
+
+		mDrawerList.setAdapter(new BaseAdapter() {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if (convertView == null) {
+					LayoutInflater infalInflater = (LayoutInflater) mContext
+							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					convertView = infalInflater.inflate(R.layout.drawer_list_item, null);
+				}
+				TextView text = (TextView) convertView.findViewById(R.id.drawer_item_text);
+				text.setText(getItem(position));
+				return convertView;
+			}
+
+			@Override
+			public long getItemId(int position) {
+				return position;
+			}
+
+			@Override
+			public String getItem(int position) {
+				return mDrawerText[position];
+			}
+
+			@Override
+			public int getCount() {
+				return mDrawerText.length;
+			}
+		});
+		// Set the list's click listener
+		mDrawerList.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu items for use in the action bar
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.map_activity_actionbar, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	public boolean onOptionsItemSelected(android.view.MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_new:
+			attemptMakeNewStory();
+			return true;
+		case R.id.action_profile:
+			ProfileLauncher.openProfile(this, mUserId);
+			return true;
+		case R.id.action_map_filters:
+			mMenuController.showFiltersLayout();
+			return true;
+		case R.id.action_settings:
+			Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+			startActivity(settingsIntent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	OnNavigationListener mOnNavigationListener = new OnNavigationListener() {
+		@Override
+		public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+			mMenuController.switchSearchTypes(itemPosition);
+			return true;
+		}
+	};
 
 	private void initFields() {
 		initStoryLists();
@@ -369,19 +484,27 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	private boolean handleLogoutIntent() {
 		boolean finish = getIntent().getBooleanExtra("finish", false);
 		if (finish) {
-			Intent logoutIntent = new Intent(mContext, LoginActivity.class);
-			mContext.startActivity(logoutIntent);
-			startActivity(logoutIntent);
-			SharedPreferences settings = getSharedPreferences("map_settings", MODE_PRIVATE);
-			SharedPreferences.Editor editor = settings.edit();
-			editor.putFloat("latitude", (float) USA.latitude);
-			editor.putFloat("longitude", (float) USA.longitude);
-			editor.putFloat("zoom", (float) ZOOM_USA);
-			editor.putInt("current_story", 0);
-			editor.commit();
-			finish();
+			handleLogout();
 		}
 		return finish;
+	}
+
+	public void handleLogoutFromActionBar() {
+		handleLogout();
+	}
+
+	private void handleLogout() {
+		Intent logoutIntent = new Intent(mContext, LoginActivity.class);
+		mContext.startActivity(logoutIntent);
+		startActivity(logoutIntent);
+		SharedPreferences settings = getSharedPreferences("map_settings", MODE_PRIVATE);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putFloat("latitude", (float) USA.latitude);
+		editor.putFloat("longitude", (float) USA.longitude);
+		editor.putFloat("zoom", (float) ZOOM_USA);
+		editor.putInt("current_story", 0);
+		editor.commit();
+		finish();
 	}
 
 	/*
@@ -539,7 +662,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 
 	private void addMarker(Story s) {
 		Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(s.lat, s.lng)).anchor(.5f, .5f)
-				.icon(BitmapDescriptorFactory.fromResource(R.drawable.community_bubble)));
+				.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_bubble_cluster)));
 
 	}
 
@@ -577,7 +700,8 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 		options.setClusterClickBehavior(ClusterClickBehavior.ZOOM_TO_BOUNDS);
 		options.setClusterInfoWindowClickBehavior(ClusterInfoWindowClickBehavior.ZOOM_TO_BOUNDS);
 
-		options.setZoomToBoundsPadding(getResources().getDrawable(R.drawable.community_bubble).getIntrinsicHeight());
+		options.setZoomToBoundsPadding(getResources().getDrawable(R.drawable.ic_map_bubble_cluster)
+				.getIntrinsicHeight());
 		options.setMarkerOptionsChooser(new NoozMarkerOptionsChooser(this));
 		options.setOnMarkerClickDownstreamListener(new NoozOnMarkerClickDownstreamListener(this));
 		options.setProcessingListener(this);
@@ -690,6 +814,15 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	}
 
 	/* ***** MAP SEARCH END ***** */
+
+	public void attemptMakeNewStory() {
+		if (getCurrentLocation() == null) {
+			Alert.createAndShowDialog("Please turn on Locations Services", "Location not found", this);
+		} else {
+			Intent mediaRecorderIntent = new Intent(getApplicationContext(), MediaRecorderActivity.class);
+			startActivity(mediaRecorderIntent);
+		}
+	}
 
 	void handleUpdateRelevance(String storyId, int input) {
 

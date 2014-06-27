@@ -50,7 +50,7 @@
 
         <com.nooz.nooz.widget.TextView
             android:id="@+id/author"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/headline"
             android:layout_marginLeft="6dp"
@@ -60,7 +60,19 @@
             android:singleLine="true"
             android:text="Default Author"
             android:textColor="#FEFEFE"
-            android:textColorHint="#FEFEFE"
+            android:textSize="14sp"
+            custom:typeface="Bariol_Regular.otf" />
+        
+        <com.nooz.nooz.widget.TextView
+            android:id="@+id/article_content_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/headline"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="6dp"
+            android:layout_marginTop="15dp"
+            android:singleLine="true"
+            android:textColor="#FEFEFE"
             android:textSize="14sp"
             custom:typeface="Bariol_Regular.otf" />
     </RelativeLayout>

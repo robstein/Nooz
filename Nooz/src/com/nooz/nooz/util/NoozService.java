@@ -223,7 +223,29 @@ public class NoozService {
 	/**
 	 * Logs the user out of Nooz
 	 */
-	public void logout() {
+	public void logoutFromActivityOnTopOfMap() {
+		logout();
+
+		// Clear the user and return to the login activity
+		// In order to return to the login activity without leaving some other
+		// activity (namely MapActivity) on the Activity stack, we point our
+		// intent to MapActivity and have a special logout case in its onCreate
+		Intent logoutIntent = new Intent(mContext, MapActivity.class);
+		logoutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		logoutIntent.putExtra("finish", true);
+		mContext.startActivity(logoutIntent);
+		((Activity) mContext).finish();
+	}
+
+	/**
+	 * Logs the user out of Nooz
+	 */
+	public void logoutFromMap() {
+		logout();
+		((MapActivity) mContext).handleLogoutFromActionBar();
+	}
+
+	private void logout() {
 		// Clear the cookies so they won't auto login to a provider again
 		CookieSyncManager.createInstance(mContext);
 		CookieManager cookieManager = CookieManager.getInstance();
@@ -235,16 +257,7 @@ public class NoozService {
 		preferencesEditor.clear();
 		preferencesEditor.apply();
 
-		// Clear the user and return to the login activity
-		// In order to return to the login activity without leaving some other
-		// activity (namely MapActivity) on the Activity stack, we point our
-		// intent to MapActivity and have a special logout case in its onCreate
 		mClient.logout();
-		Intent logoutIntent = new Intent(mContext, MapActivity.class);
-		logoutIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		logoutIntent.putExtra("finish", true);
-		mContext.startActivity(logoutIntent);
-		((Activity) mContext).finish();
 	}
 
 	/**
