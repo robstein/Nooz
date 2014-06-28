@@ -65,7 +65,8 @@ public class MapMenusController {
 		// mC.mMiddlebar.startAnimation(mFadeIn);
 		// mC.mMenuSettings.setVisibility(View.VISIBLE);
 		// mC.mMenuSettings.startAnimation(mFadeIn);
-
+		
+		mC.getActionBar().show();
 	}
 
 	void showFiltersLayout() {
@@ -81,6 +82,8 @@ public class MapMenusController {
 		// mC.mMiddlebar.startAnimation(mFadeOut);
 		// mC.mMenuSettings.setVisibility(View.INVISIBLE);
 		// mC.mMenuSettings.startAnimation(mFadeOut);
+		
+		mC.getActionBar().hide();
 
 	}
 

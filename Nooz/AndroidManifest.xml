@@ -76,6 +76,7 @@
             android:name="com.nooz.nooz.activity.profile.ProfileActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
+            android:theme="@style/Theme.Profile"
             android:windowSoftInputMode="adjustPan" >
         </activity>
         <activity
