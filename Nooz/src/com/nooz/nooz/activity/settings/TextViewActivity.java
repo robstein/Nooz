@@ -21,7 +21,7 @@ public class TextViewActivity extends Activity {
 		String preferenceKey = getIntent().getStringExtra("preferenceKey");
 		if (getString(R.string.open_source_licenses).equals(preferenceKey)) {
 			textView.setText("" + "## License for Google Maps Android API v2\n" + "## License for android-volley\n"
-					+ "\n" + "Copyright 2005-2014, The Android Open Source Project\n" + "\n"
+					+ "\n" + "Copyright 2005-2008, The Android Open Source Project\n" + "\n"
 					+ "Licensed under the Apache License, Version 2.0 (the \"License\");\n"
 					+ "you may not use this file except in compliance with the License.\n"
 					+ "You may obtain a copy of the License at\n" + "\n"
