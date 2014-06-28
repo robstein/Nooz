@@ -13,7 +13,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
+import com.nooz.nooz.util.ErrorDialogFragment;
 
+/**
+ * Base Location serving activity.
+ * 
+ * @author Rob Stein
+ * 
+ */
 public class BaseLocationFragmentActivity extends BaseFragmentActivity implements
 		GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener {
 
@@ -64,7 +71,7 @@ public class BaseLocationFragmentActivity extends BaseFragmentActivity implement
 	@Override
 	public void onConnected(Bundle connectionHint) {
 		// Display the connection status
-		Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+		// Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
 		mCurrentLocation = mLocationClient.getLastLocation();
 	}
 

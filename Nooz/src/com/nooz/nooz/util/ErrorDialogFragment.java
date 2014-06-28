@@ -1,4 +1,4 @@
-package com.nooz.nooz.activity;
+package com.nooz.nooz.util;
 
 import android.app.Dialog;
 import android.support.v4.app.DialogFragment;

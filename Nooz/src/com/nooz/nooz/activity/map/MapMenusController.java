@@ -10,7 +10,7 @@ import com.nooz.nooz.util.SearchType;
 public class MapMenusController {
 
 	private MapActivity mC;
-	
+
 	// Colors
 	private static final int SEARCH_TYPE_ACTIVE_COLOR = 0xFF000000;
 	private static final int SEARCH_TYPE_FADED_COLOR = 0xFF979797;
@@ -25,19 +25,13 @@ public class MapMenusController {
 	private Animation mSlideOutLeft;
 	private Animation mFadeIn;
 	private Animation mFadeOut;
-	
+
 	/**
 	 * Stores the current SearchType: "RELEVANT" or "BREAKING"
 	 * 
 	 * @see com.nooz.nooz.util.SearchType
 	 */
 	SearchType mCurrentSearchType = SearchType.RELEVANT;
-
-	/**
-	 * Boolean representation of whether or not the settings menu is currently
-	 * open.
-	 */
-	Boolean settingsMenuIsOpen = false;
 
 	/**
 	 * Boolean representation of whether or not the filters menu is currently
@@ -47,7 +41,7 @@ public class MapMenusController {
 
 	MapMenusController(MapActivity mapActivity) {
 		this.mC = mapActivity;
-		
+
 		// Animations
 		mSlideInBottom = AnimationUtils.loadAnimation(mC, R.anim.slide_in_bottom);
 		mSlideOutBottom = AnimationUtils.loadAnimation(mC, R.anim.slide_out_bottom);
@@ -67,10 +61,10 @@ public class MapMenusController {
 		// Fade in the views underneath
 		mC.mMapContainer.setVisibility(View.VISIBLE);
 		mC.mMapContainer.startAnimation(mFadeIn);
-		//mC.mMiddlebar.setVisibility(View.VISIBLE);
-		//mC.mMiddlebar.startAnimation(mFadeIn);
-		//mC.mMenuSettings.setVisibility(View.VISIBLE);
-		//mC.mMenuSettings.startAnimation(mFadeIn);
+		// mC.mMiddlebar.setVisibility(View.VISIBLE);
+		// mC.mMiddlebar.startAnimation(mFadeIn);
+		// mC.mMenuSettings.setVisibility(View.VISIBLE);
+		// mC.mMenuSettings.startAnimation(mFadeIn);
 
 	}
 
@@ -83,47 +77,11 @@ public class MapMenusController {
 		// Prevent interaction with views underneath
 		mC.mMapContainer.setVisibility(View.INVISIBLE);
 		mC.mMapContainer.startAnimation(mFadeOut);
-		//mC.mMiddlebar.setVisibility(View.INVISIBLE);
-		//mC.mMiddlebar.startAnimation(mFadeOut);
-		//mC.mMenuSettings.setVisibility(View.INVISIBLE);
-		//mC.mMenuSettings.startAnimation(mFadeOut);
+		// mC.mMiddlebar.setVisibility(View.INVISIBLE);
+		// mC.mMiddlebar.startAnimation(mFadeOut);
+		// mC.mMenuSettings.setVisibility(View.INVISIBLE);
+		// mC.mMenuSettings.startAnimation(mFadeOut);
 
-	}
-
-	void hideOrShowSettingsMenu() {
-		if (settingsMenuIsOpen) {
-			mC.mStoryFooter.setVisibility(View.VISIBLE);
-			mC.mStoryFooter.startAnimation(mFadeIn);
-
-			// change color of settings icon and show relevant, breaking buttons
-			mC.mButtonSettingsAndFilters.setImageResource(R.drawable.selector_button_settings);
-
-			mC.mButtonRelevant.setVisibility(View.VISIBLE);
-			mC.mButtonRelevant.startAnimation(mFadeIn);
-			mC.mButtonBreaking.setVisibility(View.VISIBLE);
-			mC.mButtonBreaking.startAnimation(mFadeIn);
-
-			mC.mMenuSettings.setVisibility(View.GONE);
-			mC.mMenuSettings.startAnimation(mSlideOutBottom);
-
-			settingsMenuIsOpen = false;
-		} else {
-			mC.mStoryFooter.setVisibility(View.GONE);
-			mC.mStoryFooter.startAnimation(mFadeOut);
-
-			// change color of settings icon and hide relevant, breaking buttons
-			mC.mButtonSettingsAndFilters.setImageResource(R.drawable.selector_button_settings_active);
-
-			mC.mButtonRelevant.setVisibility(View.INVISIBLE);
-			mC.mButtonRelevant.startAnimation(mFadeOut);
-			mC.mButtonBreaking.setVisibility(View.INVISIBLE);
-			mC.mButtonBreaking.startAnimation(mFadeOut);
-
-			mC.mMenuSettings.setVisibility(View.VISIBLE);
-			mC.mMenuSettings.startAnimation(mSlideInBottom);
-
-			settingsMenuIsOpen = true;
-		}
 	}
 
 	/* ***** EXTRA MENUS HIDE/SHOW END ***** */
@@ -138,14 +96,6 @@ public class MapMenusController {
 		} else if ((mCurrentSearchType == SearchType.BREAKING) && (pressedButton == SPINNER_POSITION_RELEVANT)) {
 			mCurrentSearchType = SearchType.RELEVANT;
 			mC.mStoryDataController.clearAndPopulateStories();
-		}
-		// Make sure UI is up to date
-		if (mCurrentSearchType == SearchType.RELEVANT) {
-			mC.mButtonRelevant.setTextColor(SEARCH_TYPE_ACTIVE_COLOR);
-			mC.mButtonBreaking.setTextColor(SEARCH_TYPE_FADED_COLOR);
-		} else {
-			mC.mButtonRelevant.setTextColor(SEARCH_TYPE_FADED_COLOR);
-			mC.mButtonBreaking.setTextColor(SEARCH_TYPE_ACTIVE_COLOR);
 		}
 	}
 

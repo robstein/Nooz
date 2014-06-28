@@ -1,8 +1,15 @@
-package com.nooz.nooz.activity;
+package com.nooz.nooz.util;
 
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 
+/**
+ * Abstract class which invokes the unimplemented method {@link #onSwipeLeft()}
+ * when the user swipes left.
+ * 
+ * @author Rob Stein
+ * 
+ */
 public abstract class ActivityGestureDetector extends SimpleOnGestureListener {
 
 	private static final int SWIPE_MIN_DISTANCE = 120;
@@ -26,6 +33,9 @@ public abstract class ActivityGestureDetector extends SimpleOnGestureListener {
 		return false;
 	}
 
+	/**
+	 * Invoked when user swipes left
+	 */
 	public abstract void onSwipeLeft();
 
 	@Override
