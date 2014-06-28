@@ -70,7 +70,7 @@
             android:singleLine="true" />
 
         <LinearLayout
-            android:id="@+id/linearlayout_login_buttons"
+            android:id="@+id/linearlayout_login_buttons_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -145,7 +145,7 @@
             android:singleLine="true" />
 
         <LinearLayout
-            android:id="@+id/linearlayout_login_buttons"
+            android:id="@+id/linearlayout_login_buttons_signup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
