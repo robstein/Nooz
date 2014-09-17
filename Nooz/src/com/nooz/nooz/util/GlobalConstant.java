@@ -35,5 +35,6 @@ public class GlobalConstant {
 	public static final String STORIES_LOADED_ACTION = "stories.loaded";
 	public static final String RELEVANCE_UPDATE_ACTION = "relevance update";
 	public static final String COMMENTS_LOADED_ACTION = "comments loaded";
+	public static final String QUADTREE_AND_TOP_STORIES_LOADED_ACTION = "quadtree.and.top.stories.loaded";
 
 }

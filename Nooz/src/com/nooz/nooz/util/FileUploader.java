@@ -13,22 +13,37 @@ import java.net.URL;
 
 import android.os.AsyncTask;
 
+/**
+ * Generic file uploader abstract class. Methods to implement:
+ * {@link #onSuccess()} and {@link #onFail()}.
+ * 
+ * @author Rob Stein
+ * 
+ */
 public abstract class FileUploader {
 
 	String mUrl;
 	String mFilePath;
+	ContentType mContentType;
 
-	public FileUploader(String url, String filePath) {
+	public FileUploader(String url, String filePath, ContentType contentType) {
 		mUrl = url;
 		mFilePath = filePath;
+		mContentType = contentType;
 	}
 
 	public void uploadFile() {
 		(new FileUploaderTask()).execute();
 	}
-	
+
+	/**
+	 * Run on the UI if the file uploaded
+	 */
 	public abstract void onSuccess();
-	
+
+	/**
+	 * Run on the UI if the file upload failed
+	 */
 	public abstract void onFail();
 
 	/***
@@ -97,7 +112,7 @@ public abstract class FileUploader {
 				HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 				urlConnection.setDoOutput(true);
 				urlConnection.setRequestMethod("PUT");
-				urlConnection.addRequestProperty("Content-Type", "image/jpeg");
+				urlConnection.addRequestProperty("Content-Type", mContentType.toString());
 				urlConnection.setRequestProperty("Content-Length", "" + bytes.length);
 				// Write image data to server
 				DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());

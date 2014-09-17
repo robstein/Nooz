@@ -1,4 +1,4 @@
-package com.nooz.nooz.activity;
+package com.nooz.nooz.util;
 
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;

@@ -5,6 +5,12 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
+/**
+ * Expandable GridView to display stories on the profile layout.
+ * 
+ * @author Rob Stein
+ * 
+ */
 public class ExpandableGridView extends GridView {
 
 	boolean expanded = false;

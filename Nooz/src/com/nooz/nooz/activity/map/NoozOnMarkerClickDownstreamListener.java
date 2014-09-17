@@ -12,7 +12,7 @@ public class NoozOnMarkerClickDownstreamListener implements OnMarkerClickDownstr
 
 	Context mContext;
 
-	public NoozOnMarkerClickDownstreamListener(MapActivity mapActivity) {
+	public NoozOnMarkerClickDownstreamListener(Context mapActivity) {
 		mContext = mapActivity;
 	}
 

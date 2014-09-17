@@ -4,6 +4,12 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 
+/**
+ * TODO implement
+ * 
+ * @author Rob Stein
+ * 
+ */
 public class SquareRelativeLayout extends RelativeLayout {
 
 	public SquareRelativeLayout(Context context) {

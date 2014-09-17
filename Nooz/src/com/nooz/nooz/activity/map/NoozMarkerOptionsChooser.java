@@ -22,7 +22,7 @@ public class NoozMarkerOptionsChooser extends MarkerOptionsChooser {
 	private Context mContext;
 	private final Paint clusterPaint;
 
-	public NoozMarkerOptionsChooser(MapActivity mapActivity) {
+	public NoozMarkerOptionsChooser(Context mapActivity) {
 		mContext = mapActivity;
 
 		Resources res = mContext.getResources();
