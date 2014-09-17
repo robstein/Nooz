@@ -8,7 +8,6 @@ import java.util.WeakHashMap;
 
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -25,6 +24,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MotionEvent;
@@ -32,20 +32,25 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.SearchView;
+import android.widget.ScrollView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.android.volley.toolbox.NetworkImageView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
@@ -58,6 +63,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.nooz.nooz.R;
+import com.nooz.nooz.activity.ActivityGestureDetector;
 import com.nooz.nooz.activity.BaseLocationFragmentActivity;
 import com.nooz.nooz.activity.LoginActivity;
 import com.nooz.nooz.activity.article.ArticleLauncher;
@@ -65,7 +71,6 @@ import com.nooz.nooz.activity.profile.ProfileLauncher;
 import com.nooz.nooz.activity.settings.SettingsActivity;
 import com.nooz.nooz.mediarecorder.MediaRecorderActivity;
 import com.nooz.nooz.model.Story;
-import com.nooz.nooz.util.ActivityGestureDetector;
 import com.nooz.nooz.util.Alert;
 import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.util.Tools;
@@ -98,12 +103,23 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	RelativeLayout mMapContainer;
 	GoogleMap mMap;
 	TextView mRegion;
+	LinearLayout mMiddlebar;
+	TextView mButtonRelevant;
+	ImageView mButtonSettingsAndFilters;
+	TextView mButtonBreaking;
 	RelativeLayout mStoryFooter;
 	private PagerContainer mContainer;
 	PagerAdapter mFooterAdapter;
 	ViewPager mPager;
 	private ImageView mButtonRefresh;
 	private ImageView mButtonNewStory;
+
+	// Settings menu views
+	ScrollView mMenuSettings;
+	private NetworkImageView mIconProfile;
+	private TextView mButtonProfile;
+	private TextView mButtonMapFilters;
+	private TextView mButtonTopNooz;
 
 	// Filter menu views
 	LinearLayout mLayoutFilters;
@@ -119,13 +135,9 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	private ImageView mTogglerFilterArtsAndLife;
 
 	// Story Lists
-	@Deprecated
 	List<Story> mStories;
-	@Deprecated
 	WeakHashMap<Marker, Story> mMarkers;
-	@Deprecated
 	Integer mCurrentStory;
-	@Deprecated
 	Integer mResumeStory;
 
 	/* Other fields */
@@ -135,6 +147,13 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	 * we pass it along to that activity.
 	 */
 	String mUserId;
+
+	/**
+	 * Used to store zoom level on camera updates. Is compared with current zoom
+	 * level to determine if we should resize bubbles. Initialized to a
+	 * non-valid zoom value.
+	 */
+	private float mPreviousZoomLevel;
 
 	/**
 	 * Screen width in pixels measured in onCreate via
@@ -151,6 +170,11 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	 * various devices. Also used to compute the map width in meters.
 	 */
 	private int mScreenWidthInPixels;
+
+	/**
+	 * Updated on zoom changes. Is used to determine size of bubbles.
+	 */
+	private double mMapWidthInMeters;
 
 	/**
 	 * A FilterSettings instance representing the user's current search
@@ -180,12 +204,9 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	OnPageChangeListener mOnStorySwipe;
 
 	/**
-	 * Controls getting story data, clearing it, and opening new stories. The
-	 * story reservoir manages displayed stories, loaded stories, and the number
-	 * of total stories in order to display the correct stories on the map while
-	 * optimizing the number of calls sent to the server.
+	 * Controls getting story data, clearing it, and opening new stories.
 	 */
-	StoryReservoir mStoryReservoir;
+	StoryDataController mStoryDataController;
 
 	/**
 	 * Controls displaying menus. This variable cannot be initialized until
@@ -196,6 +217,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	private GestureDetector mGestureDetector;
 	private OnTouchListener mGestureListener;
 
+	Clusterkraf clusterkraf;
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
 	private String[] mDrawerText;
@@ -211,6 +233,7 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 		}
 
 		initOptionsMenuSpinner();
+		// initDrawer();
 		initFields();
 		initViews();
 		initViewListeners();
@@ -227,18 +250,59 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 		actionBar.setListNavigationCallbacks(mSpinnerAdapter, mOnNavigationListener);
 	}
 
+	private void initDrawer() {
+		mDrawerText = getResources().getStringArray(R.array.drawer_array_text);
+
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		mDrawerList = (ListView) findViewById(R.id.left_drawer);
+		// Set the adapter for the list view
+
+		mDrawerList.setAdapter(new BaseAdapter() {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if (convertView == null) {
+					LayoutInflater infalInflater = (LayoutInflater) mContext
+							.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+					convertView = infalInflater.inflate(R.layout.drawer_list_item, null);
+				}
+				TextView text = (TextView) convertView.findViewById(R.id.drawer_item_text);
+				text.setText(getItem(position));
+				return convertView;
+			}
+
+			@Override
+			public long getItemId(int position) {
+				return position;
+			}
+
+			@Override
+			public String getItem(int position) {
+				return mDrawerText[position];
+			}
+
+			@Override
+			public int getCount() {
+				return mDrawerText.length;
+			}
+		});
+		// Set the list's click listener
+		mDrawerList.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu items for use in the action bar
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.map_activity_actionbar, menu);
-
-		// Associate searchable configuration with the SearchView
-		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-		SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-		return true;
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	public boolean onOptionsItemSelected(android.view.MenuItem item) {
@@ -273,12 +337,13 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 		initStoryLists();
 		mCurrentStory = 0;
 		mResumeStory = 0;
+		mPreviousZoomLevel = -1.0f;
 		mFilterSettings = new FilterSettings();
 		mReceiver = new MapBroadcastReceiver();
 		mActivityOnClickListener = new MapActivityOnClickListener(this);
 		mFilterSettingsToggler = new FilterSettingsToggler(this);
 		mOnStorySwipe = new StoryAdapterPageChangeListener(this);
-		mStoryReservoir = new StoryReservoir(this);
+		mStoryDataController = new StoryDataController(this);
 		mMenuController = new MapMenusController(this);
 	}
 
@@ -297,12 +362,22 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 		// Main map views
 		mMapContainer = (RelativeLayout) findViewById(R.id.map_container);
 		mRegion = (TextView) findViewById(R.id.region);
+		mMiddlebar = (LinearLayout) findViewById(R.id.middlebar);
+		mButtonRelevant = (TextView) findViewById(R.id.button_relevant);
+		mButtonSettingsAndFilters = (ImageView) findViewById(R.id.button_settings);
+		mButtonBreaking = (TextView) findViewById(R.id.button_breaking);
 		mStoryFooter = (RelativeLayout) findViewById(R.id.story_footer);
 		mContainer = (PagerContainer) findViewById(R.id.pager_container);
 		mFooterAdapter = new StoryAdapter(this);
 		mPager = mContainer.getViewPager();
 		mButtonRefresh = (ImageView) findViewById(R.id.button_refresh);
 		mButtonNewStory = (ImageView) findViewById(R.id.button_new_story);
+
+		// Settings menu views
+		mMenuSettings = (ScrollView) findViewById(R.id.menu_settings);
+		mIconProfile = (NetworkImageView) findViewById(R.id.icon_profile);
+		mButtonProfile = (TextView) findViewById(R.id.button_profile);
+		mButtonMapFilters = (TextView) findViewById(R.id.button_map_filters);
 
 		// Filter menu views
 		mLayoutFilters = (LinearLayout) findViewById(R.id.filters_layout);
@@ -323,8 +398,15 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 		mRegion.setOnEditorActionListener(mRegionEditorDoneListener);
 		mRegion.setOnFocusChangeListener(mRegionFocusDoneListener);
 		mRegion.setOnClickListener(mActivityOnClickListener);
+		mButtonRelevant.setOnClickListener(mActivityOnClickListener);
+		mButtonSettingsAndFilters.setOnClickListener(mActivityOnClickListener);
+		mButtonBreaking.setOnClickListener(mActivityOnClickListener);
 		mButtonRefresh.setOnClickListener(mActivityOnClickListener);
 		mButtonNewStory.setOnClickListener(mActivityOnClickListener);
+
+		// Settings menu view listeners
+		mButtonProfile.setOnClickListener(mActivityOnClickListener);
+		mButtonMapFilters.setOnClickListener(mActivityOnClickListener);
 
 		// Filter menu view listeners
 		initGestureDetectionListeners();
@@ -406,10 +488,6 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 		return finish;
 	}
 
-	/**
-	 * Runs logout without checking for the intent boolean extra. This will only
-	 * work if called from inside the MapActivity.
-	 */
 	public void handleLogoutFromActionBar() {
 		handleLogout();
 	}
@@ -442,22 +520,20 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 
 		registerReceivers();
 		setUpMapIfNeeded();
-		setUpStoryReservoir();
-		initUserData();
+		getUserData();
 		restoreSettings();
-		getInitialStories();
+		mStoryDataController.clearAndPopulateStories();
+		mIconProfile.setImageUrl(GlobalConstant.PROFILE_URL + mUserId, mImageLoader);
 	}
 
-	private void setUpStoryReservoir() {
-		mStoryReservoir.setMap(mMap);
-	}
-
-	private void getInitialStories() {
-		mStoryReservoir.getInitialStories();
-	}
-
-	private void initUserData() {
+	private void getUserData() {
+		// SharedPreferences userData =
+		// mContext.getSharedPreferences("UserData", Context.MODE_PRIVATE);
+		// mButtonProfile.setText(userData.getString("user_name", ""));
+		// mUserId = userData.getString("userid", null);
+		mButtonProfile.setText(mNoozService.getUserName());
 		mUserId = mNoozService.getUserId();
+
 	}
 
 	private void restoreSettings() {
@@ -495,7 +571,16 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	protected void onPause() {
 		unRegisterReceivers();
 		saveSettings();
-		mStoryReservoir.onPause();
+
+		/*
+		 * When pausing, we clear all of the clusterkraf's markers in order to
+		 * conserve memory. When (if) we resume, we can rebuild from where we
+		 * left off.
+		 */
+		if (clusterkraf != null) {
+			clusterkraf.clear();
+			clusterkraf = null;
+		}
 
 		super.onPause();
 	}
@@ -538,41 +623,42 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 			// Check if we were successful in obtaining the map.
 			if (mMap != null) {
 				// The Map is verified. It is now safe to manipulate the map.
-				setUpMap();
+				setUpMapAndInitClusterkraf();
 			}
 		} else {
-			setUpMap();
+			setUpMapAndInitClusterkraf();
 		}
 	}
 
-	private void setUpMap() {
+	private void setUpMapAndInitClusterkraf() {
 		mMap.setMyLocationEnabled(false);
 		UiSettings uiSettings = mMap.getUiSettings();
 		uiSettings.setZoomControlsEnabled(true);
-
-		// mMap.setOnMarkerClickListener(new OnMarkerClickListener() {
-		// @Override
-		// public boolean onMarkerClick(Marker marker) {
-		// ArticleLauncher.openStory(mContext, mMarkers.get(marker));
-		// return false; // Don't show info-window
-		// }
-		// });
+		mMap.setOnMarkerClickListener(new OnMarkerClickListener() {
+			@Override
+			public boolean onMarkerClick(Marker marker) {
+				ArticleLauncher.openStory(mContext, mMarkers.get(marker));
+				return false; // Don't show info-window
+			}
+		});
+		// Init Clusterkraf
+		initClusterkraf();
 	}
 
 	/* ***** MAP SETUP END ***** */
 
 	/* ***** BUBBLES BEGIN ***** */
 
-	@Deprecated
 	void drawCirlesOnMap() {
 		// int i = 0;
 		// for (Story s : mStories) {
 		// addMarker(s);
 		// i++;
 		// }
+		buildClusterkrafInputPoints();
+		initClusterkraf();
 	}
 
-	@Deprecated
 	private void addMarker(Story s) {
 		Marker marker = mMap.addMarker(new MarkerOptions().position(new LatLng(s.lat, s.lng)).anchor(.5f, .5f)
 				.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_bubble_cluster)));
@@ -580,6 +666,45 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	}
 
 	ArrayList<InputPoint> mClusterkrafInputPoints;
+
+	private void buildClusterkrafInputPoints() {
+		mClusterkrafInputPoints = new ArrayList<InputPoint>(mStories.size());
+		for (Story s : mStories) {
+			mClusterkrafInputPoints.add(new InputPoint(new LatLng(s.lat, s.lng), s));
+		}
+	}
+
+	private void initClusterkraf() {
+		if (mMap != null && mClusterkrafInputPoints != null && mClusterkrafInputPoints.size() > 0) {
+			Options options = new Options();
+			applyOptionsToClusterkrafOptions(options);
+			this.clusterkraf = new Clusterkraf(mMap, options, mClusterkrafInputPoints,
+					new CustomOnCameraChangeCallable() {
+						@Override
+						public void onCameraChange() {
+							mStoryDataController.clearAndPopulateStories();
+						}
+					});
+		}
+	}
+
+	private void applyOptionsToClusterkrafOptions(Options options) {
+		options.setTransitionInterpolator(new AccelerateDecelerateInterpolator());
+		options.setPixelDistanceToJoinCluster((int) Tools.dipToPixels(this, 72));
+
+		options.setZoomToBoundsAnimationDuration(500);
+		options.setShowInfoWindowAnimationDuration(500);
+		options.setExpandBoundsFactor(0.5d);
+		options.setSinglePointClickBehavior(SinglePointClickBehavior.NO_OP);
+		options.setClusterClickBehavior(ClusterClickBehavior.ZOOM_TO_BOUNDS);
+		options.setClusterInfoWindowClickBehavior(ClusterInfoWindowClickBehavior.ZOOM_TO_BOUNDS);
+
+		options.setZoomToBoundsPadding(getResources().getDrawable(R.drawable.ic_map_bubble_cluster)
+				.getIntrinsicHeight());
+		options.setMarkerOptionsChooser(new NoozMarkerOptionsChooser(this));
+		options.setOnMarkerClickDownstreamListener(new NoozOnMarkerClickDownstreamListener(this));
+		options.setProcessingListener(this);
+	}
 
 	private DelayedIndeterminateProgressBarRunnable delayedIndeterminateProgressBarRunnable;
 	private final Handler handler = new Handler();
@@ -615,6 +740,8 @@ public class MapActivity extends BaseLocationFragmentActivity implements Process
 	public void onBackPressed() {
 		if (mMenuController.filtersMenuIsOpen) {
 			mMenuController.hideFiltersLayout();
+		} else if (mMenuController.settingsMenuIsOpen) {
+			mMenuController.hideOrShowSettingsMenu();
 		} else {
 			super.onBackPressed();
 		}

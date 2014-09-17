@@ -1,11 +1,11 @@
 package com.nooz.nooz.activity.map;
 
+import com.nooz.nooz.util.GlobalConstant;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-
-import com.nooz.nooz.util.GlobalConstant;
 
 public class MapBroadcastReceiver extends BroadcastReceiver {
 
@@ -14,9 +14,9 @@ public class MapBroadcastReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		String intentAction = intent.getAction();
-		if (GlobalConstant.QUADTREE_AND_TOP_STORIES_LOADED_ACTION.equals(intentAction)) {
+		if (GlobalConstant.STORIES_LOADED_ACTION.equals(intentAction)) {
 			try {
-				((MapActivity) context).mStoryReservoir.getInitialStoriesCallback();
+				((MapActivity) context).mStoryDataController.getStoriesCallBack();
 			} catch (Exception e) {
 				Log.e(TAG, "There was a problem in getStoriesCallBack: " + e.getMessage());
 			}

@@ -2,13 +2,11 @@ package com.nooz.nooz.activity.map;
 
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.nooz.nooz.model.Story;
 
-@Deprecated
 public class StoryDataController {
 
 	private MapActivity mC;
@@ -17,13 +15,11 @@ public class StoryDataController {
 		this.mC = mapActivity;
 	}
 
-	@Deprecated
 	void clearAndPopulateStories() {
 		LatLngBounds bounds = mC.mMap.getProjection().getVisibleRegion().latLngBounds;
 		mC.getNoozService().getAllStories(bounds, mC.mFilterSettings, mC.mMenuController.mCurrentSearchType, null);
 	}
 
-	@Deprecated
 	void getStoriesCallBack() {
 		List<Story> newStories = mC.getNoozService().getLoadedStories();
 		if (!newStories.equals(mC.mStories)) {
@@ -44,7 +40,6 @@ public class StoryDataController {
 	 * 
 	 * @see #clearMap()
 	 */
-	@Deprecated
 	void clearStories() {
 		// Reset index
 		mC.mResumeStory = 0;
@@ -58,11 +53,9 @@ public class StoryDataController {
 	}
 
 	/**
-	 * 
 	 * Removes each of the Circle and GroundOverlay objects from the Google Map,
 	 * and then clears all elements in the Circles and GroundOverlay Lists.
 	 **/
-	@Deprecated
 	private void clearMap() {
 		for (Entry<Marker, Story> entry : mC.mMarkers.entrySet()) {
 			entry.getKey().remove();
@@ -72,15 +65,11 @@ public class StoryDataController {
 		clearClusterkraf();
 	}
 
-	/**
-	 * {@link Deprecated}
-	 */
-	@Deprecated
 	private void clearClusterkraf() {
-		// if (mC.clusterkraf != null) {
-		// mC.clusterkraf.clear();
-		// mC.clusterkraf = null;
-		// }
+		if (mC.clusterkraf != null) {
+			mC.clusterkraf.clear();
+			mC.clusterkraf = null;
+		}
 	}
 
 }

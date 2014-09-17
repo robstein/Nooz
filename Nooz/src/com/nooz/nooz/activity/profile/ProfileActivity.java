@@ -16,9 +16,9 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.nooz.nooz.R;
+import com.nooz.nooz.activity.ActivityGestureDetector;
 import com.nooz.nooz.activity.BaseFragmentActivity;
 import com.nooz.nooz.model.ProfileInfo;
-import com.nooz.nooz.util.ActivityGestureDetector;
 import com.nooz.nooz.util.GlobalConstant;
 import com.nooz.nooz.widget.ExpandableGridView;
 import com.soundcloud.android.crop.Crop;

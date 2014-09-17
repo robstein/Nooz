@@ -9,13 +9,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
-/**
- * View for displaying audio intensity feedback (which replaces the camera
- * preview).
- * 
- * @author Rob Stein
- * 
- */
 public class AudioIntensityFeedback extends View {
 
 	private Paint mCenterCirclePaint;
@@ -41,7 +34,7 @@ public class AudioIntensityFeedback extends View {
 		init();
 		// TODO Auto-generated constructor stub
 	}
-
+	
 	private void init() {
 		mRadius = -1;
 		// Set up the paint for the center circle
@@ -52,43 +45,45 @@ public class AudioIntensityFeedback extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		canvas.drawCircle(mWidth / 2, mHeight / 2, (float) mRadius, mCenterCirclePaint);
+		canvas.drawCircle(mWidth/2, mHeight/2, (float) mRadius, mCenterCirclePaint);
 	}
-
+	
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		mWidth = MeasureSpec.getSize(widthMeasureSpec);
 		mHeight = MeasureSpec.getSize(heightMeasureSpec);
 	}
-
+	
 	public void reportAmplitude(int amplitude) {
-		double db = 20.0 * Math.log10(amplitude / 10);
-
+		double db = 20.0 * Math.log10(amplitude/10);
+		
 		final Handler handler = new Handler();
 		final long start = SystemClock.uptimeMillis();
 		final double startPoint = mLastRadius;
 		final double endPoint = db * 3;
 		final long duration = 250;
-
+		
 		final DecelerateInterpolator interpolator = new DecelerateInterpolator();
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
 				long elapsed = SystemClock.uptimeMillis() - start;
 				float t = interpolator.getInterpolation((float) elapsed / duration);
-
+				
 				mRadius = t * endPoint + (1 - t) * startPoint;
 
 				if (t < 1.0) {
 					// Post again 16ms later.
 					handler.postDelayed(this, 16);
 				} else {
-
+					
 				}
 			}
 		});
-
+		
+		
+		
 		mLastRadius = db * 3;
 		invalidate();
 	}

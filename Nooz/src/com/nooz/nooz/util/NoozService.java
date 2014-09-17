@@ -34,7 +34,6 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.nooz.nooz.activity.map.FilterSettings;
 import com.nooz.nooz.activity.map.MapActivity;
-import com.nooz.nooz.activity.map.QuadTree;
 import com.nooz.nooz.model.Comment;
 import com.nooz.nooz.model.ProfileInfo;
 import com.nooz.nooz.model.Story;
@@ -655,69 +654,6 @@ public class NoozService {
 		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("postComment", "true"));
 		mTableComments.insert(newComment, parameters, callback);
-	}
-
-	private QuadTree mLoadedRealNumStories;
-
-	/**
-	 * Map search 2. Loads some stories and a quadtree.
-	 * 
-	 * @param bounds
-	 *            boundaries of the map
-	 * @param filterSettings
-	 *            filter settings
-	 * @param currentSearchType
-	 *            relevant, breaking, or profile
-	 */
-	public void searchNoozInRegionAndGetStoryCountQuadTree(LatLngBounds bounds, FilterSettings filterSettings,
-			SearchType currentSearchType) {
-		JsonObject body = new JsonObject();
-		body.addProperty("searchType", currentSearchType.toString());
-		body.addProperty("user_id", mClient.getCurrentUser().getUserId());
-		body.addProperty("northeastLat", bounds.northeast.latitude);
-		body.addProperty("northeastLng", bounds.northeast.longitude);
-		body.addProperty("southwestLat", bounds.southwest.latitude);
-		body.addProperty("southwestLng", bounds.southwest.longitude);
-		body.addProperty("defaultMedium", filterSettings.DefaultMedium);
-		body.addProperty("audio", filterSettings.Audio);
-		body.addProperty("picture", filterSettings.Picture);
-		body.addProperty("video", filterSettings.Video);
-		body.addProperty("defaultCategory", filterSettings.DefaultCategory);
-		body.addProperty("people", filterSettings.People);
-		body.addProperty("community", filterSettings.Community);
-		body.addProperty("sports", filterSettings.Sports);
-		body.addProperty("food", filterSettings.Food);
-		body.addProperty("publicSaftey", filterSettings.PublicSafety);
-		body.addProperty("artsAndLife", filterSettings.ArtsAndLife);
-		mClient.invokeApi("getnooz2", body, new ApiJsonOperationCallback() {
-
-			@Override
-			public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
-				if (exception == null) {
-
-					// TODO implement this, separate quad tree and stories.
-
-					Type listType = new TypeToken<List<Story>>() {
-					}.getType();
-					List<Story> stories = new Gson().fromJson(jsonObject, listType);
-
-					QuadTree realNumStories = null;
-					mLoadedStories = stories;
-					mLoadedRealNumStories = realNumStories;
-					Intent broadcast = new Intent();
-					broadcast.setAction(GlobalConstant.QUADTREE_AND_TOP_STORIES_LOADED_ACTION);
-					mContext.sendBroadcast(broadcast);
-				} else {
-					Log.e(TAG, "There was an error retrieving stories: " + exception.getMessage());
-				}
-			}
-
-		});
-
-	}
-
-	public QuadTree getLoadedRealStoryCount() {
-		return mLoadedRealNumStories;
 	}
 
 }
