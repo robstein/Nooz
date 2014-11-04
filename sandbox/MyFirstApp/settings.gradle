@@ -1,1 +1,2 @@
 include ':app', ':app/libs/Parse-1.7.0'
+include ':iconicDroid'

@@ -1,9 +1,13 @@
 package com.example.matt.myfirstapp;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
@@ -14,8 +18,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.atermenji.android.iconicdroid.IconicFontDrawable;
+import com.atermenji.android.iconicdroid.icon.EntypoIcon;
+import com.atermenji.android.iconicdroid.icon.EntypoSocialIcon;
 import com.parse.LogInCallback;
 import com.parse.ParseUser;
+import com.parse.RequestPasswordResetCallback;
 import com.parse.SignUpCallback;
 import com.parse.ParseException;
 
@@ -36,14 +44,17 @@ public class AuthenticationFragment extends Fragment
 
     private View m_rootView;
     private OnAuthenticationFragmentInteractionListener m_listener;
+    private ProgressDialog loadingDialog;
 
     public AuthenticationFragment() {
-        // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        loadingDialog = new ProgressDialog(getActivity());
+        loadingDialog.setIndeterminate(true);
     }
 
     @Override
@@ -52,17 +63,11 @@ public class AuthenticationFragment extends Fragment
         // Inflate the layout for this fragment
         m_rootView = inflater.inflate(R.layout.fragment_authentication, container, false);
 
-        Button loginButton = (Button) m_rootView.findViewById(R.id.login_Button);
-        loginButton.setOnClickListener(this);
+        setOnClickListeners();
 
-        Button signupButton = (Button) m_rootView.findViewById(R.id.signup_Button);
-        signupButton.setOnClickListener(this);
+        setEntypoIcons();
 
-        TextView logInText = (TextView) m_rootView.findViewById(R.id.logIn_Text);
-        logInText.setOnClickListener(this);
-
-        TextView createLoginText = (TextView) m_rootView.findViewById(R.id.createLogin_Text);
-        createLoginText.setOnClickListener(this);
+        setTypefaces();
 
         return m_rootView;
     }
@@ -94,6 +99,70 @@ public class AuthenticationFragment extends Fragment
         public void onAuthenticationConfirmed();
     }
 
+    private void setOnClickListeners() {
+        Button loginButton = (Button) m_rootView.findViewById(R.id.login_Button);
+        loginButton.setOnClickListener(this);
+
+        Button signupButton = (Button) m_rootView.findViewById(R.id.signup_Button);
+        signupButton.setOnClickListener(this);
+
+        TextView forgotPasswordText = (TextView) m_rootView.findViewById(R.id.forgotPassword_Text);
+        forgotPasswordText.setOnClickListener(this);
+
+        TextView logInText = (TextView) m_rootView.findViewById(R.id.logIn_Text);
+        logInText.setOnClickListener(this);
+
+        TextView createLoginText = (TextView) m_rootView.findViewById(R.id.createLogin_Text);
+        createLoginText.setOnClickListener(this);
+    }
+
+    private void setEntypoIcons() {
+        IconicFontDrawable nameIcon = new IconicFontDrawable(getActivity());
+        nameIcon.setIcon(EntypoIcon.USER);
+        nameIcon.setIconColor(Color.GRAY);
+        m_rootView.findViewById(R.id.nameIcon_View).setBackground(nameIcon);
+
+        IconicFontDrawable emailIcon = new IconicFontDrawable(getActivity());
+        emailIcon.setIcon(EntypoIcon.MAIL);
+        emailIcon.setIconColor(Color.GRAY);
+        m_rootView.findViewById(R.id.emailIcon_View).setBackground(emailIcon);
+
+        IconicFontDrawable passwordIcon = new IconicFontDrawable(getActivity());
+        passwordIcon.setIcon(EntypoIcon.KEY);
+        passwordIcon.setIconColor(Color.GRAY);
+        m_rootView.findViewById(R.id.passwordIcon_View).setBackground(passwordIcon);
+    }
+
+    private void setTypefaces() {
+        String assetPath = "Lato-Regular.ttf";
+        Typeface font;
+        try {
+            font = Typeface.createFromAsset(getActivity().getAssets(), assetPath);
+        } catch (Exception e) {
+            Log.e(LOG, "Could not get typeface '" + assetPath
+                + "' because " + e.getMessage());
+            return;
+        }
+        TextView txt = (TextView) m_rootView.findViewById(R.id.name_EditText);
+        txt.setTypeface(font);
+        txt = (TextView) m_rootView.findViewById(R.id.email_EditText);
+        txt.setTypeface(font);
+        txt = (TextView) m_rootView.findViewById(R.id.password_EditText);
+        txt.setTypeface(font);
+        txt = (TextView) m_rootView.findViewById(R.id.login_Button);
+        txt.setTypeface(font);
+        txt = (TextView) m_rootView.findViewById(R.id.signup_Button);
+        txt.setTypeface(font);
+        txt = (TextView) m_rootView.findViewById(R.id.forgotPassword_Text);
+        txt.setTypeface(font);
+        txt = (TextView) m_rootView.findViewById(R.id.createLogin_Text);
+        txt.setTypeface(font);
+        txt = (TextView) m_rootView.findViewById(R.id.haveAnAccount_Text);
+        txt.setTypeface(font);
+        txt = (TextView) m_rootView.findViewById(R.id.logIn_Text);
+        txt.setTypeface(font);
+    }
+
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.login_Button:
@@ -103,7 +172,7 @@ public class AuthenticationFragment extends Fragment
                 signupCallback();
                 break;
             case R.id.forgotPassword_Text:
-                // TODO: INSERT FUNCTION
+                forgotPasswordCallback();
                 break;
             case R.id.createLogin_Text:
                 switchToView(SIGNUP);
@@ -160,7 +229,8 @@ public class AuthenticationFragment extends Fragment
      * Called when the user clicks the Login button
      */
     public void loginCallback() {
-        final ProgressDialog loadingDialog = ProgressDialog.show(getActivity(), "", "Logging in...", true);
+        loadingDialog.setMessage("Logging in...");
+        loadingDialog.show();
         ParseUser.logInInBackground(((EditText) m_rootView.findViewById(R.id.email_EditText)).getText().toString(),
                                     ((EditText) m_rootView.findViewById(R.id.password_EditText)).getText().toString(),
                                     new LogInCallback() {
@@ -183,14 +253,72 @@ public class AuthenticationFragment extends Fragment
     }
 
     /**
+     * Called when the user clicks the "Forgot password" text
+     */
+    public void forgotPasswordCallback() {
+        (new DialogFragment() {
+
+            @Override
+            public void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+            }
+
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                final View thisDialogView = inflater.inflate(R.layout.dialog_forgotpassword, null);
+
+                builder.setTitle(R.string.reset_password)
+                        .setView(thisDialogView)
+                        .setPositiveButton(R.string.reset_password, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                sendPasswordReset(((EditText)thisDialogView.findViewById(R.id.pwemail_EditText)).getText().toString());
+                                loadingDialog.setMessage("Loading...");
+                                loadingDialog.show();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener(){
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            }
+                        });
+                return builder.create();
+            }
+
+        }).show(getFragmentManager(), "login_failed");
+    }
+
+    public void sendPasswordReset( String email ){
+        ParseUser.requestPasswordResetInBackground(email,
+                                                   new RequestPasswordResetCallback() {
+            public void done(ParseException e) {
+                loadingDialog.dismiss();
+                if (e == null) {
+                    NotificationDialogFragment notification = new NotificationDialogFragment();
+                    notification.setMessage("An email was sent with instructions on how to reset your password.");
+                    notification.show(getFragmentManager(), "resetPassword_success");
+                } else {
+                    NotificationDialogFragment notification = new NotificationDialogFragment();
+                    notification.setMessage("Email invalid.");
+                    notification.show(getFragmentManager(), "resetPassword_failed");
+                }
+            }
+        });
+    }
+
+    /**
      * Switches to a designated view
      */
-    public void switchToView( int viewID  ) {
+    public void switchToView( int viewID ) {
         m_rootView.findViewById(R.id.login_Button).setVisibility(viewID == SIGNUP ? View.GONE : View.VISIBLE);
         m_rootView.findViewById(R.id.forgotPassword_Text).setVisibility(viewID == SIGNUP ? View.GONE : View.VISIBLE);
         m_rootView.findViewById(R.id.createLogin_Text).setVisibility(viewID == SIGNUP ? View.GONE : View.VISIBLE);
 
-        m_rootView.findViewById(R.id.name_EditText).setVisibility(viewID == SIGNUP ? View.VISIBLE : View.GONE);
+        m_rootView.findViewById(R.id.nameEditText_Layout).setVisibility(viewID == SIGNUP ? View.VISIBLE : View.GONE);
+        m_rootView.findViewById(R.id.line_View).setVisibility(viewID == SIGNUP ? View.VISIBLE : View.GONE);
+        m_rootView.findViewById(R.id.space_View).setVisibility(viewID == SIGNUP ? View.GONE : View.VISIBLE);
         m_rootView.findViewById(R.id.signup_Button).setVisibility(viewID == SIGNUP ? View.VISIBLE : View.GONE);
         m_rootView.findViewById(R.id.logInText_Layout).setVisibility(viewID == SIGNUP ? View.VISIBLE : View.GONE);
     }

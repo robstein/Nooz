@@ -10,6 +10,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/app/libs/Parse-1.7.0" />
+            <option value="$PROJECT_DIR$/iconicDroid" />
           </set>
         </option>
       </GradleProjectSettings>

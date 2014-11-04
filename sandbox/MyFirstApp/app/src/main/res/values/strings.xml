@@ -15,11 +15,14 @@
     <string name="login">LOGIN</string>
     <string name="logout">LOGOUT</string>
     <string name="signup">SIGN UP</string>
-    <string name="forgot_password">Forgot password?</string>
-    <string name="create_login">Don\'t have an account?</string>
+    <string name="forgot_password"><u><b>Forgot password?</b></u></string>
+    <string name="create_login"><u><b>Don\'t have an account?</b></u></string>
     <string name="have_an_account">Have an account?</string>
-    <string name="logIn">Log In</string>
+    <string name="logIn"><u><b>Log In</b></u></string>
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
     <string name="no_message">No message received</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="enter_email">Please enter your email:</string>
 
 </resources>
