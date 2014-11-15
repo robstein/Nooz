@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="category_color_black">#FF222222</color>
+    <color name="category_people">#FF32B4FF</color>
+    <color name="category_community">#FF377DEC</color>
+    <color name="category_sports">#FFE84C3D</color>
+    <color name="category_food">#FF3CB34B</color>
+    <color name="category_public_safety">#FFED7B22</color>
+    <color name="category_arts_and_life">#FF9A55BF</color>
+    <color name="category_sports_wrong">#FFE94D3E</color>
+    <color name="almost_black">#FF222222</color>
+    <color name="footer_story_item_highlighted_background_normal">#38000000</color>
+    <color name="footer_story_item_highlighted_background_focused">#10000000</color>
+    <color name="footer_story_item_highlighted_background_pressed">#10000000</color>
+    <color name="footer_story_item_unhighlighted_background_normal">#C0000000</color>
+    <color name="footer_story_item_unhighlighted_background_focused">#C0000000</color>
+    <color name="footer_story_item_unhighlighted_background_pressed">#C0000000</color>
+    <color name="settings_button_background_normal">#00FFFFFF</color>
+    <color name="settings_button_background_pressed">#60FFFFFF</color>
+    <color name="settings_button_background_focused">#60FFFFFF</color>
+    <color name="actionbar_map_text">#222222</color>
+    <color name="actionbar_article_text">#FFFFFF</color>
+
+</resources>

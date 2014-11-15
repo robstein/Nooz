@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.nooz.nooz"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="61dp"
+        android:background="#FFF"
+        android:orientation="horizontal"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:weightSum="1" >
+
+        <ImageView
+            android:id="@+id/btn_new_article_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="20dp"
+            android:contentDescription="Cancel"
+            android:src="@drawable/cancel_new_article" />
+
+        <Spinner
+            android:id="@+id/spinner_choose_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="24dp"
+            android:layout_weight=".6"
+            android:background="@drawable/text_button"
+            android:gravity="center"
+            android:padding="9dp" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="61dp" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <com.nooz.nooz.widget.SquareImageView
+                android:id="@+id/new_article_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="centerCrop"
+                android:src="@drawable/example_article_picture" />
+
+            <com.nooz.nooz.widget.EditText
+                android:id="@+id/input_headline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/new_article_image"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/edittext_headline"
+                android:ellipsize="end"
+                android:hint="Enter a headline..."
+                android:inputType="textCapWords"
+                android:lines="1"
+                android:padding="20dp"
+                android:scrollHorizontally="true"
+                android:textColor="#FEFEFE"
+                android:textColorHint="#FEFEFE"
+                android:textSize="28dp"
+                android:textStyle="bold"
+                custom:typeface="Bariol_Regular.otf" />
+
+            <LinearLayout
+                android:id="@+id/layout_story_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/new_article_image"
+                android:layout_margin="0dp"
+                android:background="#FFF"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingBottom="5dp"
+                android:paddingTop="5dp" >
+
+                <com.nooz.nooz.widget.EditText
+                    android:id="@+id/input_caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/edittext_rounded_border"
+                    android:hint="Enter a caption..."
+                    android:inputType="textCapSentences"
+                    android:padding="10dp"
+                    android:singleLine="true"
+                    custom:typeface="Bariol_Regular.otf" />
+
+                <com.nooz.nooz.widget.EditText
+                    android:id="@+id/input_keywords"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="0dp"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/edittext_rounded_border"
+                    android:hint="Enter keywords..."
+                    android:padding="10dp"
+                    android:singleLine="true"
+                    custom:typeface="Bariol_Regular.otf" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_weight="9"
+                    android:background="#FFF"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp"
+                    android:weightSum="1" >
+
+                    <ImageView
+                        android:id="@+id/btn_share_facebook"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="7dp"
+                        android:layout_weight=".233"
+                        android:clickable="true"
+                        android:contentDescription="Share to Facebook"
+                        android:padding="3dp"
+                        android:src="@drawable/share_facebook" />
+
+                    <ImageView
+                        android:id="@+id/btn_share_twitter"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="7dp"
+                        android:layout_weight=".233"
+                        android:clickable="true"
+                        android:contentDescription="Share to Twitter"
+                        android:padding="3dp"
+                        android:src="@drawable/share_twitter" />
+
+                    <ImageView
+                        android:id="@+id/btn_share_tumblr"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="7dp"
+                        android:layout_weight=".233"
+                        android:clickable="true"
+                        android:contentDescription="Share to Tumblr"
+                        android:padding="3dp"
+                        android:src="@drawable/share_tumblr" />
+
+                    <com.nooz.nooz.widget.TextView
+                        android:id="@+id/btn_break_post"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="24dp"
+                        android:layout_weight=".3"
+                        android:background="@drawable/text_button"
+                        android:clickable="true"
+                        android:gravity="center_horizontal"
+                        android:onClick="onClick"
+                        android:paddingBottom="9dp"
+                        android:paddingLeft="19dp"
+                        android:paddingRight="19dp"
+                        android:paddingTop="9dp"
+                        android:text="BREAK!"
+                        android:textAllCaps="true"
+                        android:textColor="#222222"
+                        android:textSize="20dp"
+                        android:textStyle="bold"
+                        custom:typeface="Bariol_Regular.otf" />
+                </LinearLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

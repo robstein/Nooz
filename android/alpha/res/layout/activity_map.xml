@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.nooz.nooz"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:weightSum="1" >
+
+            <RelativeLayout
+                android:id="@+id/map_container"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".71" >
+
+                <include layout="@layout/layout_map" />
+
+                <!-- Dummy item to prevent AutoCompleteTextView from receiving focus -->
+
+                <LinearLayout
+                    android:layout_width="0px"
+                    android:layout_height="0px"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true" />
+
+                <com.nooz.nooz.widget.EditText
+                    android:id="@+id/region"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/region_label"
+                    android:clickable="true"
+                    android:gravity="center_horizontal"
+                    android:hint="SEARCH CITY"
+                    android:inputType="textCapCharacters"
+                    android:nextFocusLeft="@id/region"
+                    android:nextFocusUp="@id/region"
+                    android:onClick="onClick"
+                    android:paddingBottom="9dp"
+                    android:paddingLeft="18dp"
+                    android:paddingRight="18dp"
+                    android:paddingTop="9dp"
+                    android:textAllCaps="true"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    custom:typeface="Bariol_Regular.otf" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/middlebar"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_margin="0dp"
+                android:layout_weight=".1"
+                android:background="#FFF"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingBottom="5dp"
+                android:paddingTop="5dp"
+                android:visibility="gone" >
+
+                <com.nooz.nooz.widget.TextView
+                    android:id="@+id/button_relevant"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:paddingRight="25dp"
+                    android:text="@string/relevant"
+                    android:textColor="#000"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    custom:typeface="Bariol_Regular.otf" />
+
+                <ImageView
+                    android:id="@+id/button_settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:contentDescription="SettingsAndFilters"
+                    android:src="@drawable/selector_button_settings" />
+
+                <com.nooz.nooz.widget.TextView
+                    android:id="@+id/button_breaking"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="25dp"
+                    android:text="@string/breaking"
+                    android:textColor="#979797"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    custom:typeface="Bariol_Regular.otf" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/story_footer"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".29"
+                android:background="#FFDDDDDD"
+                android:paddingTop="4dp" >
+
+                <com.nooz.nooz.widget.PagerContainer
+                    android:id="@+id/pager_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="0dp"
+                    android:background="#FFDDDDDD"
+                    android:padding="0dp" >
+
+                    <android.support.v4.view.ViewPager
+                        android:id="@+id/view_pager"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_margin="0dp"
+                        android:padding="0dp" />
+                </com.nooz.nooz.widget.PagerContainer>
+
+                <ImageView
+                    android:id="@+id/button_refresh"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerInParent="true"
+                    android:clickable="true"
+                    android:contentDescription="Refresh"
+                    android:src="@drawable/refresh"
+                    android:visibility="gone" />
+
+                <ImageView
+                    android:id="@+id/button_new_story"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/selector_button_new_story"
+                    android:clickable="true"
+                    android:visibility="gone"
+                    android:contentDescription="NewStory" />
+            </RelativeLayout>
+
+            <include layout="@layout/layout_settings" />
+        </LinearLayout>
+
+        <include layout="@layout/layout_filter" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#111"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp" />
+
+</android.support.v4.widget.DrawerLayout>
