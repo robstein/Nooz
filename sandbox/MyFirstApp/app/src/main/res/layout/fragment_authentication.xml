@@ -17,86 +17,24 @@
         android:layout_weight="25"
         android:src="@drawable/ic_auth_wordmark"/>
 
-    <View android:id="@+id/space_View"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="45dp" />
+        android:layout_height="140dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:padding="10dp"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:background="@drawable/sh_auth_box">
+        <View android:id="@+id/entryBox_View"
+            android:layout_width="match_parent"
+            android:layout_height="95dp"
+            android:layout_alignParentBottom="true"
+            android:transformPivotY="95dp"
+            android:background="@drawable/sh_auth_box"/>
 
-        <LinearLayout android:id="@+id/nameEditText_Layout"
+        <LinearLayout android:id="@+id/passwordEditText_Layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:visibility="gone">
-
-            <View android:id="@+id/nameIcon_View"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_weight="0" />
-
-            <View
-                android:layout_width="15dp"
-                android:layout_height="match_parent" />
-
-            <EditText android:id="@+id/name_EditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:background="@android:color/transparent"
-                android:hint="@string/name"
-                android:inputType="textCapWords"/>
-
-        </LinearLayout>
-
-        <View android:id="@+id/line_View"
-            android:layout_width="match_parent"
-            android:layout_height="15dp"
-            android:background="@drawable/sh_auth_line"
-            android:visibility="gone"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:visibility="visible">
-
-            <View android:id="@+id/emailIcon_View"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_weight="0" />
-
-            <View
-                android:layout_width="15dp"
-                android:layout_height="match_parent" />
-
-            <EditText android:id="@+id/email_EditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:background="@android:color/transparent"
-            android:hint="@string/email"
-            android:inputType="textEmailAddress"/>
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="15dp"
-            android:background="@drawable/sh_auth_line"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:paddingBottom="10dp"
+            android:layout_alignParentBottom="true"
             android:orientation="horizontal"
             android:gravity="center"
             android:visibility="visible">
@@ -117,60 +55,145 @@
                 android:background="@android:color/transparent"
                 android:hint="@string/password"
                 android:inputType="textPassword"/>
-
         </LinearLayout>
 
-    </LinearLayout>
+        <View android:id="@+id/bottomLine_View"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_above="@id/passwordEditText_Layout"
+            android:background="@drawable/sh_auth_line"/>
+
+        <LinearLayout android:id="@+id/emailEditText_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_above="@id/bottomLine_View"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="visible">
+
+            <View android:id="@+id/emailIcon_View"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_weight="0" />
+
+            <View
+                android:layout_width="15dp"
+                android:layout_height="match_parent" />
+
+            <EditText android:id="@+id/email_EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:background="@android:color/transparent"
+                android:hint="@string/email"
+                android:inputType="textEmailAddress"/>
+        </LinearLayout>
+
+        <View android:id="@+id/topLine_View"
+            android:layout_width="match_parent"
+            android:layout_height="15dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_above="@id/emailEditText_Layout"
+            android:background="@drawable/sh_auth_line"
+            android:visibility="gone"/>
+
+        <LinearLayout android:id="@+id/nameEditText_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:paddingTop="10dp"
+            android:layout_above="@id/topLine_View"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <View android:id="@+id/nameIcon_View"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_weight="0" />
+
+            <View
+                android:layout_width="15dp"
+                android:layout_height="match_parent" />
+
+            <EditText android:id="@+id/name_EditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:background="@android:color/transparent"
+                android:hint="@string/name"
+                android:inputType="textCapWords"/>
+        </LinearLayout>
+    </RelativeLayout>
 
     <View
         android:layout_height="0dp"
         android:layout_width="match_parent"
         android:layout_weight="2"/>
 
-    <Button android:id="@+id/login_Button"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:text="@string/login"
-        android:textColor="@color/white"
-        android:visibility="visible"
-        android:background="@drawable/sh_auth_button"/>
+        android:layout_height="45dp">
 
-    <Button android:id="@+id/signup_Button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:text="@string/signup"
-        android:textColor="@color/white"
-        android:visibility="gone"
-        android:background="@drawable/sh_auth_button"/>
+        <Button android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="1dp"
+            android:layout_marginRight="1dp"
+            android:visibility="visible"
+            android:background="@drawable/sh_auth_button"/>
+
+        <TextView android:id="@+id/login_Text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/login"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:visibility="visible"/>
+
+        <TextView android:id="@+id/signup_Text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/signup"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:visibility="gone"/>
+    </RelativeLayout>
 
     <View
         android:layout_height="0dp"
         android:layout_width="match_parent"
         android:layout_weight="1"/>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="45dp"
+        android:layout_height="50dp"
         android:orientation="vertical"
-        android:visibility="visible"
-        android:gravity="center">
+        android:visibility="visible">
 
         <TextView android:id="@+id/forgotPassword_Text"
             android:text="@string/forgot_password"
             android:gravity="center"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_weight="0"
+            android:layout_height="20dp"
+            android:layout_width="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
             android:clickable="true"
-            android:visibility="visible"/>
+            android:visibility="visible"
+            android:background="@drawable/sh_auth_text"/>
 
         <LinearLayout android:id="@+id/logInText_Layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="20dp"
+            android:layout_alignParentTop="true"
             android:orientation="horizontal"
             android:gravity="center"
             android:visibility="gone">
@@ -192,25 +215,26 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_weight="0"
-                android:clickable="true"/>
-
+                android:clickable="true"
+                android:background="@drawable/sh_auth_text"/>
         </LinearLayout>
 
-        <View
-            android:layout_height="0dp"
+        <View android:id="@+id/space_View"
+            android:layout_height="8dp"
             android:layout_width="match_parent"
-            android:layout_weight="1"/>
+            android:layout_below="@id/forgotPassword_Text"/>
 
         <TextView android:id="@+id/createLogin_Text"
             android:text="@string/create_login"
             android:gravity="center"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_weight="0"
+            android:layout_height="20dp"
+            android:layout_width="wrap_content"
+            android:layout_below="@id/space_View"
+            android:layout_centerHorizontal="true"
             android:clickable="true"
-            android:visibility="visible"/>
-
-    </LinearLayout>
+            android:visibility="visible"
+            android:background="@drawable/sh_auth_text"/>
+    </RelativeLayout>
 
     <View
         android:layout_height="0dp"

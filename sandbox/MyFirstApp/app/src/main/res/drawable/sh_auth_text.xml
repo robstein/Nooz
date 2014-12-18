@@ -4,19 +4,13 @@
     <item android:state_pressed="true">
         <shape xmlns:android="http://schemas.android.com/apk/res/android"
             android:shape="rectangle" >
-            <corners
-                android:radius="8dp" />
             <solid
-                android:color="@color/darkGrey_pressed" />
+                android:color="@color/lightGrey_pressed" />
         </shape>
     </item>
     <item>
         <shape xmlns:android="http://schemas.android.com/apk/res/android"
             android:shape="rectangle" >
-            <corners
-                android:radius="8dp" />
-            <solid
-                android:color="@color/darkGrey" />
         </shape>
     </item>
 </selector>

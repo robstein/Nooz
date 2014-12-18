@@ -3,6 +3,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="grey">#FFC3C3C3</color>
     <color name="lightGrey">#FFDDDDDD</color>
+    <color name="lightGrey_pressed">#FFBBBBBB</color>
     <color name="darkGrey">#FF333333</color>
-    <color name="darkGrey_pressed">#FF262626</color>
+    <color name="darkGrey_pressed">#FF101010</color>
 </resources>
