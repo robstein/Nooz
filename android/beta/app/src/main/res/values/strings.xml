@@ -2,7 +2,18 @@
 <resources>
 
     <string name="app_name">Nooz</string>
+    <string name="version">1.0.0</string>
+
     <string name="hello_world">Hello world!</string>
+
+    <string name="title_activity_map">MapActivity</string>
+    <string name="title_activity_maps">Map</string>
+
+    <string name="action_search">Search</string>
+    <string name="action_new">New Story</string>
+    <string name="action_about">About</string>
+    <string name="action_profile">Profile</string>
+    <string name="action_map_filters">Map Filters</string>
     <string name="action_settings">Settings</string>
 
 </resources>
